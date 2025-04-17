@@ -1,0 +1,63 @@
+@use './variables' as vars;
+
+// Common header styles
+%sectionHeader {
+  margin-bottom: vars.$spacing-xl;
+  text-align: center;
+}
+
+// Common grid layouts
+%infoGrid {
+  display: grid;
+  gap: vars.$spacing-lg;
+}
+
+// Common card styles
+%infoCard {
+  background: vars.$background-white;
+  border-radius: vars.$border-radius-lg;
+  padding: vars.$spacing-xl;
+  box-shadow: vars.$shadow-sm;
+}
+
+// Common container styles
+%employmentContainer {
+  max-width: vars.$container-xl;
+  margin: 0 auto;
+  padding: vars.$spacing-2xl vars.$spacing-xl;
+  background: vars.$background-white;
+  min-height: calc(100vh - 200px);
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-xl vars.$spacing-md;
+  }
+}
+
+// Responsive styles
+@media (max-width: vars.$breakpoint-lg) {
+  %employmentContainer {
+    padding: vars.$spacing-xl vars.$spacing-md;
+  }
+
+  %infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: vars.$breakpoint-md) {
+  %sectionHeader {
+    h1 {
+      font-size: vars.$font-size-3xl;
+    }
+  }
+}
+
+.employment {
+  padding: vars.$spacing-2xl;
+  margin: 0 auto;
+  max-width: vars.$container-xl;
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding: vars.$spacing-lg;
+  }
+}

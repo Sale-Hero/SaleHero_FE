@@ -1,0 +1,23 @@
+
+//탑버튼 css
+.topButtonWrapper{
+  z-index: 10;
+
+  position: fixed;
+  bottom: 82px;
+  right: 52px;
+  cursor: pointer;
+  opacity: 0;
+  > .topButtonImg{
+    background-image: url('../../img/topButton.png');
+    width: 75px;
+    height: 75px;
+    //background-color: white;
+    background-size: cover; /* 이미지가 컨테이너를 가득 채우도록 설정 */
+    background-position: center;
+  }
+
+  &.show{
+    opacity: 1;
+  }
+}

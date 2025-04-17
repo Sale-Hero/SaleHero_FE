@@ -1,0 +1,247 @@
+@use './variables' as *;
+
+.employmentLayout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--layout-bg, $background-light);
+  padding-top: 70px; // Account for fixed header
+
+  @media (prefers-color-scheme: dark) {
+    --layout-bg: #{$dark-background};
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: $spacing-2xl;
+    position: relative;
+    padding: $spacing-2xl $spacing-xl;
+    background: var(--header-bg, linear-gradient(135deg, rgba($primary-color, 0.1), transparent));
+    border-radius: $border-radius-lg;
+
+    @media (prefers-color-scheme: dark) {
+      --header-bg: #{linear-gradient(135deg, rgba($primary-lighter, 0.05), transparent)};
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(to right, $primary-color, transparent);
+      border-radius: $border-radius-lg $border-radius-lg 0 0;
+
+      @media (prefers-color-scheme: dark) {
+        background: linear-gradient(to right, $primary-lighter, transparent);
+      }
+    }
+
+    h1 {
+      font-size: $font-size-3xl;
+      color: var(--title-color, $text-primary);
+      margin-bottom: $spacing-md;
+      font-weight: $font-weight-bold;
+      text-shadow: var(--title-shadow, 0 2px 4px rgba($primary-color, 0.1));
+
+      @media (prefers-color-scheme: dark) {
+        --title-color: #{$dark-text-primary};
+        --title-shadow: 0 2px 4px rgba($primary-lighter, 0.1);
+      }
+    }
+
+    p {
+      font-size: $font-size-lg;
+      color: var(--subtitle-color, $text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+
+      @media (prefers-color-scheme: dark) {
+        --subtitle-color: #{$dark-text-secondary};
+      }
+    }
+  }
+
+  .navigation {
+    width: 280px;
+    padding: $spacing-xl;
+    background: var(--nav-bg, rgba($background-lighter, 0.8));
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--nav-border, $border-light);
+    position: fixed;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    transition: all $transition-normal;
+
+    @media (prefers-color-scheme: dark) {
+      --nav-bg: #{rgba($dark-surface, 0.8)};
+      --nav-border: #{$dark-border};
+    }
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-color, rgba($text-secondary, 0.2));
+      border-radius: $border-radius-full;
+
+      @media (prefers-color-scheme: dark) {
+        --scrollbar-color: #{rgba($dark-text-secondary, 0.2)};
+      }
+
+      &:hover {
+        background: var(--scrollbar-hover, rgba($text-secondary, 0.3));
+
+        @media (prefers-color-scheme: dark) {
+          --scrollbar-hover: #{rgba($dark-text-secondary, 0.3)};
+        }
+      }
+    }
+
+    .section {
+      margin-bottom: $spacing-2xl;
+
+      h2 {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-bold;
+        color: var(--section-title, $text-primary);
+        margin-bottom: $spacing-md;
+        padding-bottom: $spacing-sm;
+        border-bottom: 2px solid var(--section-border, transparent);
+        transition: all $transition-normal;
+
+        @media (prefers-color-scheme: dark) {
+          --section-title: #{$dark-text-primary};
+        }
+      }
+
+      &.active h2 {
+        color: var(--active-section, $primary-color);
+        border-bottom-color: var(--active-border, $primary-color);
+
+        @media (prefers-color-scheme: dark) {
+          --active-section: #{$primary-lighter};
+          --active-border: #{$primary-lighter};
+        }
+      }
+
+      .links {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+      }
+
+      .link {
+        display: flex;
+        align-items: center;
+        padding: $spacing-md;
+        border-radius: $border-radius-md;
+        color: var(--link-color, $text-secondary);
+        font-size: $font-size-sm;
+        text-decoration: none;
+        transition: all $transition-normal;
+        position: relative;
+        overflow: hidden;
+
+        @media (prefers-color-scheme: dark) {
+          --link-color: #{$dark-text-secondary};
+        }
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          width: 3px;
+          background: var(--link-indicator, $primary-color);
+          transform: scaleY(0);
+          transition: transform $transition-normal;
+
+          @media (prefers-color-scheme: dark) {
+            --link-indicator: #{$primary-lighter};
+          }
+        }
+
+        &:hover {
+          color: var(--link-hover, $primary-color);
+          background: var(--link-hover-bg, rgba($primary-color, 0.05));
+          padding-left: $spacing-lg;
+
+          @media (prefers-color-scheme: dark) {
+            --link-hover: #{$primary-lighter};
+            --link-hover-bg: #{rgba($primary-lighter, 0.1)};
+          }
+
+          &::before {
+            transform: scaleY(0.6);
+          }
+        }
+
+        &.active {
+          color: var(--active-link, $primary-color);
+          background: var(--active-link-bg, rgba($primary-color, 0.1));
+          font-weight: $font-weight-semibold;
+          padding-left: $spacing-lg;
+
+          @media (prefers-color-scheme: dark) {
+            --active-link: #{$primary-lighter};
+            --active-link-bg: #{rgba($primary-lighter, 0.15)};
+          }
+
+          &::before {
+            transform: scaleY(1);
+          }
+        }
+      }
+    }
+  }
+
+  .content {
+    flex: 1;
+    margin-left: 280px;
+    padding: $spacing-2xl;
+    background: var(--content-bg, linear-gradient(135deg, $background-accent 0%, $background-light 100%));
+    min-height: calc(100vh - 70px);
+
+    @media (prefers-color-scheme: dark) {
+      --content-bg: #{linear-gradient(135deg, $dark-background 0%, darken($dark-background, 3%) 100%)};
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+
+    .navigation {
+      width: 100%;
+      height: auto;
+      position: relative;
+      border-right: none;
+      border-bottom: 1px solid var(--nav-border, $border-light);
+      padding: $spacing-md;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: $spacing-lg;
+    }
+
+    .header {
+      padding: $spacing-xl $spacing-lg;
+
+      h1 {
+        font-size: $font-size-2xl;
+      }
+
+      p {
+        font-size: $font-size-md;
+      }
+    }
+  }
+}

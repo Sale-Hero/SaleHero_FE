@@ -1,0 +1,11 @@
+@import '../shared/variables';
+
+.container {
+  @extend %employment-container;
+  
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}

@@ -1,0 +1,260 @@
+@import '../common/variables';
+
+.aboutContainer {
+  padding: $spacing-xl 0;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, rgba($primary-color, 0.02), rgba($secondary-color, 0.02));
+
+  .header {
+    text-align: center;
+    margin-bottom: $spacing-xl * 2;
+
+    .title {
+      font-weight: 700;
+      margin-bottom: $spacing-md;
+      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: $text-color-light;
+      font-weight: 400;
+    }
+  }
+
+  .mission {
+    text-align: center;
+    margin-bottom: $spacing-xl * 2;
+    padding: 0 $spacing-xl;
+
+    h4 {
+      color: $text-color;
+      margin-bottom: $spacing-lg;
+      position: relative;
+      display: inline-block;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, $primary-color, $secondary-color);
+        border-radius: 2px;
+      }
+    }
+
+    p {
+      color: $text-color-light;
+      line-height: 1.8;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+  }
+
+  .visionPoints {
+    margin-bottom: $spacing-xl * 2;
+
+    .visionCard {
+      height: 100%;
+      padding: $spacing-lg;
+      border-radius: $border-radius-xl;
+      background: white;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba($primary-color, 0.1);
+
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: $box-shadow-lg;
+      }
+
+      .iconWrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($secondary-color, 0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: $spacing-md;
+
+        svg {
+          font-size: 30px;
+          color: $primary-color;
+        }
+      }
+
+      .pointTitle {
+        color: $text-color;
+        font-weight: 600;
+        margin-bottom: $spacing-md;
+      }
+
+      .pointDescription {
+        color: $text-color;
+        font-weight: 500;
+        margin-bottom: $spacing-md;
+      }
+
+      .pointDetail {
+        color: $text-color-light;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  .impact {
+    margin-bottom: $spacing-xl * 2;
+    padding: $spacing-xl;
+    background: linear-gradient(135deg, rgba($primary-color, 0.05), rgba($secondary-color, 0.05));
+    border-radius: $border-radius-xl;
+
+    .impactTitle {
+      text-align: center;
+      margin-bottom: $spacing-xl;
+      color: $text-color;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, $primary-color, $secondary-color);
+        border-radius: 2px;
+      }
+    }
+
+    .impactCard {
+      text-align: center;
+      padding: $spacing-lg;
+      background: white;
+      border-radius: $border-radius-lg;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: translateY(-5px);
+      }
+
+      .iconWrapper {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($secondary-color, 0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto $spacing-md;
+
+        svg {
+          font-size: 35px;
+          color: $primary-color;
+        }
+      }
+
+      .stat {
+        color: $primary-color;
+        font-weight: 700;
+        margin-bottom: $spacing-sm;
+        background: linear-gradient(135deg, $primary-color, $secondary-color);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+  }
+
+  .values {
+    text-align: center;
+    padding: $spacing-xl 0;
+
+    h4 {
+      margin-bottom: $spacing-xl;
+      color: $text-color;
+      position: relative;
+      display: inline-block;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, $primary-color, $secondary-color);
+        border-radius: 2px;
+      }
+    }
+
+    h6 {
+      position: relative;
+      display: inline-block;
+      margin-bottom: $spacing-md;
+      font-weight: 600;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, $primary-color, $secondary-color);
+        border-radius: 2px;
+      }
+    }
+
+    p {
+      color: $text-color-light;
+      line-height: 1.6;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .aboutContainer {
+    padding: $spacing-lg $spacing-md;
+
+    .header {
+      margin-bottom: $spacing-xl;
+
+      .title {
+        font-size: 2rem;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+      }
+    }
+
+    .mission {
+      padding: 0 $spacing-md;
+      margin-bottom: $spacing-xl;
+    }
+
+    .impact {
+      padding: $spacing-lg $spacing-md;
+      margin-bottom: $spacing-xl;
+    }
+
+    .values {
+      padding: $spacing-xl $spacing-md;
+
+      p {
+        max-width: 100%;
+      }
+    }
+  }
+}

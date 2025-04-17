@@ -1,0 +1,78 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 노드 설정
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.20.0'
+          cache: 'yarn'
+          cache-dependency-path: './yarn.lock'
+
+      - name: Create production env file
+        run: |
+          echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+
+      # 프론트엔드 의존성 설치 및 빌드
+      - name: Install and Build Frontend
+        run: |
+          yarn install
+          yarn add --dev @types/lodash @types/node
+          pwd
+          yarn build
+
+        env:
+          NODE_ENV: production
+          CI: false
+          SKIP_PREFLIGHT_CHECK: true
+
+      # 프론트엔드 압축
+      - name: Create ZIP archive
+        run: |
+          zip -r salehero_fe.zip build
+          ls -la salehero_fe.zip
+
+      # SSH 접근 설정
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+          ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      # ZIP 파일 전송
+      - name: Copy ZIP to remote server
+        run: |
+          scp -i ~/.ssh/id_rsa salehero_fe.zip ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/salehero/
+
+      # 배포 스크립트 실행
+      - name: Deploy on remote server
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "
+            cd /salehero &&
+            rm -rf salehero_fe || true &&
+            mkdir -p salehero_fe &&
+            unzip -o salehero_fe.zip -d salehero_fe &&
+            rm -rf ./nginx/html/* || true &&
+            mkdir -p ./nginx/html &&
+            cp -r salehero_fe/build/* ./nginx/html/ &&
+            chmod -R 755 ./nginx/html &&
+            docker-compose restart nginx
+          "
+
+      # 배포 완료 알림
+      - name: Deployment notification
+        run: echo "✅ Frontend deployment completed successfully!"

@@ -1,0 +1,15 @@
+@use './variables' as vars;
+
+%pageContainer {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: vars.$spacing-md;
+  padding-left: vars.$spacing-md;
+  min-height: 100vh;
+  
+  @media (max-width: vars.$breakpoint-md) {
+    padding-right: vars.$spacing-sm;
+    padding-left: vars.$spacing-sm;
+  }
+}

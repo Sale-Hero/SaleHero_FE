@@ -1,0 +1,204 @@
+@use '../shared/variables' as *;
+
+.titleContainer {
+  padding: $spacing-2xl 0;
+  margin-bottom: $spacing-xl;
+  position: relative;
+  overflow: hidden;
+  background: var(--title-bg, linear-gradient(135deg, rgba($primary-color, 0.05) 0%, transparent 100%));
+  border-radius: $border-radius-lg;
+
+  @media (prefers-color-scheme: dark) {
+    --title-bg: #{linear-gradient(135deg, rgba($primary-lighter, 0.05) 0%, transparent 100%)};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20%;
+    width: 140%;
+    height: 100%;
+    background: var(--title-accent, linear-gradient(90deg, 
+      rgba($primary-color, 0) 0%,
+      rgba($primary-color, 0.05) 25%,
+      rgba($primary-color, 0.05) 75%,
+      rgba($primary-color, 0) 100%
+    ));
+    z-index: 0;
+    transform: skewX(-20deg);
+
+    @media (prefers-color-scheme: dark) {
+      --title-accent: #{linear-gradient(90deg, 
+        rgba($primary-lighter, 0) 0%,
+        rgba($primary-lighter, 0.05) 25%,
+        rgba($primary-lighter, 0.05) 75%,
+        rgba($primary-lighter, 0) 100%
+      )};
+    }
+  }
+
+  &.left {
+    text-align: left;
+    padding-left: $spacing-xl;
+    .title .underline {
+      margin-left: 0;
+      margin-right: auto;
+    }
+  }
+
+  &.center {
+    text-align: center;
+    .title .underline {
+      margin: 0 auto;
+    }
+  }
+
+  &.right {
+    text-align: right;
+    padding-right: $spacing-xl;
+    .title .underline {
+      margin-left: auto;
+      margin-right: 0;
+    }
+  }
+}
+
+.title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: var(--title-color, $text-primary);
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: inline-block;
+  letter-spacing: 0.05em;
+  text-shadow: var(--title-shadow, 2px 2px 4px rgba($primary-color, 0.1));
+  z-index: 1;
+
+  @media (prefers-color-scheme: dark) {
+    --title-color: #{$dark-text-primary};
+    --title-shadow: #{2px 2px 4px rgba($primary-lighter, 0.1)};
+  }
+
+  &::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    color: var(--title-ghost, rgba($primary-color, 0.1));
+    z-index: -1;
+    filter: blur(1px);
+
+    @media (prefers-color-scheme: dark) {
+      --title-ghost: #{rgba($primary-lighter, 0.1)};
+    }
+  }
+
+  .underline {
+    width: 60%;
+    height: 4px;
+    background: var(--underline-bg, linear-gradient(90deg, 
+      $primary-color 0%,
+      lighten($primary-color, 20%) 50%,
+      $primary-color 100%
+    ));
+    margin-top: $spacing-sm;
+    border-radius: $border-radius-full;
+    box-shadow: var(--underline-shadow, 0 2px 4px rgba($primary-color, 0.2));
+    position: relative;
+    overflow: hidden;
+
+    @media (prefers-color-scheme: dark) {
+      --underline-bg: #{linear-gradient(90deg, 
+        $primary-lighter 0%,
+        lighten($primary-lighter, 10%) 50%,
+        $primary-lighter 100%
+      )};
+      --underline-shadow: #{0 2px 4px rgba($primary-lighter, 0.2)};
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--shimmer-bg, linear-gradient(90deg, 
+        transparent 0%,
+        rgba($text-white, 0.4) 50%,
+        transparent 100%
+      ));
+      animation: shimmer 2s infinite;
+
+      @media (prefers-color-scheme: dark) {
+        --shimmer-bg: #{linear-gradient(90deg, 
+          transparent 0%,
+          rgba($dark-text-primary, 0.4) 50%,
+          transparent 100%
+        )};
+      }
+    }
+  }
+}
+
+.subtitle {
+  font-size: $font-size-lg;
+  color: var(--subtitle-color, $text-secondary);
+  margin: $spacing-md 0 0;
+  font-weight: $font-weight-medium;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+
+  @media (prefers-color-scheme: dark) {
+    --subtitle-color: #{$dark-text-secondary};
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .titleContainer {
+    padding: $spacing-xl $spacing-lg;
+  }
+
+  .title {
+    font-size: $font-size-2xl;
+
+    .underline {
+      height: 3px;
+    }
+  }
+
+  .subtitle {
+    font-size: $font-size-md;
+    padding: 0 $spacing-lg;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .titleContainer {
+    padding: $spacing-lg $spacing-md;
+  }
+
+  .title {
+    font-size: $font-size-xl;
+  }
+
+  .subtitle {
+    font-size: $font-size-sm;
+    padding: 0 $spacing-md;
+  }
+}

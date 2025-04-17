@@ -1,0 +1,123 @@
+@import './variables';
+
+.footer {
+  background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, rgba($secondary-color, 0.05) 100%);
+  padding: $spacing-xl 0;
+  margin-top: auto;
+  border-top: 1px solid rgba($primary-color, 0.1);
+
+  .title {
+    color: $text-color;
+    font-weight: 600;
+    margin-bottom: $spacing-lg;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, $primary-color, $secondary-color);
+      border-radius: 2px;
+    }
+  }
+
+  .description {
+    color: $text-color-light;
+    line-height: 1.8;
+    margin-bottom: $spacing-lg;
+  }
+
+  .linkList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: $spacing-sm;
+    }
+
+    .link {
+      color: $text-color-light;
+      text-decoration: none;
+      transition: all $transition-fast;
+      display: inline-block;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        transform: scaleX(0);
+        height: 1px;
+        bottom: -2px;
+        left: 0;
+        background: linear-gradient(90deg, $primary-color, $secondary-color);
+        transform-origin: bottom right;
+        transition: transform 0.3s ease-out;
+      }
+
+      &:hover {
+        color: $primary-color;
+        
+        &::after {
+          transform: scaleX(1);
+          transform-origin: bottom left;
+        }
+      }
+    }
+  }
+
+  .contactInfo {
+    color: $text-color-light;
+    line-height: 1.8;
+  }
+
+  .socialLinks {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+
+    .socialIcon {
+      color: $text-color-light;
+      transition: all $transition-fast;
+      
+      &:hover {
+        color: $primary-color;
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  .bottom {
+    margin-top: $spacing-xl;
+    padding-top: $spacing-lg;
+    border-top: 1px solid rgba($primary-color, 0.1);
+
+    .copyright {
+      color: $text-color-light;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .footer {
+    padding: $spacing-lg $spacing-md;
+
+    .title {
+      margin-bottom: $spacing-md;
+    }
+
+    .linkList {
+      margin-bottom: $spacing-lg;
+    }
+
+    .bottom {
+      margin-top: $spacing-lg;
+      padding-top: $spacing-md;
+    }
+  }
+}

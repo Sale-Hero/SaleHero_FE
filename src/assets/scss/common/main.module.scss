@@ -1,0 +1,485 @@
+@import "variables";
+
+// Main Container
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  margin-top: 60px;
+}
+
+// Hero Section
+.container {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  margin-bottom: 40px;
+  background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)),
+              url("../../../assets/img/main.webp") center/cover no-repeat;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .headingText {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: #0072b3;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .subText {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: #666;
+    margin-bottom: 2.5rem;
+    line-height: 1.5;
+    max-width: 600px;
+  }
+
+  .imageBanner {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 2.5rem;
+
+    .bannerImage {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+  }
+
+  .callToAction {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: #0072b3;
+    margin-bottom: 2rem;
+    font-weight: 500;
+  }
+
+  .buttonsContainer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    .choiceButton {
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background-color: #0072b3;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px;
+
+      &:hover {
+        background-color: #f5ba13;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+// Hiring Process Section
+.hiringTitleWrapper {
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+  margin: 40px 0 20px;
+
+  .text {
+    font-size: clamp(1.8rem, 4vw, 2.2rem);
+    font-weight: 700;
+    color: #0072b3;
+  }
+}
+
+.hiringProcessWrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  .hiringProcessBodyWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .hiringProcessBody {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #0072b3;
+    }
+
+    .hiringProcessContents {
+      .stepHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 16px;
+
+        .text {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #0072b3;
+        }
+
+        .stats {
+          display: flex;
+          gap: 16px;
+
+          .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 6px 12px;
+            border-radius: 20px;
+
+            .label {
+              font-size: 0.875rem;
+              color: #666;
+            }
+
+            .value {
+              font-size: 0.875rem;
+              font-weight: 600;
+              color: #0072b3;
+            }
+          }
+        }
+      }
+
+      .subText {
+        display: block;
+        font-size: 1rem;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+
+      .requirements {
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 8px;
+        margin-top: 16px;
+
+        .requirementsTitle {
+          display: block;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #0072b3;
+          margin-bottom: 8px;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            font-size: 0.875rem;
+            color: #666;
+            padding-left: 20px;
+            position: relative;
+            margin-bottom: 4px;
+
+            &:before {
+              content: "•";
+              position: absolute;
+              left: 8px;
+              color: #0072b3;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .hiringSupportButtonWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+
+    .detailButtonWrapper {
+      padding: 12px 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #0072b3;
+      background: white;
+      border: 1px solid #0072b3;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #0072b3;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+}
+
+// Community Section
+.mainCommunityWrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 40px 20px;
+
+  .communityTitleWrapper {
+    text-align: center;
+    margin-bottom: 32px;
+
+    .titleTop {
+      font-size: 0.875rem;
+      color: #0072b3;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .titleMain {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      color: #f5ba13;
+      font-weight: 700;
+    }
+  }
+}
+
+// List Items
+.listBoxWrapper {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+
+  .listItems {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #0072b3;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .listTitleWrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .listCategory {
+        background: #f0f7ff;
+        color: #0072b3;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: #0072b3;
+          color: white;
+        }
+      }
+
+      .listTitle {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #333;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .listContentWrapper {
+      margin-bottom: 20px;
+
+      .listDescription {
+        font-size: 0.9375rem;
+        color: #666;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .listIconWrapper {
+      display: flex;
+      justify-content: flex-end;
+      gap: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+
+      .iconContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+
+        .icon {
+          font-size: 1.25rem;
+          color: #0072b3;
+          opacity: 0.8;
+          transition: all 0.3s ease;
+
+          &:hover {
+            opacity: 1;
+            color: #f5ba13;
+          }
+        }
+
+        .iconCount {
+          font-size: 0.875rem;
+          color: #666;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+.underLine {
+  width: 100%;
+  max-width: 1200px;
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 40px auto;
+}
+
+// Responsive Styles
+@media (max-width: 768px) {
+  .mainContainer {
+    padding: 0 16px;
+    margin-top: 40px;
+  }
+
+  .container {
+    padding: 32px 16px;
+    min-height: 500px;
+
+    .buttonsContainer {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 280px;
+
+      .choiceButton {
+        width: 100%;
+      }
+    }
+  }
+
+  .hiringProcessWrapper {
+    padding: 16px;
+
+    .hiringProcessBody {
+      padding: 16px;
+
+      .hiringProcessContents {
+        .stepHeader {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+
+          .stats {
+            width: 100%;
+            justify-content: flex-start;
+          }
+        }
+      }
+    }
+
+    .hiringSupportButtonWrapper {
+      flex-direction: column;
+      gap: 12px;
+
+      .detailButtonWrapper {
+        width: 100%;
+      }
+    }
+  }
+
+  .listBoxWrapper {
+    padding: 16px;
+
+    .listItems {
+      padding: 16px;
+
+      .listTitleWrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+
+        .listCategory {
+          font-size: 0.75rem;
+        }
+
+        .listTitle {
+          font-size: 1rem;
+        }
+      }
+
+      .listContentWrapper {
+        .listDescription {
+          font-size: 0.875rem;
+        }
+      }
+
+      .listIconWrapper {
+        gap: 16px;
+        justify-content: space-around;
+
+        .iconContainer {
+          .icon {
+            font-size: 1.125rem;
+          }
+
+          .iconCount {
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}

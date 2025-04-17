@@ -1,0 +1,215 @@
+.confirmBackdrop{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+
+  .modalWrapper{
+    align-items: center;
+    background-color: #fff;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 20px 98px;
+    position: fixed;
+    width: 400px;
+
+    .textArea{
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: 100%;
+      justify-content: center;
+      letter-spacing: -.015em;
+
+      > .title{
+        color: #383649;
+        font-size: 33px;
+        font-weight: 700;
+        line-height: 1.4;
+      }
+
+      > .description{
+        color: #6b6b6b;
+        font-size: 21px;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: center;
+        white-space: break-spaces;
+      }
+    }
+
+    .buttonArea{
+      bottom: 0;
+      display: flex;
+      height: 68px;
+      left: 0;
+      position: absolute;
+      width: 100%;
+
+      .confirm{
+        background-color: #583be2;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        color: #fff;
+        flex: 1 1;
+        font-size: 20px;
+        font-weight: 700;
+        height: 68px;
+        letter-spacing: -.015em;
+        line-height: 1.4;
+
+        border: none;
+      }
+    }
+  }
+}
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+
+  .modalWrapper{
+    width: 1200px;
+
+    background-color: #b7a5a5;
+    border: 1px solid ;
+    border-radius: 10px;
+    position: fixed;
+    max-height: 90%;
+    overflow-y: auto;
+
+    .modal{
+      display: flex;
+      flex-direction: column;
+      padding: 10px 55px;
+      gap: 15px;
+
+      .headerArea{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+
+        > .closeBtn{
+          width: 40px;
+          height: 40px;
+          align-self: flex-end;
+          cursor: pointer;
+        }
+      }
+
+      .titleArea{
+        width: 100%;
+        border-bottom: 3px solid #444444;
+
+        > .titleText{
+          font-size: 56px;
+          font-style: normal;
+          font-weight: 850;
+          line-height: 150%;
+          letter-spacing: -0.24px;
+          color: #3e336b;
+        }
+      }
+    }
+
+    .bodyArea {
+      display: flex;
+      padding: 10px 0 25px 0;
+      width: 100%;
+      border-bottom: 3px solid #444444;
+      flex-direction: column;
+      gap: 34px;
+
+      .jobContent {
+        gap: 40px;
+
+        min-width: 600px;
+        display: flex;
+        flex-direction: row;
+        //justify-content: space-between;
+
+        .contentsName {
+          width: 20rem;
+
+          font-size: 29px;
+          font-style: normal;
+          font-weight: 850;
+          line-height: 150%;
+          letter-spacing: -0.24px;
+          color: #3e336b;
+        }
+
+        .contentText {
+          width: 90%;
+          font-weight: 300;
+          font-size: 21px;
+        }
+      }
+    }
+
+    .footerArea{
+      padding: 15px 0 30px 0;
+      display: flex;
+      flex-direction: row;
+      width: 80%;
+      align-self: center;
+      justify-content: center;
+
+      .buttonWrapper{
+
+        display: flex;
+        gap: 33px;
+        padding: 0 50px;
+
+        .applyButton{
+          width: 340px;
+          height: 80px;
+          background-color: #3e336b;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+          border-radius: 11px;
+
+          cursor: pointer;
+        }
+
+        .closeButton{
+          width: 320px;
+          height: 80px;
+          background-color: #aa4343;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+          border-radius: 11px;
+
+          cursor: pointer;
+        }
+
+        .buttonText{
+          font-size: 29px;
+          font-style: normal;
+          font-weight: 850;
+          line-height: 150%;
+          letter-spacing: -0.24px;
+          color: #b7a5a5;
+        }
+      }
+    }
+
+  }
+}
+

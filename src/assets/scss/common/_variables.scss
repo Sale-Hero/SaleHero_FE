@@ -1,0 +1,72 @@
+$breakpoint-mobile: 1080px;
+$breakpoint-desktop: 1380px;
+
+@mixin desktop {
+  @media (min-width: calc(#{$breakpoint-mobile} + 1px)) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: calc(#{$breakpoint-mobile} - 1px)) {
+    @content;
+  }
+}
+
+.spinner {
+  width: 200px;
+  height: 200px;
+  animation: spin 1s linear infinite;
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 11;
+}
+
+// Colors
+$primary-color: #1e90ff;
+$secondary-color: #00bcd4;
+$text-color: #2d3748;
+$text-color-light: #718096;
+$background-color: #f8fafc;
+$border-color: #e2e8f0;
+
+// Spacing
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+
+// Typography
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-md: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+
+// Border Radius
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+
+// Box Shadow
+$box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$box-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Z-index
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;

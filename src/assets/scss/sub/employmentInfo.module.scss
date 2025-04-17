@@ -1,0 +1,12 @@
+@import '../shared/variables';
+
+.container {
+  @extend %employment-container;
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    color: $dark-text-primary;
+    margin-bottom: 20px;
+  }
+}

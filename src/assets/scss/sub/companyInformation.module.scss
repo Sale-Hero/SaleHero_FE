@@ -1,0 +1,313 @@
+@import "../common/variables";
+
+@include mobile {
+  .companyInfoContainer {
+    padding: 30px 15px;
+    gap: 30px;
+    margin-top: 50px;
+  }
+
+  .introSection {
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .introVideo {
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .videoPlaceholder {
+    font-size: 36px;
+    color: #ffffff;
+  }
+
+  .introText {
+    font-size: 16px;
+    margin-top: 8px;
+    color: #0072b3;
+  }
+
+  .companyContents {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .filterSection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .filterButton {
+    width: 300px;
+    height: 45px;
+    background-color: #0072b3;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #ffffff;
+    transition: background-color 0.3s;
+  }
+
+  .filterButton:hover {
+    background-color: #0056b3;
+  }
+
+  .jobListingWrapper {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .jobListing {
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .jobListing:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .jobHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #b0bec5;
+    padding-bottom: 10px;
+  }
+
+  .companyThumbnail {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+
+  .jobInfo {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .companyName {
+    font-size: 20px;
+    color: #0072b3;
+  }
+
+  .jobTitle {
+    font-size: 20px;
+    color: #424242;
+  }
+
+  .jobDetail {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .jobContent {
+    width: 100%;
+  }
+
+  .contentsName {
+    font-size: 18px;
+    color: #0072b3;
+  }
+
+  .contentText {
+    font-size: 14px;
+    color: #424242;
+  }
+}
+
+
+@include desktop {
+  .companyInfoContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f1f4f8; /* 밝은 배경으로 변경 */
+    color: #0072b3; /* 파란색 텍스트 */
+    min-height: 100vh;
+    margin-top: 80px;
+    gap: 50px;
+  }
+
+  .introSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .introVideo {
+    width: 940px;
+    height: 350px;
+    position: relative;
+    background-image: url("../../../../src/assets/img/canada_information_thumbnail.jpg");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* 더 큰 그림자 */
+    margin-bottom: 10px;
+  }
+
+  .videoPlaceholder {
+    position: relative;
+    z-index: 2;
+    font-size: 50px;
+    color: #ffffff;
+  }
+
+  .introVideo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 어두운 반투명 배경 */
+    border-radius: 10px;
+    z-index: 1;
+  }
+
+  .introText {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #0072b3;
+  }
+
+  /* 회사 정보 및 필터 섹션 */
+  .companyContents {
+    display: flex;
+    width: 940px;
+    flex-direction: column;
+  }
+
+  .filterSection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+
+  .filterButton {
+    width: 230px;
+    height: 55px;
+    background-color: #0072b3; /* 파란색 버튼 */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #ffffff;
+    transition: background-color 0.3s;
+  }
+
+  .filterButton:hover {
+    background-color: #0056b3; /* 호버 시 더 어두운 파란색 */
+  }
+
+  /* 회사 리스트 */
+  .jobListingWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .jobListing {
+    width: 100%;
+    max-width: 940px;
+    border: 1px solid #0072b3; /* 파란색 테두리 */
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+    background-color: #ffffff; /* 흰색 배경 */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .jobListing:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* 호버 시 더 큰 그림자 */
+  }
+
+  .jobHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #b0bec5; /* 연한 회색 */
+    padding-bottom: 10px;
+  }
+
+  .companyThumbnail {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 5px;
+    object-fit: cover;
+  }
+
+  .jobInfo {
+    display: flex;
+    width: 90%;
+    justify-content: space-between;
+  }
+
+  .companyName {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0072b3;
+  }
+
+  .jobTitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #424242;
+  }
+
+  .jobDetail {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .jobContent {
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contentsName {
+    font-size: 19px;
+    font-weight: bold;
+    color: #0072b3;
+  }
+
+  .contentText {
+    font-size: 16px;
+    font-weight: 300;
+    color: #424242;
+  }
+}

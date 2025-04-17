@@ -1,0 +1,295 @@
+// Variables
+$primary-color: #1e90ff;
+$secondary-color: #00bcd4;
+$text-color: #2d3748;
+$text-color-light: #718096;
+
+@import '../common/variables';
+
+.seminarInfo {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: $text-color;
+
+    .hero {
+        text-align: center;
+        margin-bottom: 4rem;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($secondary-color, 0.1) 100%);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, $primary-color, $secondary-color);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: $text-color-light;
+            margin-bottom: 2rem;
+        }
+
+        .searchBox {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+
+            .searchIcon {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                color: $text-color-light;
+            }
+
+            input {
+                width: 100%;
+                padding: 1rem 1rem 1rem 3rem;
+                border: 2px solid rgba($primary-color, 0.1);
+                border-radius: 50px;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-color;
+                    box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+                }
+            }
+        }
+    }
+
+    .categorySection {
+        margin-bottom: 4rem;
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: $text-color;
+        }
+
+        .categoryList {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+
+            .categoryItem {
+                display: flex;
+                align-items: center;
+                padding: 1.5rem;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                }
+
+                &.active {
+                    background: linear-gradient(135deg, $primary-color, $secondary-color);
+                    color: white;
+
+                    .categoryName {
+                        color: white;
+                    }
+                }
+
+                .categoryIcon {
+                    font-size: 1.5rem;
+                    margin-right: 1rem;
+                }
+
+                .categoryName {
+                    font-size: 1.1rem;
+                    font-weight: 500;
+                    color: $text-color;
+                }
+            }
+        }
+    }
+
+    .seminarList {
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: $text-color;
+        }
+
+        .seminarGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .seminarCard {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+
+            .cardHeader {
+                padding: 1.5rem;
+                background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, rgba($secondary-color, 0.05) 100%);
+
+                .format {
+                    display: inline-block;
+                    padding: 0.5rem 1rem;
+                    background: rgba($primary-color, 0.1);
+                    color: $primary-color;
+                    border-radius: 20px;
+                    font-size: 0.9rem;
+                    margin-bottom: 1rem;
+                }
+
+                h3 {
+                    font-size: 1.4rem;
+                    margin-bottom: 0.5rem;
+                    color: $text-color;
+                }
+
+                .instructor {
+                    color: $text-color-light;
+                    font-size: 1rem;
+                }
+            }
+
+            .description {
+                padding: 1.5rem;
+                color: $text-color-light;
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            .details {
+                padding: 0 1.5rem;
+                display: flex;
+                gap: 1.5rem;
+                margin-bottom: 1.5rem;
+
+                .detailItem {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: $text-color-light;
+
+                    svg {
+                        font-size: 1.2rem;
+                        color: $primary-color;
+                    }
+                }
+            }
+
+            .benefits {
+                padding: 0 1.5rem 1.5rem;
+
+                h4 {
+                    font-size: 1.1rem;
+                    margin-bottom: 1rem;
+                    color: $text-color;
+                }
+
+                ul {
+                    list-style: none;
+                    padding: 0;
+
+                    li {
+                        position: relative;
+                        padding-left: 1.5rem;
+                        margin-bottom: 0.5rem;
+                        color: $text-color-light;
+
+                        &:before {
+                            content: "•";
+                            color: $primary-color;
+                            position: absolute;
+                            left: 0;
+                        }
+                    }
+                }
+            }
+
+            .applyButton {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                width: calc(100% - 3rem);
+                margin: 0 1.5rem 1.5rem;
+                padding: 1rem;
+                background: linear-gradient(135deg, $primary-color, $secondary-color);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba($primary-color, 0.3);
+                }
+
+                svg {
+                    font-size: 1.2rem;
+                }
+            }
+
+            .capacityBar {
+                height: 4px;
+                background: rgba($primary-color, 0.1);
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+
+                .progress {
+                    height: 100%;
+                    background: linear-gradient(to right, $primary-color, $secondary-color);
+                    transition: width 0.3s ease;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .seminarInfo {
+        padding: 1rem;
+
+        .hero {
+            padding: 2rem 1rem;
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+        }
+
+        .categorySection {
+            .categoryList {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .seminarList {
+            .seminarGrid {
+                grid-template-columns: 1fr;
+            }
+        }
+    }
+}
