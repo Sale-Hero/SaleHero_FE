@@ -21,7 +21,7 @@ import {
 import { Search, Add, Edit, Delete } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { motion } from 'framer-motion';
-import { useCookieFunctions } from "../../components/common/hooks/useCookieFunctions";
+import { useCookieFunctions } from "../common/hooks/useCookieFunctions";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';

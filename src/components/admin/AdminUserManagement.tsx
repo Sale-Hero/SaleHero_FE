@@ -14,10 +14,10 @@ import {
 } from '@mui/material';
 import {DataGrid} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
-import {useCookieFunctions} from "../../components/common/hooks/useCookieFunctions";
+import {useCookieFunctions} from "../common/hooks/useCookieFunctions";
 import {AdminUser} from "../../types/adminUser";
 import {ApiResponse} from "../../types/common";
-import {useAdminUserColumns} from "../../features/admin/hooks/useAdminUserColumns";
+import {useAdminUserColumns} from "./hooks/useAdminUserColumns";
 
 export function AdminUserManagement() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);

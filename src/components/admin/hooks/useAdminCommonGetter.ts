@@ -2,7 +2,7 @@ import {useDispatch} from "react-redux";
 import {useCallback, useState} from "react";
 import {getCurrentCountAsync} from "../../../slice/AdminSlice";
 import {AdminCurrentCount} from "../../../types/adminUser";
-import {useCookieFunctions} from "../../../components/common/hooks/useCookieFunctions";
+import {useCookieFunctions} from "../../common/hooks/useCookieFunctions";
 import {JsonResponseDTO} from "../../../types/common";
 
 export function useAdminCommonGetter() {

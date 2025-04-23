@@ -9,7 +9,7 @@ import {
     CardContent,
 } from '@mui/material';
 import { Person, Article, Email } from '@mui/icons-material';
-import {useAdminCommonGetter} from "../../features/admin/hooks/useAdminCommonGetter";
+import {useAdminCommonGetter} from "./hooks/useAdminCommonGetter";
 import {useEffect} from "react";
 
 export function AdminDashboard() {

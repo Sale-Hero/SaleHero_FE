@@ -18,7 +18,7 @@ import { Search } from '@mui/icons-material';
 import { GridValueGetter } from '@mui/x-data-grid';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { motion } from 'framer-motion';
-import { useCookieFunctions } from "../../components/common/hooks/useCookieFunctions";
+import { useCookieFunctions } from "../common/hooks/useCookieFunctions";
 
 interface CommunityPost {
     id: number;

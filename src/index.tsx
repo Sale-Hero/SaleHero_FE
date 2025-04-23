@@ -13,14 +13,14 @@ import {SignIn} from './components/auth/SignIn';
 import {HelmetProvider} from 'react-helmet-async';
 import {TermsAndConditions} from './components/legal/TermsAndConditions';
 import {PrivacyPolicy} from './components/legal/PrivacyPolicy';
-import {AdminDashboard} from "./features/admin/AdminDashboard";
-import {AdminLayout} from './features/admin/AdminLayout';
-import {AdminUserManagement} from "./features/admin/AdminUserManagement";
-import {AdminCover} from "./features/admin/AdminCover";
+import {AdminDashboard} from "./components/admin/AdminDashboard";
+import {AdminLayout} from './components/admin/AdminLayout';
+import {AdminUserManagement} from "./components/admin/AdminUserManagement";
+import {AdminCover} from "./components/admin/AdminCover";
 import ProtectedRoute from "./config/ProtectedRoute";
-import {AdminCommunityManagement} from "./features/admin/AdminCommunityManagement";
-import {AdminCodesManagement} from "./features/admin/AdminCodesManagement";
-import {AdminNewsletterManagement} from "./features/admin/AdminNewsletterManagement";
+import {AdminCommunityManagement} from "./components/admin/AdminCommunityManagement";
+import {AdminCodesManagement} from "./components/admin/AdminCodesManagement";
+import {AdminNewsletterManagement} from "./components/admin/AdminNewsletterManagement";
 import Contact from "./components/contactus/Contact";
 
 const router = createBrowserRouter([

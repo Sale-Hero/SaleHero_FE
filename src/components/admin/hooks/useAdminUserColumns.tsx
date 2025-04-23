@@ -1,9 +1,9 @@
 import {GridColDef, GridRenderCellParams} from "@mui/x-data-grid";
 import {AdminUser} from "../../../types/adminUser";
-import {Box, Button, Chip, IconButton} from "@mui/material";
-import {AdminPanelSettings, Block, Delete, Edit, Visibility} from "@mui/icons-material";
+import {Box, Button, Chip} from "@mui/material";
+import {AdminPanelSettings, Block} from "@mui/icons-material";
 import {StatusMapping} from "../../../types/common";
-import {useAdminModifyFunctions} from "../../../features/admin/hooks/useAdminModifyFunctions";
+import {useAdminModifyFunctions} from "./useAdminModifyFunctions";
 import React from "react";
 
 export function useAdminUserColumns() {
