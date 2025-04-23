@@ -94,7 +94,6 @@ export const Community: React.FC = () => {
         return category === CommunityCategory.INFORMATION ? '정보' : '커뮤니티';
     };
 
-    console.log(category)
     return (
         <StyledContainer maxWidth="lg">
             <motion.div

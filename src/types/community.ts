@@ -1,4 +1,4 @@
-import {PageSearchDTO, SearchCondition} from "./common";
+import {SearchCondition} from "./common";
 
 export interface CommunityDTO{
     id: number,
@@ -19,4 +19,5 @@ export enum CommunityCategory{
 
 export interface CommunitySearchDTO extends SearchCondition{
     category?: CommunityCategory;
+    query?: String
 }
