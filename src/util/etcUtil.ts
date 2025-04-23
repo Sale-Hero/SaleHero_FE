@@ -49,3 +49,7 @@ export const convertTimeToFormat = (newDate: string | Date | null): string | nul
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+
+export const DEFAULT_ARTICLE_SIZE = 5;
+
+export const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);

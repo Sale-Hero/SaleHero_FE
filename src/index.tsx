@@ -9,8 +9,6 @@ import Main from "./components/common/Main";
 import {Success} from './components/common/Success';
 import {NotFoundPage} from './components/common/NotFoundPage';
 import {Community} from './components/community/Community';
-import {CommunityForm} from './components/community/CommunityForm';
-import {CommunityDetail} from "./components/community/CommunityDetail";
 import {SignIn} from './components/auth/SignIn';
 import {HelmetProvider} from 'react-helmet-async';
 import {TermsAndConditions} from './components/legal/TermsAndConditions';
@@ -43,14 +41,14 @@ const router = createBrowserRouter([
         path: "community",
         element: <Community />
       },
-      {
-        path: "community/post",
-        element: <CommunityForm />
-      },
-      {
-        path: "community/detail/:id",
-        element: <CommunityDetail />
-      },
+      // {
+      //   path: "community/post",
+      //   element: <CommunityForm />
+      // },
+      // {
+      //   path: "community/detail/:id",
+      //   element: <CommunityDetail />
+      // },
       {
         path: "contact",
         element: <Contact />
