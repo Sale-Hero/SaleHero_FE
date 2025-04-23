@@ -18,8 +18,9 @@ export interface PageInfo{
 }
 
 export interface PageResponse<T>{
-    meta: PageInfo;
-    data: Array<T>;
+    totalPages: number;
+    totalElement: number;
+    content: Array<T>;
 }
 
 export interface JsonResponseDTO<T>{
@@ -72,6 +73,15 @@ export interface ResponseDTO<T>{
     success: boolean,
     message: string,
     data: T
+}
+
+export interface SearchCondition {
+    pageCondition: PageSearchDTO;
+}
+
+export interface PageSearchDTO{
+    page?: number;
+    size?: number;
 }
 
 // ~admin

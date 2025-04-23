@@ -60,7 +60,7 @@ export function AdminNewsletterManagement() {
     const [totalPages, setTotalPages] = useState<number>(0);
     const [searchWord, setSearchWord] = useState<string>('');
     const [paginationModel, setPaginationModel] = useState({
-        page: 0,
+        page: 1,
         pageSize: 15,
     });
 
@@ -204,8 +204,8 @@ export function AdminNewsletterManagement() {
 
     const handleSearch = () => {
         // 검색 시 첫 페이지로 초기화
-        setPaginationModel(prev => ({ ...prev, page: 0 }));
-        fetchNewsletters(0, paginationModel.pageSize, searchWord);
+        setPaginationModel(prev => ({ ...prev, page: 1 }));
+        fetchNewsletters(1, paginationModel.pageSize, searchWord);
     };
 
     // 엔터키로 검색 지원
@@ -252,7 +252,7 @@ export function AdminNewsletterManagement() {
     };
 
     const handlePaginationModelChange = (newModel: typeof paginationModel): void => {
-        setPaginationModel(newModel);
+        // setPaginationModel(newModel);
     };
 
     const handleViewNewsletter = (newsletter: Newsletter): void => {
