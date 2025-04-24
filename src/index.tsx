@@ -22,7 +22,8 @@ import {AdminCommunityManagement} from "./components/admin/AdminCommunityManagem
 import {AdminCodesManagement} from "./components/admin/AdminCodesManagement";
 import {AdminNewsletterManagement} from "./components/admin/AdminNewsletterManagement";
 import Contact from "./components/contactus/Contact";
-import {Deal} from "./components/deals/Deal";
+import {Deals} from "./components/deals/Deals";
+import { DealDetail } from 'components/deals/DealDetail';
 
 const router = createBrowserRouter([
   {
@@ -56,7 +57,11 @@ const router = createBrowserRouter([
       },
       {
         path: "deals",
-        element: <Deal />
+        element: <Deals />
+      },
+      {
+        path: "deals/:id",
+        element: <DealDetail />
       },
       {
         path: "signin",
