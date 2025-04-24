@@ -22,6 +22,7 @@ import {AdminCommunityManagement} from "./components/admin/AdminCommunityManagem
 import {AdminCodesManagement} from "./components/admin/AdminCodesManagement";
 import {AdminNewsletterManagement} from "./components/admin/AdminNewsletterManagement";
 import Contact from "./components/contactus/Contact";
+import {Deal} from "./components/deals/Deal";
 
 const router = createBrowserRouter([
   {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "contact",
         element: <Contact />
+      },
+      {
+        path: "deals",
+        element: <Deal />
       },
       {
         path: "signin",

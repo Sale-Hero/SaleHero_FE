@@ -3,13 +3,13 @@ import {Alert, Box, Button, Container, Grid, IconButton, Paper, Snackbar, TextFi
 import {AccessTime, Email, LocationOn, Phone, Send,} from '@mui/icons-material';
 import {motion} from 'framer-motion';
 import {ComponentHelmet} from "../../components/common/ComponentHelmet";
-import {InquiryPostDTO} from "../../types/inquiry";
+import {SupportPostDTO} from "../../types/support";
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone_number: '',
+    cellPhone: '',
     title: '',
     content: '',
   });
@@ -32,15 +32,15 @@ export const Contact: React.FC = () => {
     e.preventDefault();
 
     try {
-      const dto: InquiryPostDTO = {
+      const dto: SupportPostDTO = {
         name: formData.name,
         email: formData.email,
-        phone_number: formData.phone_number,
+        cellPhone: formData.cellPhone,
         title: formData.title,
         content: formData.content
       };
 
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/inquiry`, {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/support`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dto)
@@ -70,7 +70,7 @@ export const Contact: React.FC = () => {
     setFormData({
       name: '',
       email: '',
-      phone_number: '',
+      cellPhone: '',
       title: '',
       content: '',
     });
@@ -346,8 +346,8 @@ export const Contact: React.FC = () => {
                         <TextField
                             fullWidth
                             label="연락처"
-                            name="phone_number"
-                            value={formData.phone_number}
+                            name="cellPhone"
+                            value={formData.cellPhone}
                             onChange={handleChange}
                             variant="outlined"
                             sx={{

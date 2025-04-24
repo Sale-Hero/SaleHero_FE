@@ -1,7 +1,7 @@
-export interface InquiryPostDTO{
+export interface SupportPostDTO{
     name: string;
     email: string;
-    phone_number: string;
+    cellPhone: string;
     title: string;
     content: string;
 }

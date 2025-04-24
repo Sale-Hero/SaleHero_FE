@@ -23,6 +23,7 @@ import {
     TypeChip
 } from './hooks/useCommunityStyles';
 import {useCommunityGetter} from "./hooks/useCommunityGetter";
+import saleHeroLogo from "../../assets/img/sale_hero_ico.png"
 import {PageSearchDTO} from "../../types/common";
 import {DEFAULT_ARTICLE_SIZE} from "../../util/etcUtil";
 
@@ -104,8 +105,7 @@ export const Community: React.FC = () => {
                 {/* 헤더 섹션 */}
                 <HeroSection>
                     <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                        {/* 실제 이미지 경로로 변경 필요 */}
-                        <img src="/path-to-salehero-icon.png" alt="세일히어로" width="80" />
+                        <img src={saleHeroLogo} alt="세일히어로" width="80" />
                     </Box>
                     <Typography
                         variant="h4"
