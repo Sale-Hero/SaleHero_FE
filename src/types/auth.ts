@@ -2,6 +2,7 @@ export interface UserDTO {
     id: number,
     userEmail: string,
     userName: string,
+    nickName: string,
     role: UserRole,
 
 }

@@ -32,7 +32,9 @@ import {
     ShoppingBag, ContactSupport,
 } from '@mui/icons-material';
 import logo from '../../assets/img/sale_hero_ico.png';
-import { HeaderStatus } from 'types/common';
+import {HeaderStatus} from 'types/common';
+import {useUserInfo} from "../../hooks/hooks";
+
 interface MenuItem {
     label: string;
     icon: JSX.Element;
@@ -43,25 +45,25 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
     {
         label: '홈',
-        icon: <Home />,
+        icon: <Home/>,
         path: '/',
         status: HeaderStatus.NONE,
     },
     {
         label: '할인정보',
-        icon: <ShoppingBag />,
+        icon: <ShoppingBag/>,
         path: '/deals',
         status: HeaderStatus.DEALS,
     },
     {
         label: '커뮤니티',
-        icon: <Forum />,
+        icon: <Forum/>,
         path: '/community',
         status: HeaderStatus.COMMUNITY,
     },
     {
         label: '문의하기',
-        icon: <ContactSupport />,
+        icon: <ContactSupport/>,
         path: '/contact',
         status: HeaderStatus.CONTACT,
     }
@@ -72,8 +74,9 @@ export function Header() {
     const [isLogin, setIsLogin] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const { getCookie, removeCookie } = useCookieFunctions();
+    const {getCookie, removeCookie} = useCookieFunctions();
     const navigate = useNavigate();
+    const {nickName} = useUserInfo();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -120,7 +123,7 @@ export function Header() {
     }, [getCookie]);
 
     const drawer = (
-        <Box sx={{ width: 280, bgcolor: 'background.paper' }}>
+        <Box sx={{width: 280, bgcolor: 'background.paper'}}>
             <Box
                 sx={{
                     display: 'flex',
@@ -133,7 +136,7 @@ export function Header() {
                     component="img"
                     src={logo}
                     alt="Sale Hero Logo"
-                    sx={{ height: 40, width: 40, mr: 2 }}
+                    sx={{height: 40, width: 40, mr: 2}}
                 />
                 <Typography
                     variant="h6"
@@ -147,7 +150,7 @@ export function Header() {
                     Sale Hero
                 </Typography>
             </Box>
-            <List sx={{ py: 2 }}>
+            <List sx={{py: 2}}>
                 {menuItems.map((item) => (
                     <ListItemButton
                         key={item.label}
@@ -174,7 +177,7 @@ export function Header() {
                             })
                         }}
                     >
-                        <ListItemIcon sx={{ minWidth: 40, color: headerStatus === item.status ? '#F29727' : 'inherit' }}>
+                        <ListItemIcon sx={{minWidth: 40, color: headerStatus === item.status ? '#F29727' : 'inherit'}}>
                             {item.icon}
                         </ListItemIcon>
                         <ListItemText
@@ -186,12 +189,12 @@ export function Header() {
                     </ListItemButton>
                 ))}
             </List>
-            <Box sx={{ p: 2, mt: 'auto' }}>
+            <Box sx={{p: 2, mt: 'auto'}}>
                 {isLogin ? (
                     <Button
                         fullWidth
                         variant="outlined"
-                        startIcon={<Logout />}
+                        startIcon={<Logout/>}
                         onClick={handleLogout}
                         sx={{
                             py: 1.2,
@@ -210,7 +213,7 @@ export function Header() {
                     <Button
                         fullWidth
                         variant="contained"
-                        startIcon={<Login />}
+                        startIcon={<Login/>}
                         onClick={() => handleNavigation('/signin', HeaderStatus.NONE)}
                         sx={{
                             py: 1.2,
@@ -259,20 +262,20 @@ export function Header() {
                     },
                 },
             }}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            transformOrigin={{horizontal: 'right', vertical: 'top'}}
+            anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
         >
             <MenuItem onClick={() => {
                 handleMenuClose();
                 handleNavigation('/my-page', HeaderStatus.NONE);
             }}>
-                <Person sx={{ mr: 1.5, color: '#F29727' }} /> 마이페이지
+                <Person sx={{mr: 1.5, color: '#F29727'}}/> 마이페이지
             </MenuItem>
             <MenuItem onClick={() => {
                 handleMenuClose();
                 handleLogout();
             }}>
-                <Logout sx={{ mr: 1.5, color: '#F29727' }} /> 로그아웃
+                <Logout sx={{mr: 1.5, color: '#F29727'}}/> 로그아웃
             </MenuItem>
         </Menu>
     );
@@ -308,11 +311,11 @@ export function Header() {
                             onClick={handleDrawerToggle}
                             sx={{
                                 mr: 2,
-                                display: { md: 'none' },
+                                display: {md: 'none'},
                                 color: '#F29727',
                             }}
                         >
-                            <MenuIcon />
+                            <MenuIcon/>
                         </IconButton>
 
                         {/* 로고 영역 */}
@@ -365,7 +368,7 @@ export function Header() {
                         {/* 데스크톱 메뉴 아이템 */}
                         <Box
                             sx={{
-                                display: { xs: 'none', md: 'flex' },
+                                display: {xs: 'none', md: 'flex'},
                                 alignItems: 'center',
                                 flexGrow: 1,
                             }}
@@ -418,23 +421,58 @@ export function Header() {
                             ))}
                         </Box>
 
-                        {/* 오른쪽 영역: 알림, 프로필 */}
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {/* 오른쪽 영역: 환영 메시지, 알림, 프로필 */}
+                        <Box sx={{display: 'flex', alignItems: 'center'}}>
                             {isLogin && (
-                                <IconButton
-                                    size="large"
-                                    aria-label="show notifications"
-                                    color="inherit"
-                                    sx={{
-                                        mr: 2,
-                                        color: '#666',
-                                        '&:hover': { color: '#F29727' }
-                                    }}
-                                >
-                                    <Badge badgeContent={3} color="error">
-                                        <Notifications />
-                                    </Badge>
-                                </IconButton>
+                                <>
+                                    <Box
+                                        sx={{
+                                            display: {xs: 'none', md: 'flex'},
+                                            alignItems: 'center',
+                                            mr: 3,
+                                            py: 0.5,
+                                            px: 2,
+                                            borderRadius: 2,
+                                            background: 'linear-gradient(to right, rgba(255, 248, 225, 0.5), rgba(255, 236, 179, 0.5))',
+                                            boxShadow: 'inset 0 0 0 1px rgba(255, 205, 0, 0.2)',
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontWeight: 500,
+                                                color: '#F29727',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                '& strong': {
+                                                    fontWeight: 700,
+                                                    color: '#E67E22',
+                                                    mx: 0.5,
+                                                },
+                                            }}
+                                        >
+          <span role="img" aria-label="wave" style={{marginRight: '4px', fontSize: '16px'}}>
+            👋
+          </span>
+                                            <strong>{nickName}</strong>님, 오늘도 득템하세요!
+                                        </Typography>
+                                    </Box>
+
+                                    <IconButton
+                                        size="large"
+                                        aria-label="show notifications"
+                                        color="inherit"
+                                        sx={{
+                                            mr: 2,
+                                            color: '#666',
+                                            '&:hover': {color: '#F29727'}
+                                        }}
+                                    >
+                                        <Badge badgeContent={3} color="error">
+                                            <Notifications/>
+                                        </Badge>
+                                    </IconButton>
+                                </>
                             )}
 
                             {isLogin ? (
@@ -455,7 +493,7 @@ export function Header() {
                                     }}
                                 >
                                     <Avatar
-                                        alt="User"
+                                        alt={nickName?.toString() || "User"}
                                         src="/path-to-user-image.jpg" // 실제 사용자 이미지로 교체
                                         sx={{
                                             width: 32,
@@ -463,17 +501,17 @@ export function Header() {
                                             bgcolor: '#FFB74D'
                                         }}
                                     >
-                                        <Person />
+                                        {nickName ? nickName.toString().charAt(0) : <Person/>}
                                     </Avatar>
                                 </IconButton>
                             ) : (
                                 <Button
                                     variant="contained"
-                                    startIcon={<Login />}
+                                    startIcon={<Login/>}
                                     onClick={() => handleNavigation('/signin', HeaderStatus.NONE)}
                                     sx={{
-                                        ml: { xs: 1, md: 2 },
-                                        px: { xs: 2, md: 3 },
+                                        ml: {xs: 1, md: 2},
+                                        px: {xs: 2, md: 3},
                                         py: 1,
                                         borderRadius: '50px',
                                         textTransform: 'none',
@@ -505,7 +543,7 @@ export function Header() {
                     anchor="left"
                     open={mobileOpen}
                     onClose={handleDrawerToggle}
-                    ModalProps={{ keepMounted: true }}
+                    ModalProps={{keepMounted: true}}
                     PaperProps={{
                         sx: {
                             width: 280,
@@ -515,7 +553,7 @@ export function Header() {
                         }
                     }}
                     sx={{
-                        display: { xs: 'block', md: 'none' },
+                        display: {xs: 'block', md: 'none'},
                     }}
                 >
                     {drawer}
@@ -525,7 +563,7 @@ export function Header() {
             {renderMenu}
 
             {/* 헤더 높이만큼 여백 */}
-            <Toolbar sx={{ height: { xs: 64, md: 70 }, mb: 1 }} />
+            <Toolbar sx={{height: {xs: 64, md: 70}, mb: 1}}/>
         </>
     );
 }

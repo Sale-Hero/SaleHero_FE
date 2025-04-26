@@ -91,3 +91,6 @@ export enum HeaderStatus {
     NONE = "NONE",
 }
 
+export interface ChildrenProp {
+    children: JSX.Element;
+}

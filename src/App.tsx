@@ -5,6 +5,7 @@ import {Footer} from "./components/common/Footer";
 import theme from './theme';
 import {useEffect, useLayoutEffect} from 'react';
 import {AuthProvider} from "./components/common/AuthProvider";
+import {UserProvider} from "./hooks/userinfo/UserProvider";
 
 function App() {
     const location = useLocation();
@@ -27,11 +28,13 @@ function App() {
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <AuthProvider>
-                <div className="App">
-                    {!isAdminRoute && <Header/>}
-                    <Outlet/>
-                    {!isAdminRoute && <Footer/>}
-                </div>
+                <UserProvider>
+                    <div className="App">
+                        {!isAdminRoute && <Header/>}
+                        <Outlet/>
+                        {!isAdminRoute && <Footer/>}
+                    </div>
+                </UserProvider>
             </AuthProvider>
         </ThemeProvider>
     );

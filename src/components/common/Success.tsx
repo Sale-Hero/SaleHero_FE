@@ -3,13 +3,15 @@ import {useEffect} from "react";
 import {useDispatch} from "react-redux";
 import {getCurrentUserAsync} from "../../slice/AuthSlice";
 import {MainApi} from "../../api/MainApi";
-import { UserDTO } from "types/auth";
+import {UserDTO} from "types/auth";
 import {AppDispatch} from "../../store/store";
+import {useUserInfo} from "../../hooks/hooks";
 
 export function Success() {
     const location = useLocation(); // 현재 URL 정보를 가져옴
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
+    const { setUserInfo } = useUserInfo();
 
     useEffect(() => {
         // 쿼리 파라미터 파싱
@@ -28,15 +30,17 @@ export function Success() {
             }
 
             // 유저 정보 확인
-            const result:UserDTO = await dispatch(getCurrentUserAsync()).unwrap();
+            const result: UserDTO = await dispatch(getCurrentUserAsync()).unwrap();
+
+            setUserInfo(result);
             console.log('success result : ', result)
-                navigate('/', { replace: true });
+            navigate('/', {replace: true});
         };
 
         setup();
     }, [location, dispatch, navigate]);
 
-    return(
+    return (
         <>
         </>
     )
