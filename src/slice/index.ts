@@ -1,9 +1,7 @@
 import {Action, configureStore, ThunkAction} from "@reduxjs/toolkit";
-import CompanyInformationSlice from "./companyInformationSlice";
 
 export const store = configureStore({
     reducer: {
-        emoji: CompanyInformationSlice,
     },
 });
 

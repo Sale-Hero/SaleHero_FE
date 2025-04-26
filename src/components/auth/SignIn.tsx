@@ -1,9 +1,9 @@
 import {Link as RouterLink} from 'react-router-dom';
-import React, {useCallback, useState} from 'react';
+import React, {useState} from 'react';
 import {Alert, Box, Button, CircularProgress, Container, Paper, Stack, Typography,} from '@mui/material';
 import {Google} from '@mui/icons-material';
 import {motion} from 'framer-motion';
-import dailySaleLogo from '../../assets/img/daily_sale_logo.png';
+import saleHeroLogo from '../../assets/img/sale_hero_ico.png';
 
 
 export function SignIn() {
@@ -17,24 +17,6 @@ export function SignIn() {
             console.error('구글 인증 URL을 가져오는데 실패했습니다:', error);
         }
     }
-
-    // const handleGoogleLogin = useCallback(() => {
-    //     setIsLoading(true);
-    //     setErrorMessage('');
-    //     console.log('start')
-    //
-    //     try {
-    //         const redirectUri = `${process.env.REACT_APP_BASE_URL}/auth/google`;
-    //         const requestUri = `${process.env.REACT_APP_BASE_URL}/auth/google`;
-    //         const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    //         console.log(redirectUri)
-    //         console.log(googleClientId)
-    //         window.location.href = requestUri;
-    //     } catch (error: any) {
-    //         setErrorMessage(error.message || '로그인에 실패했습니다');
-    //         setIsLoading(false);
-    //     }
-    // }, []);
 
     return (
         <Box
@@ -72,7 +54,7 @@ export function SignIn() {
                         >
                             <Box
                                 component="img"
-                                src={dailySaleLogo}
+                                src={saleHeroLogo}
                                 alt="Sale Hero Logo"
                                 sx={{
                                     height: 50,
