@@ -32,14 +32,7 @@ import {
     ShoppingBag, ContactSupport,
 } from '@mui/icons-material';
 import logo from '../../assets/img/sale_hero_ico.png';
-
-export enum HeaderStatus {
-    COMMUNITY = "COMMUNITY",
-    DEALS = "DEALS",
-    CONTACT = "CONTACT",
-    NONE = "NONE",
-}
-
+import { HeaderStatus } from 'types/common';
 interface MenuItem {
     label: string;
     icon: JSX.Element;

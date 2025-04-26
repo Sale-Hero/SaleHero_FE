@@ -1,4 +1,3 @@
-import {HeaderStatus} from "../components/common/Header";
 import {AdminUser} from "./adminUser";
 
 export enum Status {
@@ -60,10 +59,10 @@ interface SubMenuGroup extends BaseMenuItem {
     subItems: SubMenuItem[];
 }
 
-interface MenuItem extends BaseMenuItem {
-    status: HeaderStatus;
-    subItems?: SubMenuGroup[];
-}
+// interface MenuItem extends BaseMenuItem {
+//     status: HeaderStatus;
+//     subItems?: SubMenuGroup[];
+// }
 
 export enum SubMenu{
 
@@ -84,4 +83,11 @@ export interface PageSearchDTO{
     size?: number;
 }
 
-// ~admin
+
+export enum HeaderStatus {
+    COMMUNITY = "COMMUNITY",
+    DEALS = "DEALS",
+    CONTACT = "CONTACT",
+    NONE = "NONE",
+}
+
