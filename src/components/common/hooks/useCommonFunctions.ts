@@ -1,5 +1,6 @@
 import {useCookieFunctions} from "../../../components/common/hooks/useCookieFunctions";
 import {useNavigate} from "react-router-dom";
+import {DayOfWeek} from "../../../types/common";
 
 export function useCommonFunctions() {
     /**
@@ -19,8 +20,17 @@ export function useCommonFunctions() {
         }
     };
 
+    const getDaysOfWeek = () => {
+        return [
+            DayOfWeek.MONDAY,
+            DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.THURSDAY,
+            DayOfWeek.FRIDAY
+        ]
+    }
     return{
-        checkAuth
+        checkAuth, getDaysOfWeek
     }
 
 }
