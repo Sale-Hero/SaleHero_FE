@@ -1,10 +1,14 @@
-export enum NewsLetterFrequency{
-    WEEKLY_ONCE = "WEEKLY_ONCE",
-    WEEKLY_FIVE = "WEEKLY_FIVE",
+
+export enum DayOfWeek{
+    MONDAY = "MONDAY",
+    TUESDAY = "TUESDAY",
+    WEDNESDAY = "WEDNESDAY",
+    THURSDAY = "THURSDAY",
+    FRIDAY = "FRIDAY",
 }
 
 export interface SubscribePostDTO{
     userEmail: string,
-    frequency: NewsLetterFrequency,
-    isMarketingAgreed: boolean
+    isMarketingAgreed: boolean;
+    dayOfWeek: DayOfWeek[];
 }
