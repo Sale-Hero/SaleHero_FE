@@ -2,17 +2,17 @@ import {StyledDialog, SubmitButton, TermsBox} from "./styled/MainStyledComponent
 import {
     Alert,
     Box, Button,
-    Checkbox, DialogActions,
+    Checkbox, CircularProgress, DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
     FormControlLabel,
     Grid,
-    Paper, Snackbar,
+    Paper, Snackbar, TextField,
     Typography
 } from "@mui/material";
-import {Email} from "@mui/icons-material";
-import React, {useState} from "react";
+import {Email, LockClock} from "@mui/icons-material";
+import React, {useEffect, useState} from "react";
 import {DayOfWeek, SubscribePostDTO} from "../../../types/subscribe";
 import {useSubscribeFunctions} from "./hooks/useSubscribeFunctions";
 
@@ -28,14 +28,47 @@ export function SubscribeModal(
     {email, setEmail, error, setError, openSubscribeModal, setOpenSubscribeModal}
     :Args) {
     const [selectedWeekDays, setSelectedWeekDays] = useState<DayOfWeek[]>([]);
-    console.log(selectedWeekDays)
     const [termsAgreed, setTermsAgreed] = useState(false);
     const [marketingAgreed, setMarketingAgreed] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
-    const { getDaysOfWeek} = useSubscribeFunctions();
+    const { getDaysOfWeek } = useSubscribeFunctions();
+
+    // 추가된 상태들
+    const [isVerificationSent, setIsVerificationSent] = useState(false);
+    const [verificationCode, setVerificationCode] = useState("");
+    const [remainingTime, setRemainingTime] = useState(180); // 3분 = 180초
+    const [isVerified, setIsVerified] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
+
+    // 타이머 구현
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+
+        if (isVerificationSent && remainingTime > 0) {
+            timer = setInterval(() => {
+                setRemainingTime(prev => prev - 1);
+            }, 1000);
+        } else if (remainingTime === 0 && isVerificationSent) {
+            // 시간 초과시 초기화
+            setIsVerificationSent(false);
+            setVerificationCode("");
+        }
+
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+    }, [isVerificationSent, remainingTime]);
 
     const handleCloseTermsModal = () => {
         setOpenSubscribeModal(false);
+        resetVerificationState();
+    };
+
+    const resetVerificationState = () => {
+        setIsVerificationSent(false);
+        setVerificationCode("");
+        setRemainingTime(180);
+        setIsVerified(false);
     };
 
     const handleTermsAgreement = () => {
@@ -46,9 +79,79 @@ export function SubscribeModal(
         setMarketingAgreed(!marketingAgreed);
     };
 
+    const handleSendVerification = async () => {
+        if (!termsAgreed || selectedWeekDays.length === 0) {
+            return; // 필수 약관에 동의하지 않았거나 요일을 선택하지 않았으면 인증 불가
+        }
+
+        try {
+            // 이메일 인증 API 호출
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userEmail:email })
+            });
+
+            // 응답 오류 처리
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '이메일 인증 요청에 실패했습니다.');
+            }
+
+            // 인증 요청 성공
+            setIsVerificationSent(true);
+            setRemainingTime(180); // 3분 설정
+
+        } catch (error) {
+            // 오류 처리
+            const errorMessage = error instanceof Error ? error.message : '이메일 인증 요청 중 오류가 발생했습니다.';
+            setError(errorMessage);
+            console.error('인증 요청 오류:', error);
+        }
+    };
+
+    const handleVerifyCode = async () => {
+        if (!verificationCode) return;
+
+        setIsVerifying(true);
+
+        try {
+            // 인증 코드 확인 API 호출
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/subscribe/confirm-verification`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email,
+                    verificationCode
+                })
+            });
+
+            // 응답 오류 처리
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '인증 코드 확인에 실패했습니다.');
+            }
+
+            // 인증 성공
+            setIsVerified(true);
+
+        } catch (error) {
+            // 오류 처리
+            const errorMessage = error instanceof Error ? error.message : '인증 코드 확인 중 오류가 발생했습니다.';
+            setError(errorMessage);
+            console.error('인증 코드 확인 오류:', error);
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
     const handleSubmit = async () => {
-        if (!termsAgreed) {
-            return; // 필수 약관에 동의하지 않았으면 제출 불가
+        if (!termsAgreed || !isVerified) {
+            return; // 필수 약관에 동의하지 않았거나 인증되지 않았으면 제출 불가
         }
 
         try {
@@ -78,6 +181,7 @@ export function SubscribeModal(
             setEmail("");
             setTermsAgreed(false);
             setMarketingAgreed(false);
+            resetVerificationState();
             setOpenSubscribeModal(false);
             setOpenSnackbar(true);
 
@@ -90,6 +194,8 @@ export function SubscribeModal(
     };
 
     const toggleDay = (day: DayOfWeek) => {
+        if (isVerificationSent) return; // 인증 과정 중에는 요일 변경 불가
+
         setSelectedWeekDays(prevDays => {
             // 이미 선택된 요일이면 제거
             if (prevDays.includes(day)) {
@@ -108,6 +214,13 @@ export function SubscribeModal(
         });
     };
 
+    // 남은 시간을 분:초 형식으로 변환
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    };
+
     return(
         <>
             <StyledDialog
@@ -124,7 +237,7 @@ export function SubscribeModal(
                             수신 요일 선택 (1~5개)
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#666', mt: 0.5 }}>
-                            원하는 요일을 언제든지 변경할 수 있습니다.
+                            원하는 요일을 선택해주세요. (필수)
                         </Typography>
                         <Grid container spacing={2} sx={{ mt: 1 }}>
                             {getDaysOfWeek().map(({ key, label }) => (
@@ -137,21 +250,25 @@ export function SubscribeModal(
                                                 ? '2px solid #F29727'
                                                 : '1px solid #ccc',
                                             borderRadius: '10px',
-                                            cursor: 'pointer',
+                                            cursor: isVerificationSent ? 'not-allowed' : 'pointer',
                                             backgroundColor: selectedWeekDays.includes(key) ? '#fff7ed' : '#fff',
+                                            opacity: isVerificationSent ? 0.7 : 1,
                                             transition: 'all 0.2s',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             height: '100%', // 높이 일정하게
                                             '&:hover': {
-                                                boxShadow: '0 3px 10px rgba(242, 151, 39, 0.1)',
+                                                boxShadow: isVerificationSent ? 'none' : '0 3px 10px rgba(242, 151, 39, 0.1)',
                                             }
                                         }}
                                         onClick={() => toggleDay(key)}
                                     >
                                         <FormControlLabel
-                                            control={<Checkbox checked={selectedWeekDays.includes(key)} />}
+                                            control={<Checkbox
+                                                checked={selectedWeekDays.includes(key)}
+                                                disabled={isVerificationSent}
+                                            />}
                                             label={label}
                                             sx={{
                                                 m: 0,
@@ -178,6 +295,7 @@ export function SubscribeModal(
                         <Checkbox
                             checked={termsAgreed}
                             onChange={handleTermsAgreement}
+                            disabled={isVerificationSent}
                             sx={{
                                 color: '#F29727',
                                 '&.Mui-checked': {
@@ -199,6 +317,7 @@ export function SubscribeModal(
                         <Checkbox
                             checked={marketingAgreed}
                             onChange={handleMarketingAgreement}
+                            disabled={isVerificationSent}
                             sx={{
                                 color: '#F29727',
                                 '&.Mui-checked': {
@@ -215,6 +334,44 @@ export function SubscribeModal(
                             </Typography>
                         </Box>
                     </TermsBox>
+
+                    {isVerificationSent && !isVerified && (
+                        <Box sx={{ mt: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: '10px', border: '1px solid #e0e0e0' }}>
+                            <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                <LockClock sx={{ mr: 1, color: '#F29727' }} />
+                                이메일 인증 코드 입력
+                                <Typography variant="body2" color="error" sx={{ ml: 2 }}>
+                                    남은 시간: {formatTime(remainingTime)}
+                                </Typography>
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <TextField
+                                    value={verificationCode}
+                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                    placeholder="인증 코드 6자리 입력"
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    sx={{ mr: 2 }}
+                                />
+                                <Button
+                                    variant="contained"
+                                    onClick={handleVerifyCode}
+                                    disabled={!verificationCode || isVerifying}
+                                    sx={{
+                                        bgcolor: '#F29727',
+                                        '&:hover': { bgcolor: '#e08a24' },
+                                        minWidth: '100px'
+                                    }}
+                                >
+                                    {isVerifying ? <CircularProgress size={24} color="inherit" /> : '확인'}
+                                </Button>
+                            </Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                * 입력하신 이메일로 전송된 인증 코드를 입력해주세요.
+                            </Typography>
+                        </Box>
+                    )}
                 </DialogContent>
 
                 <DialogActions sx={{ px: 3, pb: 3, justifyContent: 'center' }}>
@@ -229,14 +386,33 @@ export function SubscribeModal(
                     >
                         취소
                     </Button>
-                    <SubmitButton
-                        onClick={handleSubmit}
-                        disabled={!termsAgreed}
-                        startIcon={<Email />}
-                        sx={{ px: 4 }}
-                    >
-                        구독 메일 받기
-                    </SubmitButton>
+
+                    {!isVerificationSent ? (
+                        <SubmitButton
+                            onClick={handleSendVerification}
+                            disabled={!termsAgreed || selectedWeekDays.length === 0}
+                            startIcon={<Email />}
+                            sx={{ px: 4 }}
+                        >
+                            메일 인증하기
+                        </SubmitButton>
+                    ) : isVerified ? (
+                        <SubmitButton
+                            onClick={handleSubmit}
+                            startIcon={<Email />}
+                            sx={{ px: 4 }}
+                        >
+                            구독 메일 받기
+                        </SubmitButton>
+                    ) : (
+                        <SubmitButton
+                            disabled={true}
+                            startIcon={<Email />}
+                            sx={{ px: 4 }}
+                        >
+                            인증 대기 중
+                        </SubmitButton>
+                    )}
                 </DialogActions>
             </StyledDialog>
 
