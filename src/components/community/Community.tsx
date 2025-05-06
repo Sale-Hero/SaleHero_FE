@@ -1,31 +1,21 @@
 import React, {useEffect, useState} from 'react';
-import {Box, CardContent, CircularProgress, IconButton, Pagination, Tab, TextField, Typography} from '@mui/material';
-import {
-    AccessTime as AccessTimeIcon,
-    Create as CreateIcon,
-    Refresh as RefreshIcon,
-    Search as SearchIcon,
-    Visibility as VisibilityIcon
-} from '@mui/icons-material';
+import {Box, CircularProgress, IconButton, Pagination, Tab, TextField, Typography} from '@mui/material';
+import {Create as CreateIcon, Refresh as RefreshIcon, Search as SearchIcon} from '@mui/icons-material';
 import {motion} from 'framer-motion';
 import {CommunityCategory} from 'types/community';
 import {
-    CardFooter,
     CategoryTabs,
-    CommunityCard,
     EmptyStateBox,
-    HeroSection,
     LoadingWrapper,
     SearchBox,
-    StyledAvatar,
     StyledButton,
-    StyledContainer,
-    TypeChip
+    StyledContainer
 } from './hooks/useCommunityStyles';
 import {useCommunityGetter} from "./hooks/useCommunityGetter";
-import saleHeroLogo from "../../assets/img/sale_hero_ico.png"
 import {PageSearchDTO} from "../../types/common";
 import {DEFAULT_ARTICLE_SIZE} from "../../util/etcUtil";
+import {CommunityHeaderField} from "./hooks/CommunityHeaderField";
+import {CommunityListField} from "./hooks/CommunityListField";
 
 
 // 메인 커뮤니티 컴포넌트
@@ -78,22 +68,6 @@ export const Community: React.FC = () => {
         fetchPosts();
     }, [page, category]);
 
-    // 날짜 포맷팅 함수
-    const formatDate = (dateString: string): string => {
-        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString('ko-KR', options);
-    };
-
-    // 시간 포맷팅 함수
-    const formatTime = (dateString: string): string => {
-        const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
-        return new Date(dateString).toLocaleTimeString('ko-KR', options);
-    };
-
-    // 카테고리 라벨 가져오기
-    const getCategoryLabel = (category: CommunityCategory): string => {
-        return category === CommunityCategory.INFORMATION ? '정보' : '커뮤니티';
-    };
 
     return (
         <StyledContainer maxWidth="lg">
@@ -103,22 +77,7 @@ export const Community: React.FC = () => {
                 transition={{ duration: 0.6 }}
             >
                 {/* 헤더 섹션 */}
-                <HeroSection>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                        <img src={saleHeroLogo} alt="세일히어로" width="80" />
-                    </Box>
-                    <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#FF6F00"
-                        gutterBottom
-                    >
-                        세일히어로 커뮤니티
-                    </Typography>
-                    <Typography variant="subtitle1" color="text.secondary">
-                        다양한 할인 정보와 경험을 공유하는 공간입니다
-                    </Typography>
-                </HeroSection>
+               <CommunityHeaderField />
 
                 {/* 카테고리 탭 */}
                 <CategoryTabs
@@ -174,46 +133,7 @@ export const Community: React.FC = () => {
                         transition={{ delay: 0.2 }}
                     >
                         {posts?.content.map((post) => (
-                            <CommunityCard key={post.id}>
-                                <CardContent>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                        <TypeChip
-                                            label={getCategoryLabel(post.category)}
-                                            category={post.category}
-                                            size="small"
-                                        />
-                                        <Typography variant="caption" color="text.secondary">
-                                            {formatDate(post.createdAt)}
-                                        </Typography>
-                                    </Box>
-
-                                    <Typography variant="h6" fontWeight="medium" sx={{ mb: 1 }}>
-                                        {post.title}
-                                    </Typography>
-
-                                    <Typography variant="body2" color="text.secondary" noWrap>
-                                        {post.content}
-                                    </Typography>
-
-                                    <CardFooter>
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <StyledAvatar>{post.writerName.charAt(0)}</StyledAvatar>
-                                            <Typography variant="body2">{post.writerName}</Typography>
-                                        </Box>
-
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <VisibilityIcon sx={{ fontSize: 16, color: '#9E9E9E', mr: 0.5 }} />
-                                            <Typography variant="caption" color="text.secondary" sx={{ mr: 2 }}>
-                                                {post.viewCount}
-                                            </Typography>
-                                            <AccessTimeIcon sx={{ fontSize: 16, color: '#9E9E9E', mr: 0.5 }} />
-                                            <Typography variant="caption" color="text.secondary">
-                                                {formatTime(post.createdAt)}
-                                            </Typography>
-                                        </Box>
-                                    </CardFooter>
-                                </CardContent>
-                            </CommunityCard>
+                            <CommunityListField post={post} />
                         ))}
 
                         {/* 페이지네이션 */}
