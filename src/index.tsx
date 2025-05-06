@@ -24,6 +24,7 @@ import {AdminNewsletterManagement} from "./components/admin/AdminNewsletterManag
 import Contact from "./components/contactus/Contact";
 import {Deals} from "./components/deals/Deals";
 import { DealDetail } from 'components/deals/DealDetail';
+import {CommunityRegister} from "./components/community/CommunityRegister";
 
 const router = createBrowserRouter([
   {
@@ -43,10 +44,10 @@ const router = createBrowserRouter([
         path: "community",
         element: <Community />
       },
-      // {
-      //   path: "community/post",
-      //   element: <CommunityForm />
-      // },
+      {
+        path: "community/register",
+        element: <CommunityRegister />
+      },
       // {
       //   path: "community/detail/:id",
       //   element: <CommunityDetail />

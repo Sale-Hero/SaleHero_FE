@@ -1,5 +1,5 @@
 import {MainApi} from "./MainApi";
-import {CommunitySearchDTO} from "../types/community";
+import {CommunityPostDTO, CommunitySearchDTO} from "../types/community";
 
 export class CommunityAPI {
 
@@ -7,4 +7,7 @@ export class CommunityAPI {
 
     static getArticles = (dto: CommunitySearchDTO) => () =>
         MainApi.api.get(`${CommunityAPI.baseUrl}${MainApi.toParamStringFromObject(dto)}`);
+
+    static postArticle = (dto: CommunityPostDTO) => () =>
+        MainApi.api.post(`${CommunityAPI.baseUrl}`, dto);
 }

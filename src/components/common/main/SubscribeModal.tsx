@@ -119,14 +119,14 @@ export function SubscribeModal(
 
         try {
             // 인증 코드 확인 API 호출
-            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/subscribe/confirm-verification`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-verify`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email,
-                    verificationCode
+                    userEmail: email,
+                    code : verificationCode
                 })
             });
 
