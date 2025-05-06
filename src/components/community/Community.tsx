@@ -16,14 +16,18 @@ import {PageSearchDTO} from "../../types/common";
 import {DEFAULT_ARTICLE_SIZE} from "../../util/etcUtil";
 import {CommunityHeaderField} from "./hooks/CommunityHeaderField";
 import {CommunityListField} from "./hooks/CommunityListField";
+import { useNavigate } from 'react-router-dom';
+import {useUserInfo} from "../../hooks/hooks";
 
 
 // 메인 커뮤니티 컴포넌트
 export const Community: React.FC = () => {
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
     const [searchKeyword, setSearchKeyword] = useState<string>('');
     const [category, setCategory] = useState<CommunityCategory>(CommunityCategory.ALL)
+    const {id} = useUserInfo();
 
     const { getArticles, posts, totalPages} = useCommunityGetter();
 
@@ -63,6 +67,15 @@ export const Community: React.FC = () => {
         fetchPosts();
     };
 
+    // 새 글쓰기 핸들러
+    const handleCreatePost = (): void => {
+        if (id === 0) {
+            alert("로그인 후 이용해주세요.");
+            return;
+        }
+        navigate('/community/register');
+    };
+
     // 페이지 로드시 데이터 가져오기
     useEffect(() => {
         fetchPosts();
@@ -77,7 +90,7 @@ export const Community: React.FC = () => {
                 transition={{ duration: 0.6 }}
             >
                 {/* 헤더 섹션 */}
-               <CommunityHeaderField />
+                <CommunityHeaderField />
 
                 {/* 카테고리 탭 */}
                 <CategoryTabs
@@ -116,6 +129,7 @@ export const Community: React.FC = () => {
                         variant="contained"
                         disableElevation
                         startIcon={<CreateIcon />}
+                        onClick={handleCreatePost}
                     >
                         새 글쓰기
                     </StyledButton>
@@ -133,7 +147,7 @@ export const Community: React.FC = () => {
                         transition={{ delay: 0.2 }}
                     >
                         {posts?.content.map((post) => (
-                            <CommunityListField post={post} />
+                            <CommunityListField key={post.id} post={post} />
                         ))}
 
                         {/* 페이지네이션 */}
