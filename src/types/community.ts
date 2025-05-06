@@ -21,3 +21,9 @@ export interface CommunitySearchDTO extends SearchCondition{
     category?: CommunityCategory;
     query?: String
 }
+
+export interface CommunityPostDTO{
+    title: string;
+    content: string;
+    category: CommunityCategory;
+}
