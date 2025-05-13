@@ -6,6 +6,8 @@ import theme from './theme';
 import {useEffect, useLayoutEffect} from 'react';
 import {AuthProvider} from "./components/common/AuthProvider";
 import {UserProvider} from "./hooks/userinfo/UserProvider";
+import {HeaderV2} from "./components/common/HeaderV2";
+import {FooterV2} from "./components/common/FooterV2";
 
 function App() {
     const location = useLocation();
@@ -30,9 +32,9 @@ function App() {
             <AuthProvider>
                 <UserProvider>
                     <div className="App">
-                        {!isAdminRoute && <Header/>}
+                        {!isAdminRoute && <HeaderV2/>}
                         <Outlet/>
-                        {!isAdminRoute && <Footer/>}
+                        {!isAdminRoute && <FooterV2/>}
                     </div>
                 </UserProvider>
             </AuthProvider>
