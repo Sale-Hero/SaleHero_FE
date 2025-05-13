@@ -27,6 +27,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ko } from 'date-fns/locale';
 import {convertTimeToFormat} from "../../util/etcUtil";
+import {useAdminNewsLetterGetter} from "./hooks/useAdminNewsLetterGetter";
 
 interface Newsletter {
     id: number;
@@ -55,19 +56,31 @@ export function AdminNewsletterManagement() {
     const [activeTab, setActiveTab] = useState<number>(0);
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
-    const [totalNewsletters, setTotalNewsletters] = useState<number>(0);
-    const [totalPages, setTotalPages] = useState<number>(0);
+    // const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+    // const [totalNewsletters, setTotalNewsletters] = useState<number>(0);
+    // const [totalPages, setTotalPages] = useState<number>(0);
     const [searchWord, setSearchWord] = useState<string>('');
     const [paginationModel, setPaginationModel] = useState({
-        page: 1,
+        page: 0,
         pageSize: 15,
     });
+    console.log(paginationModel)
 
     // 뉴스레터 병합 기능 관련 상태
     const [openMergeDialog, setOpenMergeDialog] = useState<boolean>(false);
     const [mergedContent, setMergedContent] = useState<string>('');
     const [mergedTitle, setMergedTitle] = useState<string>('');
+
+    const { getAdminNewsLetters, newsLetter} = useAdminNewsLetterGetter();
+    useEffect(() => {
+        console.log('141414')
+        getAdminNewsLetters({
+            page: paginationModel.page + 1,
+            size: paginationModel.pageSize,
+            query: searchWord
+        }).then();
+    }, [paginationModel]);
+        console.log(newsLetter)
 
     // 새 뉴스레터 또는 편집용 폼 상태
     const [formData, setFormData] = useState<NewsLetterDTO>({
@@ -161,51 +174,17 @@ export function AdminNewsletterManagement() {
         },
     ];
 
-    const fetchNewsletters = async (page: number, limit: number, search?: string): Promise<void> => {
-        setLoading(true);
-        try {
-            const accessToken = getCookie('accessToken');
-
-            // URL 생성 및 파라미터 추가
-            const url = new URL(`${process.env.REACT_APP_BASE_URL}/news`);
-            url.searchParams.append('page', String(page));
-            url.searchParams.append('size', String(limit));
-
-            // 검색어가 있는 경우에만 추가
-            if (search && search.trim() !== '') {
-                url.searchParams.append('searchWord', search.trim());
-            }
-
-            const response = await fetch(url.toString(), {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    window.location.href = '/admin/login';
-                    return;
-                }
-                throw new Error('Failed to fetch newsletters');
-            }
-
-            const responseData = await response.json();
-            setNewsletters(responseData.content || []);
-            setTotalNewsletters(responseData.totalElement || 0);
-            setTotalPages(responseData.totalPages || 0);
-        } catch (error) {
-            console.error('Error fetching newsletters:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleSearch = () => {
         // 검색 시 첫 페이지로 초기화
         setPaginationModel(prev => ({ ...prev, page: 1 }));
-        fetchNewsletters(1, paginationModel.pageSize, searchWord);
+        // fetchNewsletters(1, paginationModel.pageSize, searchWord);
+
+        getAdminNewsLetters({
+            page: 1,
+            size: paginationModel.pageSize,
+            query: searchWord
+        }).then();
     };
 
     // 엔터키로 검색 지원
@@ -221,7 +200,7 @@ export function AdminNewsletterManagement() {
 
             // 모든 선택된 ID를 한 번에 전송
             const response = await fetch(
-                `${process.env.REACT_APP_BASE_URL}/news`,
+                `${process.env.REACT_APP_BASE_URL}/admin/news`,
                 {
                     method: 'DELETE',
                     headers: {
@@ -239,7 +218,11 @@ export function AdminNewsletterManagement() {
             }
 
             // 삭제가 완료된 후 목록 새로고침
-            await fetchNewsletters(paginationModel.page, paginationModel.pageSize, searchWord);
+            await getAdminNewsLetters({
+                page: paginationModel.page,
+                size: paginationModel.pageSize,
+                query: searchWord
+            }).then();
             setSelectedNewsletterIds([]);
             setDeleteDialogOpen(false);
         } catch (error) {
@@ -252,7 +235,7 @@ export function AdminNewsletterManagement() {
     };
 
     const handlePaginationModelChange = (newModel: typeof paginationModel): void => {
-        // setPaginationModel(newModel);
+        setPaginationModel(newModel);
     };
 
     const handleViewNewsletter = (newsletter: Newsletter): void => {
@@ -317,7 +300,7 @@ export function AdminNewsletterManagement() {
 
             if (isEditing && selectedNewsletter) {
                 // PUT 요청 - 업데이트
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/news/${selectedNewsletter.id}`, {
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/admin/news/${selectedNewsletter.id}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -335,7 +318,7 @@ export function AdminNewsletterManagement() {
                 }
             } else {
                 // POST 요청 - 생성
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/news`, {
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/admin/news`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -355,7 +338,11 @@ export function AdminNewsletterManagement() {
 
             handleCloseFormDialog();
             // 목록 새로고침
-            await fetchNewsletters(paginationModel.page, paginationModel.pageSize, searchWord);
+            await getAdminNewsLetters({
+                page: paginationModel.page,
+                size: paginationModel.pageSize,
+                query: searchWord
+            }).then();
         } catch (error) {
             console.error(`Error ${isEditing ? 'updating' : 'creating'} newsletter:`, error);
         }
@@ -367,8 +354,10 @@ export function AdminNewsletterManagement() {
             return; // 두 개 이상 선택되어야 병합 가능
         }
 
+        if(!newsLetter) return;
+
         // 선택된 ID로 뉴스레터 찾기
-        const selectedNewslettersData = newsletters.filter(newsletter =>
+        const selectedNewslettersData = newsLetter.content.filter(newsletter =>
             selectedNewsletterIds.includes(newsletter.id)
         );
 
@@ -397,7 +386,7 @@ export function AdminNewsletterManagement() {
             const accessToken = getCookie('accessToken');
 
             // POST 요청 - 병합된 새 뉴스레터 생성
-            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/news`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/admin/news`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -418,7 +407,11 @@ export function AdminNewsletterManagement() {
             // 병합 후 선택 초기화
             setSelectedNewsletterIds([]);
             // 목록 새로고침
-            await fetchNewsletters(paginationModel.page, paginationModel.pageSize, searchWord);
+            await getAdminNewsLetters({
+                page: paginationModel.page,
+                size: paginationModel.pageSize,
+                query: searchWord
+            }).then();
         } catch (error) {
             console.error('Error creating merged newsletter:', error);
         }
@@ -441,9 +434,9 @@ export function AdminNewsletterManagement() {
         setMergedContent('');
     };
 
-    useEffect(() => {
-        fetchNewsletters(paginationModel.page, paginationModel.pageSize, searchWord);
-    }, [paginationModel]);
+    // useEffect(() => {
+    //     fetchNewsletters(paginationModel.page, paginationModel.pageSize, searchWord);
+    // }, [paginationModel]);
 
     return (
         <Container maxWidth="lg">
@@ -514,13 +507,16 @@ export function AdminNewsletterManagement() {
                     />
                 </Box>
 
+                {newsLetter && (
                 <Card>
                     <CardContent>
                         <Box sx={{ height: 600 }}>
+
+
                             <DataGrid
-                                rows={newsletters}
+                                rows={newsLetter.content}
                                 columns={columns}
-                                rowCount={totalNewsletters}
+                                rowCount={newsLetter.totalElement}
                                 paginationModel={paginationModel}
                                 paginationMode="server"
                                 onPaginationModelChange={handlePaginationModelChange}
@@ -539,7 +535,7 @@ export function AdminNewsletterManagement() {
                         </Box>
                     </CardContent>
                 </Card>
-
+                )}
                 {/* 뉴스레터 상세 보기 대화상자 */}
                 <Dialog
                     open={openViewDialog}
