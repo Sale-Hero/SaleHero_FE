@@ -13,3 +13,18 @@ export interface NewsLetterResponseDTO{
     sentAt: string,
     createdAt: string,
 }
+
+export interface Newsletter {
+    id: number;
+    title: string;
+    content: string;
+    isSent: string;
+    sentAt: string | null;
+    createdAt: string | null;
+}
+
+export interface NewsLetterDTO {
+    title: string;
+    content: string;
+    sentAt: string | null;
+}

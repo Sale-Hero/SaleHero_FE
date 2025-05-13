@@ -1,86 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     Button,
     Card,
     CardContent,
+    Chip,
     Container,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    TextField,
-    Typography,
-    Chip,
+    IconButton,
     InputAdornment,
     Stack,
-    IconButton,
-    Tabs,
     Tab,
+    Tabs,
+    TextField,
+    Typography,
 } from '@mui/material';
-import { Search, Add, Edit, Delete } from '@mui/icons-material';
-import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { motion } from 'framer-motion';
-import { useCookieFunctions } from "../common/hooks/useCookieFunctions";
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { ko } from 'date-fns/locale';
-import {convertTimeToFormat} from "../../util/etcUtil";
+import {Add, Delete, Edit, Search} from '@mui/icons-material';
+import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
+import {motion} from 'framer-motion';
+import {DatePicker} from '@mui/x-date-pickers/DatePicker';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {ko} from 'date-fns/locale';
+import {formatDate, formatShortDate} from "../../../util/etcUtil";
 import {useAdminNewsLetterGetter} from "./hooks/useAdminNewsLetterGetter";
-
-interface Newsletter {
-    id: number;
-    title: string;
-    content: string;
-    isSent: string;
-    sentAt: string | null;
-    createdAt: string | null;
-}
-
-interface NewsLetterDTO {
-    title: string;
-    content: string;
-    sentAt: string | null;
-}
+import {NewsLetterDTO, NewsLetterResponseDTO} from "../../../types/adminNewsLetter";
+import {useNewsLetterActions} from "./hooks/useAdminNewsLetterActions";
 
 export function AdminNewsletterManagement() {
-    const [selectedNewsletter, setSelectedNewsletter] = useState<Newsletter | null>(null);
+    const [selectedNewsletter, setSelectedNewsletter] = useState<NewsLetterResponseDTO | null>(null);
     const [openViewDialog, setOpenViewDialog] = useState<boolean>(false);
     const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
-    const { getCookie } = useCookieFunctions();
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
     const [selectedNewsletterIds, setSelectedNewsletterIds] = useState<number[]>([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<number>(0);
 
-    const [loading, setLoading] = useState<boolean>(false);
-    // const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
-    // const [totalNewsletters, setTotalNewsletters] = useState<number>(0);
-    // const [totalPages, setTotalPages] = useState<number>(0);
     const [searchWord, setSearchWord] = useState<string>('');
     const [paginationModel, setPaginationModel] = useState({
         page: 0,
         pageSize: 15,
     });
-    console.log(paginationModel)
 
     // 뉴스레터 병합 기능 관련 상태
     const [openMergeDialog, setOpenMergeDialog] = useState<boolean>(false);
     const [mergedContent, setMergedContent] = useState<string>('');
     const [mergedTitle, setMergedTitle] = useState<string>('');
-
-    const { getAdminNewsLetters, newsLetter} = useAdminNewsLetterGetter();
-    useEffect(() => {
-        console.log('141414')
-        getAdminNewsLetters({
-            page: paginationModel.page + 1,
-            size: paginationModel.pageSize,
-            query: searchWord
-        }).then();
-    }, [paginationModel]);
-        console.log(newsLetter)
 
     // 새 뉴스레터 또는 편집용 폼 상태
     const [formData, setFormData] = useState<NewsLetterDTO>({
@@ -89,27 +58,190 @@ export function AdminNewsletterManagement() {
         sentAt: null,
     });
 
-    // 안전한 날짜 포맷팅 함수
-    const formatDate = (dateStr: string | null | undefined) => {
-        if (!dateStr) return '-';
-        try {
-            return new Date(dateStr).toLocaleString();
-        } catch (e) {
-            console.error('Date formatting error:', e);
-            return '-';
+    // API 호출 훅 사용
+    const { getAdminNewsLetters, newsLetter } = useAdminNewsLetterGetter();
+    const {
+        deleteNewsletters,
+        saveNewsletter,
+        saveMergedNewsletter,
+        prepareMergeContent,
+        loading
+    } = useNewsLetterActions();
+
+    // 페이지네이션 변경 시 뉴스레터 데이터 가져오기
+    useEffect(() => {
+        getAdminNewsLetters({
+            page: paginationModel.page + 1,
+            size: paginationModel.pageSize,
+            query: searchWord
+        }).then();
+    }, [paginationModel, getAdminNewsLetters]);
+
+    // 검색 핸들러
+    const handleSearch = () => {
+        // 검색 시 첫 페이지로 초기화
+        setPaginationModel(prev => ({ ...prev, page: 0 }));
+        getAdminNewsLetters({
+            page: 1,
+            size: paginationModel.pageSize,
+            query: searchWord
+        }).then();
+    };
+
+    // 엔터키로 검색 지원
+    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
         }
     };
 
-    const formatShortDate = (dateStr: string | null | undefined) => {
-        if (!dateStr) return '미정';
-        try {
-            return new Date(dateStr).toLocaleDateString();
-        } catch (e) {
-            console.error('Date formatting error:', e);
-            return '날짜 오류';
+    // 선택 변경 핸들러
+    const handleSelectionChange = (selectionModel: GridRowSelectionModel) => {
+        setSelectedNewsletterIds(selectionModel as number[]);
+    };
+
+    // 페이지네이션 모델 변경 핸들러
+    const handlePaginationModelChange = (newModel: typeof paginationModel): void => {
+        setPaginationModel(newModel);
+    };
+
+    // 뉴스레터 보기 핸들러
+    const handleViewNewsletter = (newsletter: NewsLetterResponseDTO): void => {
+        setSelectedNewsletter(newsletter);
+        setOpenViewDialog(true);
+    };
+
+    // 뉴스레터 편집 핸들러
+    const handleEditNewsletter = (newsletter: NewsLetterResponseDTO): void => {
+        setSelectedNewsletter(newsletter);
+        setFormData({
+            title: newsletter.title,
+            content: newsletter.content,
+            sentAt: newsletter.sentAt
+        });
+        setIsEditing(true);
+        setOpenFormDialog(true);
+    };
+
+    // 뉴스레터 보기 대화 상자 닫기 핸들러
+    const handleCloseViewDialog = (): void => {
+        setOpenViewDialog(false);
+        setSelectedNewsletter(null);
+    };
+
+    // 뉴스레터 폼 대화 상자 닫기 핸들러
+    const handleCloseFormDialog = (): void => {
+        setOpenFormDialog(false);
+        setFormData({
+            title: '',
+            content: '',
+            sentAt: null
+        });
+        setIsEditing(false);
+    };
+
+    // 뉴스레터 추가 핸들러
+    const handleAddNewsletter = () => {
+        setIsEditing(false);
+        setFormData({
+            title: '',
+            content: '',
+            sentAt: null
+        });
+        setOpenFormDialog(true);
+    };
+
+    // 폼 입력 변경 핸들러
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    // 날짜 변경 핸들러
+    const handleDateChange = (newDate: Date | null) => {
+        setFormData({
+            ...formData,
+            sentAt: newDate ? newDate.toISOString() : null
+        });
+    };
+
+    // 뉴스레터 삭제 핸들러
+    const handleDeleteNewsletters = async () => {
+        const success = await deleteNewsletters(selectedNewsletterIds);
+        if (success) {
+            await getAdminNewsLetters({
+                page: paginationModel.page,
+                size: paginationModel.pageSize,
+                query: searchWord
+            });
+            setSelectedNewsletterIds([]);
+            setDeleteDialogOpen(false);
         }
     };
 
+    // 뉴스레터 폼 제출 핸들러
+    const handleSubmitForm = async () => {
+        const success = await saveNewsletter(formData, isEditing ? selectedNewsletter?.id : undefined);
+        if (success) {
+            handleCloseFormDialog();
+            await getAdminNewsLetters({
+                page: paginationModel.page,
+                size: paginationModel.pageSize,
+                query: searchWord
+            });
+        }
+    };
+
+    // 병합 준비 핸들러
+    const handleMergeNewsletters = () => {
+        if (selectedNewsletterIds.length <= 1 || !newsLetter) return;
+
+        // 선택된 ID로 뉴스레터 찾기
+        const selectedNewslettersData = newsLetter.content.filter(newsletter =>
+            selectedNewsletterIds.includes(newsletter.id)
+        );
+
+        const { mergedTitle: title, combinedContent: content } = prepareMergeContent(selectedNewslettersData);
+        setMergedTitle(title);
+        setMergedContent(content);
+        setOpenMergeDialog(true);
+    };
+
+    // 병합된 뉴스레터 저장 핸들러
+    const handleSaveMergedNewsletter = async () => {
+        const success = await saveMergedNewsletter(mergedTitle, mergedContent);
+        if (success) {
+            setOpenMergeDialog(false);
+            setSelectedNewsletterIds([]);
+            await getAdminNewsLetters({
+                page: paginationModel.page,
+                size: paginationModel.pageSize,
+                query: searchWord
+            });
+        }
+    };
+
+    // 병합 대화 상자에서 제목 변경 핸들러
+    const handleMergedTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setMergedTitle(e.target.value);
+    };
+
+    // 병합 대화 상자에서 내용 변경 핸들러
+    const handleMergedContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setMergedContent(e.target.value);
+    };
+
+    // 병합 대화 상자 닫기 핸들러
+    const handleCloseMergeDialog = () => {
+        setOpenMergeDialog(false);
+        setMergedTitle('');
+        setMergedContent('');
+    };
+
+    // 데이터 그리드 컬럼 정의
     const columns: GridColDef[] = [
         { field: 'title', headerName: '제목', width: 200 },
         {
@@ -129,8 +261,7 @@ export function AdminNewsletterManagement() {
             headerName: '발송일',
             width: 130,
             renderCell: (params) => {
-                const sentAt = params.row.sentAt;
-                return <span>{params.row.isSent === 'Y' ? formatShortDate(sentAt) : '미발송'}</span>;
+                return <span>{params.row.sentAt === null ? '발송 대기' : formatShortDate(params.row.sentAt)}</span>;
             }
         },
         {
@@ -173,270 +304,6 @@ export function AdminNewsletterManagement() {
             ),
         },
     ];
-
-
-    const handleSearch = () => {
-        // 검색 시 첫 페이지로 초기화
-        setPaginationModel(prev => ({ ...prev, page: 1 }));
-        // fetchNewsletters(1, paginationModel.pageSize, searchWord);
-
-        getAdminNewsLetters({
-            page: 1,
-            size: paginationModel.pageSize,
-            query: searchWord
-        }).then();
-    };
-
-    // 엔터키로 검색 지원
-    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    };
-
-    const handleDeleteNewsletters = async () => {
-        try {
-            const accessToken = getCookie('accessToken');
-
-            // 모든 선택된 ID를 한 번에 전송
-            const response = await fetch(
-                `${process.env.REACT_APP_BASE_URL}/admin/news`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        idxList: selectedNewsletterIds
-                    })
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('Failed to delete newsletters');
-            }
-
-            // 삭제가 완료된 후 목록 새로고침
-            await getAdminNewsLetters({
-                page: paginationModel.page,
-                size: paginationModel.pageSize,
-                query: searchWord
-            }).then();
-            setSelectedNewsletterIds([]);
-            setDeleteDialogOpen(false);
-        } catch (error) {
-            console.error('Error deleting newsletters:', error);
-        }
-    };
-
-    const handleSelectionChange = (selectionModel: GridRowSelectionModel) => {
-        setSelectedNewsletterIds(selectionModel as number[]);
-    };
-
-    const handlePaginationModelChange = (newModel: typeof paginationModel): void => {
-        setPaginationModel(newModel);
-    };
-
-    const handleViewNewsletter = (newsletter: Newsletter): void => {
-        setSelectedNewsletter(newsletter);
-        setOpenViewDialog(true);
-    };
-
-    const handleEditNewsletter = (newsletter: Newsletter): void => {
-        setSelectedNewsletter(newsletter);
-        setFormData({
-            title: newsletter.title,
-            content: newsletter.content,
-            sentAt: newsletter.sentAt
-        });
-        setIsEditing(true);
-        setOpenFormDialog(true);
-    };
-
-    const handleCloseViewDialog = (): void => {
-        setOpenViewDialog(false);
-        setSelectedNewsletter(null);
-    };
-
-    const handleCloseFormDialog = (): void => {
-        setOpenFormDialog(false);
-        setFormData({
-            title: '',
-            content: '',
-            sentAt: null
-        });
-        setIsEditing(false);
-    };
-
-    const handleAddNewsletter = () => {
-        setIsEditing(false);
-        setFormData({
-            title: '',
-            content: '',
-            sentAt: null
-        });
-        setOpenFormDialog(true);
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
-
-    const handleDateChange = (newDate: Date | null) => {
-        setFormData({
-            ...formData,
-            sentAt: newDate ? newDate.toISOString() : null
-        });
-    };
-
-    const handleSubmitForm = async () => {
-        try {
-            const accessToken = getCookie('accessToken');
-
-            if (isEditing && selectedNewsletter) {
-                // PUT 요청 - 업데이트
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/admin/news/${selectedNewsletter.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: formData.title,
-                        content: formData.content,
-                        sentAt: convertTimeToFormat(formData.sentAt)
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to update newsletter');
-                }
-            } else {
-                // POST 요청 - 생성
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/admin/news`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: formData.title,
-                        content: formData.content,
-                        sentAt: convertTimeToFormat(formData.sentAt)
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to create newsletter');
-                }
-            }
-
-            handleCloseFormDialog();
-            // 목록 새로고침
-            await getAdminNewsLetters({
-                page: paginationModel.page,
-                size: paginationModel.pageSize,
-                query: searchWord
-            }).then();
-        } catch (error) {
-            console.error(`Error ${isEditing ? 'updating' : 'creating'} newsletter:`, error);
-        }
-    };
-
-    // 뉴스레터 병합 기능 관련 함수
-    const handleMergeNewsletters = () => {
-        if (selectedNewsletterIds.length <= 1) {
-            return; // 두 개 이상 선택되어야 병합 가능
-        }
-
-        if(!newsLetter) return;
-
-        // 선택된 ID로 뉴스레터 찾기
-        const selectedNewslettersData = newsLetter.content.filter(newsletter =>
-            selectedNewsletterIds.includes(newsletter.id)
-        );
-
-        // 제목 생성 (첫 번째 뉴스레터 제목 기준)
-        const baseTitle = selectedNewslettersData[0]?.title || '';
-        setMergedTitle(`${baseTitle} 외 ${selectedNewsletterIds.length - 1}개 병합`);
-
-        // 내용 병합 (각 뉴스레터 내용 사이에 구분선 추가)
-        const combinedContent = selectedNewslettersData.map(newsletter => {
-            return `<div class="merged-newsletter-item">
-                <h3>${newsletter.title}</h3>
-                <div class="merged-newsletter-content">
-                    ${newsletter.content}
-                </div>
-            </div>
-            <hr class="newsletter-divider" />`;
-        }).join('\n\n');
-
-        setMergedContent(combinedContent);
-        setOpenMergeDialog(true);
-    };
-
-    // 병합된 뉴스레터 저장 함수
-    const handleSaveMergedNewsletter = async () => {
-        try {
-            const accessToken = getCookie('accessToken');
-
-            // POST 요청 - 병합된 새 뉴스레터 생성
-            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/admin/news`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: mergedTitle,
-                    content: mergedContent,
-                    sentAt: null // 기본값은 발송 예정일 없음
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create merged newsletter');
-            }
-
-            setOpenMergeDialog(false);
-            // 병합 후 선택 초기화
-            setSelectedNewsletterIds([]);
-            // 목록 새로고침
-            await getAdminNewsLetters({
-                page: paginationModel.page,
-                size: paginationModel.pageSize,
-                query: searchWord
-            }).then();
-        } catch (error) {
-            console.error('Error creating merged newsletter:', error);
-        }
-    };
-
-    // 병합 대화 상자에서 제목 변경 핸들러
-    const handleMergedTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMergedTitle(e.target.value);
-    };
-
-    // 병합 대화 상자에서 내용 변경 핸들러
-    const handleMergedContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setMergedContent(e.target.value);
-    };
-
-    // 병합 대화 상자 닫기 핸들러
-    const handleCloseMergeDialog = () => {
-        setOpenMergeDialog(false);
-        setMergedTitle('');
-        setMergedContent('');
-    };
-
-    // useEffect(() => {
-    //     fetchNewsletters(paginationModel.page, paginationModel.pageSize, searchWord);
-    // }, [paginationModel]);
 
     return (
         <Container maxWidth="lg">
@@ -508,34 +375,33 @@ export function AdminNewsletterManagement() {
                 </Box>
 
                 {newsLetter && (
-                <Card>
-                    <CardContent>
-                        <Box sx={{ height: 600 }}>
-
-
-                            <DataGrid
-                                rows={newsLetter.content}
-                                columns={columns}
-                                rowCount={newsLetter.totalElement}
-                                paginationModel={paginationModel}
-                                paginationMode="server"
-                                onPaginationModelChange={handlePaginationModelChange}
-                                pageSizeOptions={[10, 25, 50]}
-                                loading={loading}
-                                checkboxSelection
-                                disableRowSelectionOnClick
-                                onRowSelectionModelChange={handleSelectionChange}
-                                rowSelectionModel={selectedNewsletterIds}
-                                sx={{
-                                    '& .MuiDataGrid-cell:focus': {
-                                        outline: 'none',
-                                    },
-                                }}
-                            />
-                        </Box>
-                    </CardContent>
-                </Card>
+                    <Card>
+                        <CardContent>
+                            <Box sx={{ height: 600 }}>
+                                <DataGrid
+                                    rows={newsLetter.content}
+                                    columns={columns}
+                                    rowCount={newsLetter.totalElement}
+                                    paginationModel={paginationModel}
+                                    paginationMode="server"
+                                    onPaginationModelChange={handlePaginationModelChange}
+                                    pageSizeOptions={[10, 25, 50]}
+                                    loading={loading}
+                                    checkboxSelection
+                                    disableRowSelectionOnClick
+                                    onRowSelectionModelChange={handleSelectionChange}
+                                    rowSelectionModel={selectedNewsletterIds}
+                                    sx={{
+                                        '& .MuiDataGrid-cell:focus': {
+                                            outline: 'none',
+                                        },
+                                    }}
+                                />
+                            </Box>
+                        </CardContent>
+                    </Card>
                 )}
+
                 {/* 뉴스레터 상세 보기 대화상자 */}
                 <Dialog
                     open={openViewDialog}
@@ -553,7 +419,7 @@ export function AdminNewsletterManagement() {
                                         color={selectedNewsletter.isSent === 'Y' ? 'success' : 'warning'}
                                     />
                                     <Typography variant="body2" color="text.secondary">
-                                        발송일: {selectedNewsletter.isSent === 'Y' ? formatShortDate(selectedNewsletter.sentAt) : '미발송'}
+                                        발송일: {selectedNewsletter.sentAt === null ? '발송 대기' : formatShortDate(selectedNewsletter.sentAt)}
                                     </Typography>
                                 </Box>
 
@@ -621,28 +487,38 @@ export function AdminNewsletterManagement() {
                     </DialogActions>
                 </Dialog>
 
-                {/* 뉴스레터 추가/수정 폼 대화상자 */}
+                {/* 뉴스레터 폼 대화상자 */}
                 <Dialog
                     open={openFormDialog}
                     onClose={handleCloseFormDialog}
                     maxWidth="md"
                     fullWidth
                 >
-                    <DialogTitle>
-                        {isEditing ? '뉴스레터 수정' : '새 뉴스레터 작성'}
-                    </DialogTitle>
+                    <DialogTitle>{isEditing ? '뉴스레터 편집' : '뉴스레터 추가'}</DialogTitle>
                     <DialogContent dividers>
                         <Box sx={{ p: 2 }}>
                             <TextField
-                                name="title"
+                                fullWidth
                                 label="제목"
+                                name="title"
                                 value={formData.title}
                                 onChange={handleInputChange}
-                                fullWidth
                                 margin="normal"
+                                variant="outlined"
                                 required
                             />
-
+                            <TextField
+                                fullWidth
+                                label="내용"
+                                name="content"
+                                value={formData.content}
+                                onChange={handleInputChange}
+                                margin="normal"
+                                variant="outlined"
+                                multiline
+                                rows={10}
+                                required
+                            />
                             <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ko}>
                                 <DatePicker
                                     label="발송 예정일"
@@ -651,18 +527,6 @@ export function AdminNewsletterManagement() {
                                     sx={{ mt: 2, width: '100%' }}
                                 />
                             </LocalizationProvider>
-
-                            <TextField
-                                name="content"
-                                label="내용"
-                                value={formData.content}
-                                onChange={handleInputChange}
-                                fullWidth
-                                margin="normal"
-                                multiline
-                                rows={10}
-                                required
-                            />
                         </Box>
                     </DialogContent>
                     <DialogActions>
@@ -673,7 +537,52 @@ export function AdminNewsletterManagement() {
                             variant="contained"
                             disabled={!formData.title || !formData.content}
                         >
-                            {isEditing ? '수정 완료' : '추가하기'}
+                            {isEditing ? '저장' : '추가'}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* 병합 대화상자 */}
+                <Dialog
+                    open={openMergeDialog}
+                    onClose={handleCloseMergeDialog}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle>뉴스레터 병합</DialogTitle>
+                    <DialogContent dividers>
+                        <Box sx={{ p: 2 }}>
+                            <TextField
+                                fullWidth
+                                label="병합된 뉴스레터 제목"
+                                value={mergedTitle}
+                                onChange={handleMergedTitleChange}
+                                margin="normal"
+                                variant="outlined"
+                                required
+                            />
+                            <TextField
+                                fullWidth
+                                label="병합된 뉴스레터 내용"
+                                value={mergedContent}
+                                onChange={handleMergedContentChange}
+                                margin="normal"
+                                variant="outlined"
+                                multiline
+                                rows={15}
+                                required
+                            />
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseMergeDialog}>취소</Button>
+                        <Button
+                            onClick={handleSaveMergedNewsletter}
+                            color="primary"
+                            variant="contained"
+                            disabled={!mergedTitle || !mergedContent}
+                        >
+                            저장
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -690,78 +599,11 @@ export function AdminNewsletterManagement() {
                         </Typography>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={() => setDeleteDialogOpen(false)}>취소</Button>
-                        <Button onClick={handleDeleteNewsletters} color="error" variant="contained">
-                            삭제
+                        <Button onClick={() => setDeleteDialogOpen(false)}>
+                            취소
                         </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* 뉴스레터 병합 대화상자 */}
-                <Dialog
-                    open={openMergeDialog}
-                    onClose={handleCloseMergeDialog}
-                    maxWidth="md"
-                    fullWidth
-                >
-                    <DialogTitle>뉴스레터 병합</DialogTitle>
-                    <DialogContent dividers>
-                        <Box sx={{ p: 2 }}>
-                            <TextField
-                                label="제목"
-                                value={mergedTitle}
-                                onChange={handleMergedTitleChange}
-                                fullWidth
-                                margin="normal"
-                                required
-                            />
-
-                            <Box sx={{ mb: 2 }}>
-                                <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} aria-label="content view tabs">
-                                    <Tab label="텍스트 편집" id="tab-0" />
-                                    <Tab label="HTML 미리보기" id="tab-1" />
-                                </Tabs>
-                            </Box>
-
-                            {/* 텍스트 편집 */}
-                            {activeTab === 0 && (
-                                <TextField
-                                    label="내용"
-                                    value={mergedContent}
-                                    onChange={handleMergedContentChange}
-                                    fullWidth
-                                    margin="normal"
-                                    multiline
-                                    rows={15}
-                                    required
-                                />
-                            )}
-
-                            {/* HTML 미리보기 */}
-                            {activeTab === 1 && (
-                                <Box sx={{
-                                    my: 2,
-                                    p: 2,
-                                    border: '1px solid rgba(0, 0, 0, 0.12)',
-                                    borderRadius: 1,
-                                    minHeight: '400px',
-                                    maxHeight: '600px',
-                                    overflow: 'auto'
-                                }}>
-                                    <div dangerouslySetInnerHTML={{ __html: mergedContent }} />
-                                </Box>
-                            )}
-                        </Box>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseMergeDialog}>취소</Button>
-                        <Button
-                            onClick={handleSaveMergedNewsletter}
-                            color="primary"
-                            variant="contained"
-                            disabled={!mergedTitle || !mergedContent}
-                        >
-                            병합하여 저장
+                        <Button onClick={handleDeleteNewsletters} color="error">
+                            삭제
                         </Button>
                     </DialogActions>
                 </Dialog>
