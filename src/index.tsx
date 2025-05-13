@@ -25,6 +25,7 @@ import Contact from "./components/contactus/Contact";
 import {Deals} from "./components/deals/Deals";
 import { DealDetail } from 'components/deals/DealDetail';
 import {CommunityRegister} from "./components/community/CommunityRegister";
+import MainV2 from "./components/common/MainV2";
 
 const router = createBrowserRouter([
   {
@@ -34,7 +35,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Main />
+        element: <MainV2 />
       },
       //   {
       //   path: "my-page",
