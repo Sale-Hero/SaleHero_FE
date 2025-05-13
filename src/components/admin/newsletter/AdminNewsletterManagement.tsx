@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
     Box,
     Button,
@@ -68,14 +68,19 @@ export function AdminNewsletterManagement() {
         loading
     } = useNewsLetterActions();
 
-    // 페이지네이션 변경 시 뉴스레터 데이터 가져오기
-    useEffect(() => {
-        getAdminNewsLetters({
+    // 데이터 리프레시 함수 추가
+    const onRefresh = useCallback(() => {
+        return getAdminNewsLetters({
             page: paginationModel.page + 1,
             size: paginationModel.pageSize,
             query: searchWord
-        }).then();
-    }, [paginationModel, getAdminNewsLetters]);
+        });
+    }, [getAdminNewsLetters, paginationModel.page, paginationModel.pageSize, searchWord]);
+
+    // 페이지네이션 변경 시 뉴스레터 데이터 가져오기
+    useEffect(() => {
+        onRefresh();
+    }, [paginationModel, onRefresh]);
 
     // 검색 핸들러
     const handleSearch = () => {
@@ -172,11 +177,7 @@ export function AdminNewsletterManagement() {
     const handleDeleteNewsletters = async () => {
         const success = await deleteNewsletters(selectedNewsletterIds);
         if (success) {
-            await getAdminNewsLetters({
-                page: paginationModel.page,
-                size: paginationModel.pageSize,
-                query: searchWord
-            });
+            await onRefresh();
             setSelectedNewsletterIds([]);
             setDeleteDialogOpen(false);
         }
@@ -187,11 +188,7 @@ export function AdminNewsletterManagement() {
         const success = await saveNewsletter(formData, isEditing ? selectedNewsletter?.id : undefined);
         if (success) {
             handleCloseFormDialog();
-            await getAdminNewsLetters({
-                page: paginationModel.page,
-                size: paginationModel.pageSize,
-                query: searchWord
-            });
+            await onRefresh();
         }
     };
 
@@ -216,11 +213,7 @@ export function AdminNewsletterManagement() {
         if (success) {
             setOpenMergeDialog(false);
             setSelectedNewsletterIds([]);
-            await getAdminNewsLetters({
-                page: paginationModel.page,
-                size: paginationModel.pageSize,
-                query: searchWord
-            });
+            await onRefresh();
         }
     };
 
@@ -535,7 +528,7 @@ export function AdminNewsletterManagement() {
                             onClick={handleSubmitForm}
                             color="primary"
                             variant="contained"
-                            disabled={!formData.title || !formData.content}
+                            disabled={!formData.title || !formData.content || loading}
                         >
                             {isEditing ? '저장' : '추가'}
                         </Button>
@@ -580,7 +573,7 @@ export function AdminNewsletterManagement() {
                             onClick={handleSaveMergedNewsletter}
                             color="primary"
                             variant="contained"
-                            disabled={!mergedTitle || !mergedContent}
+                            disabled={!mergedTitle || !mergedContent || loading}
                         >
                             저장
                         </Button>
@@ -602,7 +595,11 @@ export function AdminNewsletterManagement() {
                         <Button onClick={() => setDeleteDialogOpen(false)}>
                             취소
                         </Button>
-                        <Button onClick={handleDeleteNewsletters} color="error">
+                        <Button
+                            onClick={handleDeleteNewsletters}
+                            color="error"
+                            disabled={loading}
+                        >
                             삭제
                         </Button>
                     </DialogActions>
