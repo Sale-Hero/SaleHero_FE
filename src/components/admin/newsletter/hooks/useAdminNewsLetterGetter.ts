@@ -1,8 +1,8 @@
 import {useDispatch} from "react-redux";
 import {useCallback, useState} from "react";
-import {PageResponse} from "../../../types/common";
-import {getAdminNewsLettersAsync} from "../../../slice/AdminSlice";
-import {AdminNewsLetterSearchDTO, NewsLetterResponseDTO} from "../../../types/adminNewsLetter";
+import {PageResponse} from "../../../../types/common";
+import {getAdminNewsLettersAsync} from "../../../../slice/AdminSlice";
+import {AdminNewsLetterSearchDTO, NewsLetterResponseDTO} from "../../../../types/adminNewsLetter";
 
 export function useAdminNewsLetterGetter() {
     const dispatch = useDispatch<any>();

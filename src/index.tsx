@@ -20,7 +20,7 @@ import {AdminCover} from "./components/admin/AdminCover";
 import ProtectedRoute from "./config/ProtectedRoute";
 import {AdminCommunityManagement} from "./components/admin/AdminCommunityManagement";
 import {AdminCodesManagement} from "./components/admin/AdminCodesManagement";
-import {AdminNewsletterManagement} from "./components/admin/AdminNewsletterManagement";
+import {AdminNewsletterManagement} from "./components/admin/newsletter/AdminNewsletterManagement";
 import Contact from "./components/contactus/Contact";
 import {Deals} from "./components/deals/Deals";
 import { DealDetail } from 'components/deals/DealDetail';

@@ -53,3 +53,25 @@ export const convertTimeToFormat = (newDate: string | Date | null): string | nul
 export const DEFAULT_ARTICLE_SIZE = 5;
 
 export const camelToSnakeCase = (str: string) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+export const formatShortDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '미정';
+    try {
+        return new Date(dateStr).toLocaleDateString();
+    } catch (e) {
+        console.error('Date formatting error:', e);
+        return '날짜 오류';
+    }
+};
+
+// 안전한 날짜 포맷팅 함수
+export const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-';
+    try {
+        return new Date(dateStr).toLocaleString();
+    } catch (e) {
+        console.error('Date formatting error:', e);
+        return '-';
+    }
+};
+
