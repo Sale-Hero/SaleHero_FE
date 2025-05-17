@@ -1,14 +1,16 @@
 import {useCallback, useState} from "react";
 import {useCookieFunctions} from "../../../common/hooks/useCookieFunctions";
-import {NewsLetterDTO, NewsLetterResponseDTO} from "../../../../types/adminNewsLetter";
+import {NewsLetterDeleteDTO, NewsLetterDTO, NewsLetterResponseDTO} from "../../../../types/adminNewsLetter";
 import {convertTimeToFormat} from "../../../../util/etcUtil";
+import {RawNewsLetterDTO} from "../../../../types/rawNewsLetter";
 
 export function useNewsLetterActions() {
     const { getCookie } = useCookieFunctions();
     const [loading, setLoading] = useState<boolean>(false);
 
     // 뉴스레터 삭제 함수
-    const deleteNewsletters = useCallback(async (selectedNewsletterIds: number[]) => {
+    const deleteNewsletters = useCallback(
+        async (selectedNewsletterIds: NewsLetterDeleteDTO) => {
         try {
             setLoading(true);
             const accessToken = getCookie('accessToken');
@@ -21,9 +23,7 @@ export function useNewsLetterActions() {
                         'Authorization': `Bearer ${accessToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        idxList: selectedNewsletterIds
-                    })
+                    body: JSON.stringify(selectedNewsletterIds)
                 }
             );
 
@@ -110,7 +110,7 @@ export function useNewsLetterActions() {
     }, [getCookie]);
 
     // 병합할 뉴스레터 준비 함수
-    const prepareMergeContent = useCallback((newsletters: NewsLetterResponseDTO[]) => {
+    const prepareMergeContent = useCallback((newsletters: RawNewsLetterDTO[]) => {
         // 제목 생성 (첫 번째 뉴스레터 제목 기준)
         const baseTitle = newsletters[0]?.title || '';
         const mergedTitle = `${baseTitle} 외 ${newsletters.length - 1}개 병합`;

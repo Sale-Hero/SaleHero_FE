@@ -28,3 +28,7 @@ export interface NewsLetterDTO {
     content: string;
     sentAt: string | null;
 }
+
+export interface NewsLetterDeleteDTO{
+    idxList: number[]
+}

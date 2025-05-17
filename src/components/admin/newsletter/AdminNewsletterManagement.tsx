@@ -27,7 +27,7 @@ import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {ko} from 'date-fns/locale';
 import {formatDate, formatShortDate} from "../../../util/etcUtil";
 import {useAdminNewsLetterGetter} from "./hooks/useAdminNewsLetterGetter";
-import {NewsLetterDTO, NewsLetterResponseDTO} from "../../../types/adminNewsLetter";
+import {NewsLetterDeleteDTO, NewsLetterDTO, NewsLetterResponseDTO} from "../../../types/adminNewsLetter";
 import {useNewsLetterActions} from "./hooks/useAdminNewsLetterActions";
 
 export function AdminNewsletterManagement() {
@@ -46,11 +46,6 @@ export function AdminNewsletterManagement() {
         pageSize: 15,
     });
 
-    // 뉴스레터 병합 기능 관련 상태
-    const [openMergeDialog, setOpenMergeDialog] = useState<boolean>(false);
-    const [mergedContent, setMergedContent] = useState<string>('');
-    const [mergedTitle, setMergedTitle] = useState<string>('');
-
     // 새 뉴스레터 또는 편집용 폼 상태
     const [formData, setFormData] = useState<NewsLetterDTO>({
         title: '',
@@ -63,8 +58,6 @@ export function AdminNewsletterManagement() {
     const {
         deleteNewsletters,
         saveNewsletter,
-        saveMergedNewsletter,
-        prepareMergeContent,
         loading
     } = useNewsLetterActions();
 
@@ -175,7 +168,11 @@ export function AdminNewsletterManagement() {
 
     // 뉴스레터 삭제 핸들러
     const handleDeleteNewsletters = async () => {
-        const success = await deleteNewsletters(selectedNewsletterIds);
+        const dto: NewsLetterDeleteDTO = {
+            idxList: selectedNewsletterIds
+        }
+
+        const success = await deleteNewsletters(dto);
         if (success) {
             await onRefresh();
             setSelectedNewsletterIds([]);
@@ -190,48 +187,6 @@ export function AdminNewsletterManagement() {
             handleCloseFormDialog();
             await onRefresh();
         }
-    };
-
-    // 병합 준비 핸들러
-    const handleMergeNewsletters = () => {
-        if (selectedNewsletterIds.length <= 1 || !newsLetter) return;
-
-        // 선택된 ID로 뉴스레터 찾기
-        const selectedNewslettersData = newsLetter.content.filter(newsletter =>
-            selectedNewsletterIds.includes(newsletter.id)
-        );
-
-        const { mergedTitle: title, combinedContent: content } = prepareMergeContent(selectedNewslettersData);
-        setMergedTitle(title);
-        setMergedContent(content);
-        setOpenMergeDialog(true);
-    };
-
-    // 병합된 뉴스레터 저장 핸들러
-    const handleSaveMergedNewsletter = async () => {
-        const success = await saveMergedNewsletter(mergedTitle, mergedContent);
-        if (success) {
-            setOpenMergeDialog(false);
-            setSelectedNewsletterIds([]);
-            await onRefresh();
-        }
-    };
-
-    // 병합 대화 상자에서 제목 변경 핸들러
-    const handleMergedTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setMergedTitle(e.target.value);
-    };
-
-    // 병합 대화 상자에서 내용 변경 핸들러
-    const handleMergedContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setMergedContent(e.target.value);
-    };
-
-    // 병합 대화 상자 닫기 핸들러
-    const handleCloseMergeDialog = () => {
-        setOpenMergeDialog(false);
-        setMergedTitle('');
-        setMergedContent('');
     };
 
     // 데이터 그리드 컬럼 정의
@@ -309,25 +264,14 @@ export function AdminNewsletterManagement() {
                     <Typography variant="h4">뉴스레터 관리</Typography>
                     <Box>
                         {selectedNewsletterIds.length > 0 && (
-                            <>
-                                <Button
-                                    variant="contained"
-                                    color="secondary"
-                                    onClick={handleMergeNewsletters}
-                                    disabled={selectedNewsletterIds.length <= 1}
-                                    sx={{ mr: 2 }}
-                                >
-                                    선택한 뉴스레터 병합 ({selectedNewsletterIds.length})
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    onClick={() => setDeleteDialogOpen(true)}
-                                    sx={{ mr: 2 }}
-                                >
-                                    선택한 뉴스레터 삭제 ({selectedNewsletterIds.length})
-                                </Button>
-                            </>
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={() => setDeleteDialogOpen(true)}
+                                sx={{ mr: 2 }}
+                            >
+                                선택한 뉴스레터 삭제 ({selectedNewsletterIds.length})
+                            </Button>
                         )}
                         <Button
                             variant="contained"
@@ -531,51 +475,6 @@ export function AdminNewsletterManagement() {
                             disabled={!formData.title || !formData.content || loading}
                         >
                             {isEditing ? '저장' : '추가'}
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* 병합 대화상자 */}
-                <Dialog
-                    open={openMergeDialog}
-                    onClose={handleCloseMergeDialog}
-                    maxWidth="md"
-                    fullWidth
-                >
-                    <DialogTitle>뉴스레터 병합</DialogTitle>
-                    <DialogContent dividers>
-                        <Box sx={{ p: 2 }}>
-                            <TextField
-                                fullWidth
-                                label="병합된 뉴스레터 제목"
-                                value={mergedTitle}
-                                onChange={handleMergedTitleChange}
-                                margin="normal"
-                                variant="outlined"
-                                required
-                            />
-                            <TextField
-                                fullWidth
-                                label="병합된 뉴스레터 내용"
-                                value={mergedContent}
-                                onChange={handleMergedContentChange}
-                                margin="normal"
-                                variant="outlined"
-                                multiline
-                                rows={15}
-                                required
-                            />
-                        </Box>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseMergeDialog}>취소</Button>
-                        <Button
-                            onClick={handleSaveMergedNewsletter}
-                            color="primary"
-                            variant="contained"
-                            disabled={!mergedTitle || !mergedContent || loading}
-                        >
-                            저장
                         </Button>
                     </DialogActions>
                 </Dialog>
