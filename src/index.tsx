@@ -19,7 +19,6 @@ import {AdminUserManagement} from "./components/admin/AdminUserManagement";
 import {AdminCover} from "./components/admin/AdminCover";
 import ProtectedRoute from "./config/ProtectedRoute";
 import {AdminCommunityManagement} from "./components/admin/AdminCommunityManagement";
-import {AdminCodesManagement} from "./components/admin/AdminCodesManagement";
 import {AdminNewsletterManagement} from "./components/admin/newsletter/AdminNewsletterManagement";
 import Contact from "./components/contactus/Contact";
 import {Deals} from "./components/deals/Deals";
@@ -108,10 +107,6 @@ const router = createBrowserRouter([
             path: "mails",
             element: <AdminCover />
           },
-          {
-            path: "codes",
-            element: <AdminCodesManagement />
-          }
         ]
       }
     ]

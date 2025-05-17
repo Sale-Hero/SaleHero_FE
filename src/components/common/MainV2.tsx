@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Container, Button, Grid, useTheme, useMediaQuery } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { motion, useAnimation, useScroll, useTransform } from 'framer-motion';
+import React, {useEffect, useRef} from 'react';
+import {Box, Button, Container, Grid, Typography, useMediaQuery, useTheme} from '@mui/material';
+import {styled} from '@mui/material/styles';
+import {motion, useScroll, useTransform} from 'framer-motion';
 import hero_3d from '../../assets/img/sale_hero_ico_3d.png';
-import { alpha } from '@mui/material/styles';
 
 // 스타일드 컴포넌트
 const GradientText = styled(Typography)`
@@ -110,8 +109,8 @@ export default function MainV2() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const { scrollY } = useScroll();
-    const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-    const heroY = useTransform(scrollY, [0, 300], [0, 100]);
+    const heroOpacity = useTransform(scrollY, [0, 700], [1, 0]);
+    const heroY = useTransform(scrollY, [0, 700], [0, 100]);
 
     return (
         <Box sx={{
