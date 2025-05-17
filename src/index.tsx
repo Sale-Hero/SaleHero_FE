@@ -5,7 +5,6 @@ import App from './App';
 import {Provider} from 'react-redux';
 import {store} from './store';
 import {createBrowserRouter, RouterProvider} from 'react-router-dom';
-import Main from "./components/common/Main";
 import {Success} from './components/common/Success';
 import {NotFoundPage} from './components/common/NotFoundPage';
 import {Community} from './components/community/Community';
@@ -22,107 +21,112 @@ import {AdminCommunityManagement} from "./components/admin/AdminCommunityManagem
 import {AdminNewsletterManagement} from "./components/admin/newsletter/AdminNewsletterManagement";
 import Contact from "./components/contactus/Contact";
 import {Deals} from "./components/deals/Deals";
-import { DealDetail } from 'components/deals/DealDetail';
+import {DealDetail} from 'components/deals/DealDetail';
 import {CommunityRegister} from "./components/community/CommunityRegister";
 import MainV2 from "./components/common/MainV2";
+import {AdminRawNewsLetterManagement} from "./components/admin/rawnewsletter/AdminRawNewsLetterManagement";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <NotFoundPage />,
-    children: [
-      {
-        path: "",
-        element: <MainV2 />
-      },
-      //   {
-      //   path: "my-page",
-      //   element: <MyPage />
-      // },
-      {
-        path: "community",
-        element: <Community />
-      },
-      {
-        path: "community/register",
-        element: <CommunityRegister />
-      },
-      // {
-      //   path: "community/detail/:id",
-      //   element: <CommunityDetail />
-      // },
-      {
-        path: "contact",
-        element: <Contact />
-      },
-      {
-        path: "deals",
-        element: <Deals />
-      },
-      {
-        path: "deals/:id",
-        element: <DealDetail />
-      },
-      {
-        path: "signin",
-        element: <SignIn />
-      },
-      {
-        path: "success",
-        element: <Success />
-      },
-      {
-        path: "terms",
-        element: <TermsAndConditions />
-      },
-      {
-        path: "privacy",
-        element: <PrivacyPolicy />
-      },
-      {
-        path: "admin",
-        element:
-            <ProtectedRoute>
-              <AdminLayout />,
-            </ProtectedRoute>,
+    {
+        path: "/",
+        element: <App/>,
+        errorElement: <NotFoundPage/>,
         children: [
-          {
-            path: "",
-            element: <AdminDashboard />
-          },
-          {
-            path: "users",
-            element: <AdminUserManagement />
-          },
-          {
-            path: "posts",
-            element: <AdminCommunityManagement />
-          },
-          {
-            path: "newsletter",
-            element: <AdminNewsletterManagement />
-          },
-          {
-            path: "mails",
-            element: <AdminCover />
-          },
+            {
+                path: "",
+                element: <MainV2/>
+            },
+            //   {
+            //   path: "my-page",
+            //   element: <MyPage />
+            // },
+            {
+                path: "community",
+                element: <Community/>
+            },
+            {
+                path: "community/register",
+                element: <CommunityRegister/>
+            },
+            // {
+            //   path: "community/detail/:id",
+            //   element: <CommunityDetail />
+            // },
+            {
+                path: "contact",
+                element: <Contact/>
+            },
+            {
+                path: "deals",
+                element: <Deals/>
+            },
+            {
+                path: "deals/:id",
+                element: <DealDetail/>
+            },
+            {
+                path: "signin",
+                element: <SignIn/>
+            },
+            {
+                path: "success",
+                element: <Success/>
+            },
+            {
+                path: "terms",
+                element: <TermsAndConditions/>
+            },
+            {
+                path: "privacy",
+                element: <PrivacyPolicy/>
+            },
+            {
+                path: "admin",
+                element:
+                    <ProtectedRoute>
+                        <AdminLayout/>,
+                    </ProtectedRoute>,
+                children: [
+                    {
+                        path: "",
+                        element: <AdminDashboard/>
+                    },
+                    {
+                        path: "users",
+                        element: <AdminUserManagement/>
+                    },
+                    {
+                        path: "posts",
+                        element: <AdminCommunityManagement/>
+                    },
+                    {
+                        path: "raw-newsletter",
+                        element: <AdminRawNewsLetterManagement/>
+                    },
+                    {
+                        path: "newsletter",
+                        element: <AdminNewsletterManagement/>
+                    },
+                    {
+                        path: "mails",
+                        element: <AdminCover/>
+                    },
+                ]
+            }
         ]
-      }
-    ]
-  }
+    }
 ]);
 
 const root = createRoot(
-  document.getElementById('root') as HTMLElement
+    document.getElementById('root') as HTMLElement
 );
 
 root.render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
-    </HelmetProvider>
-  </React.StrictMode>
+    <React.StrictMode>
+        <HelmetProvider>
+            <Provider store={store}>
+                <RouterProvider router={router}/>
+            </Provider>
+        </HelmetProvider>
+    </React.StrictMode>
 );
