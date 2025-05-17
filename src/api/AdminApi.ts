@@ -1,5 +1,6 @@
 import {MainApi} from "../api/MainApi";
 import {AdminNewsLetterSearchDTO} from "../types/adminNewsLetter";
+import {RawNewsLetterSearchDTO} from "../types/rawNewsLetter";
 
 export class AdminApi {
     static url = `${process.env.REACT_APP_BASE_URL}/admin`;
@@ -15,4 +16,7 @@ export class AdminApi {
 
     static getAdminNewsLetters = (dto: AdminNewsLetterSearchDTO) => () =>
         MainApi.api.get(`${AdminApi.url}/news${MainApi.toParamStringFromObject(dto)}`);
+
+    static getRawNewsLetters = (dto: RawNewsLetterSearchDTO) => () =>
+        MainApi.api.get(`${AdminApi.url}/raw${MainApi.toParamStringFromObject(dto)}`);
 }
