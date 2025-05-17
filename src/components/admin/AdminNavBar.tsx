@@ -11,9 +11,7 @@ export function AdminNavbar() {
         { icon: Dashboard, text: '대시보드', path: '/admin' },
         { icon: Person, text: '사용자 관리', path: '/admin/users' },
         { icon: Article, text: '게시글 관리', path: '/admin/posts' },
-        { icon: Email, text: '메일 관리', path: '/admin/mails' },
         { icon: Newspaper, text: '뉴스레터', path: '/admin/newsletter' },
-        { icon: Code, text: '공통 코드', path: '/admin/codes' },
     ];
 
     return (
