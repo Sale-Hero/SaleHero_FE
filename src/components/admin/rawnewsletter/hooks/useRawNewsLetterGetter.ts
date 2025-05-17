@@ -6,13 +6,15 @@ import {getRawNewsLettersAsync} from "../../../../slice/AdminSlice";
 
 export function useRawNewsLetterGetter() {
     const dispatch = useDispatch<any>();
+    const [loading, setLoading] = useState<boolean>(false);
+
     const [rawNewsLetter, setRawNewsLetter] = useState<PageResponse<RawNewsLetterDTO>>()
     const [totalElements, setTotalElements] = useState(0)
 
     const getRawNewsLetters = useCallback(async (
             dto: RawNewsLetterSearchDTO
         ) => {
-
+            setLoading(true);
             try {
                 const result: PageResponse<RawNewsLetterDTO> = await dispatch(
                     getRawNewsLettersAsync(dto)).unwrap();
@@ -22,12 +24,14 @@ export function useRawNewsLetterGetter() {
                 setRawNewsLetter(result);
             } catch (e) {
                 console.log(e)
+            } finally {
+                setLoading(false);
             }
         },
         [dispatch]
     );
 
     return{
-        getRawNewsLetters, rawNewsLetter, totalElements
+        getRawNewsLetters, rawNewsLetter, totalElements,loading
     }
 }

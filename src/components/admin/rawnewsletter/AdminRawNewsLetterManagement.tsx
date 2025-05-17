@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     Box,
     Button,
@@ -17,18 +17,19 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import {Add, Delete, Edit, Search} from '@mui/icons-material';
+import {Delete, Edit, Search} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../../util/etcUtil";
 import {useRawNewsLetterGetter} from "./hooks/useRawNewsLetterGetter";
-import {RawNewsLetterDTO} from "../../../types/rawNewsLetter";
+import {RawNewsLetterDTO, RawNewsLetterPutDTO} from "../../../types/rawNewsLetter";
+import {useRawNewsLetterActions} from "./hooks/useRawNewsLetterActions";
+import {NewsLetterDeleteDTO} from "../../../types/adminNewsLetter";
 
 export function AdminRawNewsLetterManagement() {
     const [selectedRawNewsletter, setSelectedRawNewsletter] = useState<RawNewsLetterDTO | null>(null);
     const [openViewDialog, setOpenViewDialog] = useState<boolean>(false);
     const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
-    const [isEditing, setIsEditing] = useState<boolean>(false);
 
     const [selectedRawNewsletterIds, setSelectedRawNewsletterIds] = useState<number[]>([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -40,21 +41,19 @@ export function AdminRawNewsLetterManagement() {
         pageSize: 15,
     });
 
-    // 새 로우 뉴스레터 또는 편집용 폼 상태
-    const [formData, setFormData] = useState<RawNewsLetterDTO>({
-        idx: 0,
+    // 수정용 폼 상태
+    const [formData, setFormData] = useState<RawNewsLetterPutDTO>({
+        id: 0,
         title: '',
         content: '',
-        createdAt: '',
     });
 
     // API 호출 훅 사용
-    const { getRawNewsLetters, rawNewsLetter } = useRawNewsLetterGetter();
-    // const {
-    //     deleteRawNewsletters,
-    //     saveRawNewsletter,
-    //     loading
-    // } = useRawNewsLetterActions();
+    const { getRawNewsLetters, rawNewsLetter, loading: fetchLoading } = useRawNewsLetterGetter();
+    const { modifyRawNewsLetters, deleteRawNewsLetter } = useRawNewsLetterActions();
+
+    // 로딩 상태
+    const [loading, setLoading] = useState<boolean>(false);
 
     // 데이터 리프레시 함수 추가
     const onRefresh = useCallback(() => {
@@ -108,12 +107,10 @@ export function AdminRawNewsLetterManagement() {
     const handleEditRawNewsletter = (rawNewsletter: RawNewsLetterDTO): void => {
         setSelectedRawNewsletter(rawNewsletter);
         setFormData({
-            idx: rawNewsletter.idx,
+            id: rawNewsletter.id,
             title: rawNewsletter.title,
             content: rawNewsletter.content,
-            createdAt: rawNewsletter.createdAt
         });
-        setIsEditing(true);
         setOpenFormDialog(true);
     };
 
@@ -127,24 +124,10 @@ export function AdminRawNewsLetterManagement() {
     const handleCloseFormDialog = (): void => {
         setOpenFormDialog(false);
         setFormData({
-            idx: 0,
+            id: 0,
             title: '',
             content: '',
-            createdAt: ''
         });
-        setIsEditing(false);
-    };
-
-    // 로우 뉴스레터 추가 핸들러
-    const handleAddRawNewsletter = () => {
-        setIsEditing(false);
-        setFormData({
-            idx: 0,
-            title: '',
-            content: '',
-            createdAt: ''
-        });
-        setOpenFormDialog(true);
     };
 
     // 폼 입력 변경 핸들러
@@ -157,23 +140,36 @@ export function AdminRawNewsLetterManagement() {
     };
 
     // 로우 뉴스레터 삭제 핸들러
-    // const handleDeleteRawNewsletters = async () => {
-    //     const success = await deleteRawNewsletters(selectedRawNewsletterIds);
-    //     if (success) {
-    //         await onRefresh();
-    //         setSelectedRawNewsletterIds([]);
-    //         setDeleteDialogOpen(false);
-    //     }
-    // };
-    //
-    // // 로우 뉴스레터 폼 제출 핸들러
-    // const handleSubmitForm = async () => {
-    //     const success = await saveRawNewsletter(formData, isEditing ? selectedRawNewsletter?.idx : undefined);
-    //     if (success) {
-    //         handleCloseFormDialog();
-    //         await onRefresh();
-    //     }
-    // };
+    const handleDeleteRawNewsletters = async () => {
+        setLoading(true);
+        try {
+            const deleteDto: NewsLetterDeleteDTO = {
+                idxList: selectedRawNewsletterIds
+            };
+            await deleteRawNewsLetter(deleteDto);
+            await onRefresh();
+            setSelectedRawNewsletterIds([]);
+            setDeleteDialogOpen(false);
+        } catch (error) {
+            console.error('원본 뉴스레터 삭제 중 오류 발생:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 로우 뉴스레터 수정 폼 제출 핸들러
+    const handleSubmitForm = async () => {
+        setLoading(true);
+        try {
+            await modifyRawNewsLetters(formData);
+            handleCloseFormDialog();
+            await onRefresh();
+        } catch (error) {
+            console.error('원본 뉴스레터 수정 중 오류 발생:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // 데이터 그리드 컬럼 정의
     const columns: GridColDef[] = [
@@ -207,7 +203,7 @@ export function AdminRawNewsLetterManagement() {
                     <IconButton
                         size="small"
                         onClick={() => {
-                            setSelectedRawNewsletterIds([params.row.idx]);
+                            setSelectedRawNewsletterIds([params.row.id]);
                             setDeleteDialogOpen(true);
                         }}
                         color="error"
@@ -239,14 +235,6 @@ export function AdminRawNewsLetterManagement() {
                                 선택한 뉴스레터 삭제 ({selectedRawNewsletterIds.length})
                             </Button>
                         )}
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<Add />}
-                            onClick={handleAddRawNewsletter}
-                        >
-                            원본 뉴스레터 추가
-                        </Button>
                     </Box>
                 </Box>
 
@@ -282,14 +270,14 @@ export function AdminRawNewsLetterManagement() {
                         <CardContent>
                             <Box sx={{ height: 600 }}>
                                 <DataGrid
-                                    rows={rawNewsLetter.content.map(item => ({...item, id: item.idx}))}
+                                    rows={rawNewsLetter.content.map(item => ({...item, id: item.id}))}
                                     columns={columns}
                                     rowCount={rawNewsLetter.totalElement}
                                     paginationModel={paginationModel}
                                     paginationMode="server"
                                     onPaginationModelChange={handlePaginationModelChange}
                                     pageSizeOptions={[10, 15, 25, 50]}
-                                    // loading={loading}
+                                    loading={fetchLoading || loading}
                                     checkboxSelection
                                     disableRowSelectionOnClick
                                     onRowSelectionModelChange={handleSelectionChange}
@@ -380,14 +368,14 @@ export function AdminRawNewsLetterManagement() {
                     </DialogActions>
                 </Dialog>
 
-                {/* 로우 뉴스레터 폼 대화상자 */}
+                {/* 로우 뉴스레터 수정 폼 대화상자 */}
                 <Dialog
                     open={openFormDialog}
                     onClose={handleCloseFormDialog}
                     maxWidth="md"
                     fullWidth
                 >
-                    <DialogTitle>{isEditing ? '원본 뉴스레터 편집' : '원본 뉴스레터 추가'}</DialogTitle>
+                    <DialogTitle>원본 뉴스레터 편집</DialogTitle>
                     <DialogContent dividers>
                         <Box sx={{ p: 2 }}>
                             <TextField
@@ -416,14 +404,14 @@ export function AdminRawNewsLetterManagement() {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseFormDialog}>취소</Button>
-                        {/*<Button*/}
-                        {/*    onClick={handleSubmitForm}*/}
-                        {/*    color="primary"*/}
-                        {/*    variant="contained"*/}
-                        {/*    disabled={!formData.title || !formData.content || loading}*/}
-                        {/*>*/}
-                        {/*    {isEditing ? '저장' : '추가'}*/}
-                        {/*</Button>*/}
+                        <Button
+                            onClick={handleSubmitForm}
+                            color="primary"
+                            variant="contained"
+                            disabled={!formData.title || !formData.content || loading}
+                        >
+                            저장
+                        </Button>
                     </DialogActions>
                 </Dialog>
 
@@ -442,13 +430,13 @@ export function AdminRawNewsLetterManagement() {
                         <Button onClick={() => setDeleteDialogOpen(false)}>
                             취소
                         </Button>
-                        {/*<Button*/}
-                        {/*    onClick={handleDeleteRawNewsletters}*/}
-                        {/*    color="error"*/}
-                        {/*    disabled={loading}*/}
-                        {/*>*/}
-                        {/*    삭제*/}
-                        {/*</Button>*/}
+                        <Button
+                            onClick={handleDeleteRawNewsletters}
+                            color="error"
+                            disabled={loading}
+                        >
+                            삭제
+                        </Button>
                     </DialogActions>
                 </Dialog>
             </motion.div>
