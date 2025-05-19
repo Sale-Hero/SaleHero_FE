@@ -6,8 +6,8 @@ import theme from './theme';
 import {useEffect, useLayoutEffect} from 'react';
 import {AuthProvider} from "./components/common/AuthProvider";
 import {UserProvider} from "./hooks/userinfo/UserProvider";
-import {HeaderV2} from "./components/common/HeaderV2";
-import {FooterV2} from "./components/common/FooterV2";
+import {HeaderV2} from "./components/v2/HeaderV2";
+import {FooterV2} from "./components/v2/FooterV2";
 
 function App() {
     const location = useLocation();
