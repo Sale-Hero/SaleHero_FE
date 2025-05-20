@@ -2,7 +2,6 @@ import {useCallback, useState} from "react";
 import {useCookieFunctions} from "../../../common/hooks/useCookieFunctions";
 import {NewsLetterDeleteDTO, NewsLetterDTO} from "../../../../types/adminNewsLetter";
 import {convertTimeToFormat} from "../../../../util/etcUtil";
-import {RawNewsLetterDTO} from "../../../../types/rawNewsLetter";
 
 export function useNewsLetterActions() {
     const { getCookie } = useCookieFunctions();
@@ -111,34 +110,10 @@ export function useNewsLetterActions() {
         }
     }, [getCookie]);
 
-    // 병합할 뉴스레터 준비 함수
-    const prepareMergeContent = useCallback((newsletters: RawNewsLetterDTO[]) => {
-        // 제목 생성 (첫 번째 뉴스레터 제목 기준)
-        const baseTitle = newsletters[0]?.title || '';
-        const mergedTitle = `${baseTitle} 외 ${newsletters.length - 1}개 병합`;
-
-        // 내용 병합 (각 뉴스레터 내용 사이에 구분선 추가)
-        const combinedContent = newsletters.map(newsletter => {
-            return `<div class="merged-newsletter-item">
-                <h3>${newsletter.title}</h3>
-                <div class="merged-newsletter-content">
-                    ${newsletter.content}
-                </div>
-            </div>
-            <hr class="newsletter-divider" />`;
-        }).join('\n\n');
-
-        return {
-            mergedTitle,
-            combinedContent
-        };
-    }, []);
-
     return {
         deleteNewsletters,
         saveNewsletter,
         saveMergedNewsletter,
-        prepareMergeContent,
         loading
     };
 }

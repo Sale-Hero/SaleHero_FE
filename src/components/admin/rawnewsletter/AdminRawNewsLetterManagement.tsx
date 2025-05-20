@@ -17,7 +17,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import {Delete, Edit, Search, Merge} from '@mui/icons-material';
+import {Delete, Edit, Merge, Search} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../../util/etcUtil";
