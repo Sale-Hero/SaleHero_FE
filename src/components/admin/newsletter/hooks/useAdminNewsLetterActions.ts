@@ -1,6 +1,6 @@
 import {useCallback, useState} from "react";
 import {useCookieFunctions} from "../../../common/hooks/useCookieFunctions";
-import {NewsLetterDeleteDTO, NewsLetterDTO, NewsLetterResponseDTO} from "../../../../types/adminNewsLetter";
+import {NewsLetterDeleteDTO, NewsLetterDTO} from "../../../../types/adminNewsLetter";
 import {convertTimeToFormat} from "../../../../util/etcUtil";
 import {RawNewsLetterDTO} from "../../../../types/rawNewsLetter";
 
@@ -41,7 +41,8 @@ export function useNewsLetterActions() {
     }, [getCookie]);
 
     // 뉴스레터 생성/수정 함수
-    const saveNewsletter = useCallback(async (formData: NewsLetterDTO, newsletterId?: number) => {
+    const saveNewsletter = useCallback(
+        async (formData: NewsLetterDTO, newsletterId?: number) => {
         try {
             setLoading(true);
             const accessToken = getCookie('accessToken');
@@ -78,7 +79,8 @@ export function useNewsLetterActions() {
     }, [getCookie]);
 
     // 병합된 뉴스레터 저장 함수
-    const saveMergedNewsletter = useCallback(async (mergedTitle: string, mergedContent: string) => {
+    const saveMergedNewsletter = useCallback(
+        async (mergedTitle: string, mergedContent: string) => {
         try {
             setLoading(true);
             const accessToken = getCookie('accessToken');

@@ -17,7 +17,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import {Delete, Edit, Search} from '@mui/icons-material';
+import {Delete, Edit, Search, Merge} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../../util/etcUtil";
@@ -25,12 +25,15 @@ import {useRawNewsLetterGetter} from "./hooks/useRawNewsLetterGetter";
 import {RawNewsLetterDTO, RawNewsLetterPutDTO} from "../../../types/rawNewsLetter";
 import {useRawNewsLetterActions} from "./hooks/useRawNewsLetterActions";
 import {NewsLetterDeleteDTO} from "../../../types/adminNewsLetter";
+import {useNewsLetterActions} from "../newsletter/hooks/useAdminNewsLetterActions";
 
 export function AdminRawNewsLetterManagement() {
     const [selectedRawNewsletter, setSelectedRawNewsletter] = useState<RawNewsLetterDTO | null>(null);
     const [openViewDialog, setOpenViewDialog] = useState<boolean>(false);
     const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
 
+    // 병합 관련 상태
+    const [confirmMergeDialog, setConfirmMergeDialog] = useState<boolean>(false);
     const [selectedRawNewsletterIds, setSelectedRawNewsletterIds] = useState<number[]>([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<number>(0);
@@ -48,8 +51,13 @@ export function AdminRawNewsLetterManagement() {
         content: '',
     });
 
+    // 병합용 상태
+    const [mergeTitle, setMergeTitle] = useState<string>('병합된 뉴스레터');
+    const [mergeSelectedNewsletters, setMergeSelectedNewsletters] = useState<RawNewsLetterDTO[]>([]);
+
     // API 호출 훅 사용
     const { getRawNewsLetters, rawNewsLetter, loading: fetchLoading } = useRawNewsLetterGetter();
+    const { saveMergedNewsletter } = useNewsLetterActions();
     const { modifyRawNewsLetters, deleteRawNewsLetter } = useRawNewsLetterActions();
 
     // 로딩 상태
@@ -114,6 +122,42 @@ export function AdminRawNewsLetterManagement() {
         setOpenFormDialog(true);
     };
 
+    // 로우 뉴스레터 병합 핸들러
+    const handleMergeRequest = (): void => {
+        if (rawNewsLetter && selectedRawNewsletterIds.length > 1) {
+            const selectedNewsletters = rawNewsLetter.content.filter(
+                item => selectedRawNewsletterIds.includes(item.id)
+            );
+            setMergeSelectedNewsletters(selectedNewsletters);
+            setMergeTitle(`병합된 뉴스레터 (${formatDate(new Date().toString())})`);
+            setConfirmMergeDialog(true);
+        }
+    };
+
+    // 실제 병합 처리 함수
+    const executeMerge = async () => {
+        if (mergeSelectedNewsletters.length < 2) return;
+
+        setLoading(true);
+        try {
+            const mergedContent = mergeSelectedNewsletters.map(item => item.content).join('\n\n');
+            await saveMergedNewsletter(mergeTitle, mergedContent);
+
+            // 병합 완료 후 상태 초기화
+            setConfirmMergeDialog(false);
+            setSelectedRawNewsletterIds([]);
+            setMergeSelectedNewsletters([]);
+            setMergeTitle('병합된 뉴스레터');
+
+            // 데이터 새로고침
+            await onRefresh();
+        } catch (error) {
+            console.error('뉴스레터 병합 중 오류 발생:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // 로우 뉴스레터 보기 대화 상자 닫기 핸들러
     const handleCloseViewDialog = (): void => {
         setOpenViewDialog(false);
@@ -128,6 +172,18 @@ export function AdminRawNewsLetterManagement() {
             title: '',
             content: '',
         });
+    };
+
+    // 병합 취소 핸들러
+    const handleCancelMerge = (): void => {
+        setConfirmMergeDialog(false);
+        setMergeSelectedNewsletters([]);
+        setMergeTitle('병합된 뉴스레터');
+    };
+
+    // 병합 제목 변경 핸들러
+    const handleMergeTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setMergeTitle(e.target.value);
     };
 
     // 폼 입력 변경 핸들러
@@ -169,6 +225,11 @@ export function AdminRawNewsLetterManagement() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // 병합된 HTML 미리보기 생성
+    const getMergedHtmlPreview = () => {
+        return mergeSelectedNewsletters.map(newsletter => newsletter.content).join('<hr />');
     };
 
     // 데이터 그리드 컬럼 정의
@@ -225,6 +286,17 @@ export function AdminRawNewsLetterManagement() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
                     <Typography variant="h4">원본 뉴스레터 관리</Typography>
                     <Box>
+                        {selectedRawNewsletterIds.length > 1 && (
+                            <Button
+                                variant="contained"
+                                color="success"
+                                onClick={handleMergeRequest}
+                                startIcon={<Merge />}
+                                sx={{ mr: 2 }}
+                            >
+                                뉴스레터 병합 ({selectedRawNewsletterIds.length})
+                            </Button>
+                        )}
                         {selectedRawNewsletterIds.length > 0 && (
                             <Button
                                 variant="contained"
@@ -411,6 +483,81 @@ export function AdminRawNewsLetterManagement() {
                             disabled={!formData.title || !formData.content || loading}
                         >
                             저장
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* 뉴스레터 병합 확인 대화상자 */}
+                <Dialog
+                    open={confirmMergeDialog}
+                    onClose={handleCancelMerge}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle>뉴스레터 병합</DialogTitle>
+                    <DialogContent dividers>
+                        <Box sx={{ p: 2 }}>
+                            <Typography variant="body1" gutterBottom>
+                                선택한 {mergeSelectedNewsletters.length}개의 뉴스레터를 병합하시겠습니까?
+                            </Typography>
+
+                            <TextField
+                                fullWidth
+                                label="병합된 뉴스레터 제목"
+                                name="title"
+                                value={mergeTitle}
+                                onChange={handleMergeTitleChange}
+                                margin="normal"
+                                variant="outlined"
+                                required
+                            />
+
+                            <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                                선택된 뉴스레터
+                            </Typography>
+
+                            <Box sx={{
+                                border: '1px solid rgba(0, 0, 0, 0.12)',
+                                borderRadius: 1,
+                                p: 2,
+                                maxHeight: '200px',
+                                overflow: 'auto',
+                                mb: 2
+                            }}>
+                                {mergeSelectedNewsletters.map((newsletter, index) => (
+                                    <Box key={newsletter.id} sx={{ mb: 1 }}>
+                                        <Typography variant="body2">
+                                            {index + 1}. {newsletter.title} ({formatDate(newsletter.createdAt)})
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+
+                            <Box sx={{ mt: 2 }}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    병합 미리보기
+                                </Typography>
+                                <Box sx={{
+                                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                                    borderRadius: 1,
+                                    p: 2,
+                                    height: '300px',
+                                    overflow: 'auto'
+                                }}>
+                                    <div dangerouslySetInnerHTML={{ __html: getMergedHtmlPreview() }} />
+                                </Box>
+                            </Box>
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCancelMerge}>취소</Button>
+                        <Button
+                            onClick={executeMerge}
+                            color="primary"
+                            variant="contained"
+                            disabled={!mergeTitle || mergeSelectedNewsletters.length < 2 || loading}
+                        >
+                            병합하기
                         </Button>
                     </DialogActions>
                 </Dialog>
