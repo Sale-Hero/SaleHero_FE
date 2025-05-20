@@ -229,7 +229,7 @@ export function AdminRawNewsLetterManagement() {
 
     // 병합된 HTML 미리보기 생성
     const getMergedHtmlPreview = () => {
-        return mergeSelectedNewsletters.map(newsletter => newsletter.content).join('<hr />');
+        return mergeSelectedNewsletters.map(newsletter => newsletter.content).join('<hr /><br />');
     };
 
     // 데이터 그리드 컬럼 정의

@@ -1,9 +1,7 @@
 import {styled} from "@mui/material/styles";
 import {Box, Button, Dialog, Paper} from "@mui/material";
 
-export function MainStyledComponents() {
-
-}
+export function MainStyledComponents() {}
 
 
 export const Logo = styled('img')`
