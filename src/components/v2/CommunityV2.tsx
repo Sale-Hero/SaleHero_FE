@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Box, CircularProgress, IconButton, Pagination, Tab, TextField, Typography, alpha} from '@mui/material';
+import {alpha, Box, CircularProgress, IconButton, Pagination, Tab, TextField, Typography} from '@mui/material';
 import {Create as CreateIcon, Refresh as RefreshIcon, Search as SearchIcon} from '@mui/icons-material';
 import {motion} from 'framer-motion';
 import {CommunityCategory} from 'types/community';
 import {PageSearchDTO} from "../../types/common";
 import {DEFAULT_ARTICLE_SIZE} from "../../util/etcUtil";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {useUserInfo} from "../../hooks/hooks";
-import { useCommunityGetter } from 'components/community/hooks/useCommunityGetter';
+import {useCommunityGetter} from 'components/community/hooks/useCommunityGetter';
 import {
     CategoryTabs,
     EmptyStateBox,
@@ -16,7 +16,7 @@ import {
     StyledButton,
     StyledContainer
 } from 'components/community/hooks/useCommunityStyles';
-import {CommunityListField} from "../community/hooks/CommunityListField";
+import {CommunityListFieldV2} from "../community/hooks/CommunityListFieldV2";
 
 // 스타일 재정의 (어두운 우주 테마와 오렌지/금색 강조)
 const darkSpaceTheme = {
@@ -171,31 +171,32 @@ export const CommunityV2: React.FC = () => {
                         </motion.div>
                     </Box>
 
-                    {/* 카테고리 탭 - 스타일 적용 */}
+                    {/* 카테고리 탭  */}
                     <Box sx={{ mb: 5 }}>
                         <CategoryTabs
                             value={category}
                             onChange={handleTabChange}
                             centered
                             sx={{
-                                backgroundColor: 'rgba(22, 28, 45, 0.5)',
+                                backgroundColor: 'rgba(22, 28, 45, 0.8)',
                                 borderRadius: '12px',
                                 padding: '8px',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
                                 '& .MuiTab-root': {
-                                    color: alpha(darkSpaceTheme.text.primary, 0.7),
+                                    color: '#B0B0B0', // 기본 상태에서 더 밝은 색상
                                     fontWeight: 500,
                                     transition: 'all 0.3s ease',
                                     margin: '0 8px',
                                     borderRadius: '8px',
                                     minHeight: '44px',
                                     '&:hover': {
-                                        backgroundColor: alpha(darkSpaceTheme.primary, 0.1),
-                                        color: darkSpaceTheme.primary
+                                        backgroundColor: alpha(darkSpaceTheme.primary, 0.15),
+                                        color: '#FFFFFF' // 호버 시 흰색으로 변경
                                     }
                                 },
                                 '& .Mui-selected': {
-                                    color: darkSpaceTheme.primary,
-                                    backgroundColor: alpha(darkSpaceTheme.primary, 0.15),
+                                    color: '#FFFFFF', // 선택된 탭은 흰색
+                                    backgroundColor: alpha(darkSpaceTheme.primary, 0.25),
                                     fontWeight: 700
                                 },
                                 '& .MuiTabs-indicator': {
@@ -209,7 +210,6 @@ export const CommunityV2: React.FC = () => {
                         </CategoryTabs>
                     </Box>
 
-                    {/* 검색 및 새 글쓰기 - 스타일 적용 */}
                     <Box
                         sx={{
                             display: 'flex',
@@ -222,16 +222,21 @@ export const CommunityV2: React.FC = () => {
                     >
                         <SearchBox
                             sx={{
-                                backgroundColor: alpha(darkSpaceTheme.paper, 0.8),
+                                backgroundColor: 'rgba(22, 28, 45, 0.9)',
                                 borderRadius: '10px',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                border: '1px solid rgba(255, 255, 255, 0.15)',
                                 padding: '6px 12px',
+                                height: '44px', // 높이 고정
+                                display: 'flex',
+                                alignItems: 'center',
                                 '&:hover': {
-                                    border: `1px solid ${alpha(darkSpaceTheme.primary, 0.5)}`
+                                    border: `1px solid ${alpha(darkSpaceTheme.primary, 0.6)}`,
+                                    backgroundColor: 'rgba(22, 28, 45, 1)'
                                 },
                                 transition: 'all 0.3s ease',
                                 flex: 1,
-                                minWidth: '250px'
+                                minWidth: '250px',
+                                marginBottom: '0'
                             }}
                         >
                             <TextField
@@ -242,12 +247,13 @@ export const CommunityV2: React.FC = () => {
                                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                                 InputProps={{
                                     disableUnderline: true,
-                                    style: { color: darkSpaceTheme.text.primary }
+                                    style: { color: '#FFFFFF' } // 입력 텍스트 색상 개선
                                 }}
                                 sx={{
                                     flex: 1,
                                     '& .MuiInputBase-input::placeholder': {
-                                        color: alpha(darkSpaceTheme.text.secondary, 0.6)
+                                        color: '#A0A0A0', // 플레이스홀더 색상 개선
+                                        opacity: 1
                                     }
                                 }}
                             />
@@ -256,7 +262,8 @@ export const CommunityV2: React.FC = () => {
                                 sx={{
                                     color: darkSpaceTheme.primary,
                                     '&:hover': {
-                                        backgroundColor: alpha(darkSpaceTheme.primary, 0.1)
+                                        backgroundColor: alpha(darkSpaceTheme.primary, 0.15),
+                                        color: darkSpaceTheme.secondary
                                     }
                                 }}
                             >
@@ -265,10 +272,10 @@ export const CommunityV2: React.FC = () => {
                             <IconButton
                                 onClick={() => window.location.reload()}
                                 sx={{
-                                    color: alpha(darkSpaceTheme.text.primary, 0.7),
+                                    color: '#C0C0C0', // 새로고침 아이콘 색상 개선
                                     '&:hover': {
                                         backgroundColor: alpha(darkSpaceTheme.text.primary, 0.1),
-                                        color: darkSpaceTheme.text.primary
+                                        color: '#FFFFFF'
                                     }
                                 }}
                             >
@@ -287,8 +294,11 @@ export const CommunityV2: React.FC = () => {
                                 fontWeight: 600,
                                 padding: '10px 20px',
                                 borderRadius: '10px',
+                                height: '44px', // 검색박스와 같은 높이
                                 '&:hover': {
-                                    backgroundColor: darkSpaceTheme.secondary
+                                    backgroundColor: darkSpaceTheme.secondary,
+                                    transform: 'translateY(-1px)',
+                                    boxShadow: `0 6px 20px ${alpha(darkSpaceTheme.primary, 0.4)}`
                                 },
                                 transition: 'all 0.3s ease',
                                 boxShadow: `0 4px 14px ${alpha(darkSpaceTheme.primary, 0.3)}`
@@ -298,7 +308,7 @@ export const CommunityV2: React.FC = () => {
                         </StyledButton>
                     </Box>
 
-                    {/* 게시글 리스트 - 스타일 적용 */}
+                    {/* 게시글 리스트 - 스타일 개선 */}
                     {isLoading ? (
                         <LoadingWrapper
                             sx={{
@@ -316,11 +326,11 @@ export const CommunityV2: React.FC = () => {
                         >
                             <Box
                                 sx={{
-                                    backgroundColor: alpha(darkSpaceTheme.paper, 0.7),
+                                    backgroundColor: 'rgba(22, 28, 45, 0.8)',
                                     borderRadius: '16px',
                                     backdropFilter: 'blur(10px)',
                                     overflow: 'hidden',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                                    border: '1px solid rgba(255, 255, 255, 0.15)'
                                 }}
                             >
                                 {posts?.content.map((post, index) => (
@@ -329,36 +339,39 @@ export const CommunityV2: React.FC = () => {
                                         sx={{
                                             padding: '16px 20px',
                                             borderBottom: index !== posts.content.length - 1 ?
-                                                `1px solid ${alpha(darkSpaceTheme.text.primary, 0.1)}` :
+                                                `1px solid ${alpha(darkSpaceTheme.text.primary, 0.15)}` :
                                                 'none',
                                             transition: 'all 0.2s ease',
                                             '&:hover': {
-                                                backgroundColor: alpha(darkSpaceTheme.primary, 0.05)
+                                                backgroundColor: alpha(darkSpaceTheme.primary, 0.08),
+                                                borderColor: alpha(darkSpaceTheme.primary, 0.2)
                                             },
                                             cursor: 'pointer',
-                                            // 자식 컴포넌트 내부 요소들의 스타일링
+                                            // 자식 컴포넌트 내부 요소들의 스타일링 개선
                                             '& .title': {
-                                                color: darkSpaceTheme.text.primary
+                                                color: '#FFFFFF', // 제목 색상 개선
+                                                fontWeight: 500
                                             },
                                             '& .category': {
-                                                backgroundColor: alpha(darkSpaceTheme.primary, 0.2),
-                                                color: darkSpaceTheme.primary
+                                                backgroundColor: alpha(darkSpaceTheme.primary, 0.25),
+                                                color: '#FFFFFF', // 카테고리 텍스트 색상 개선
+                                                fontWeight: 600
                                             },
                                             '& .date': {
-                                                color: alpha(darkSpaceTheme.text.secondary, 0.7)
+                                                color: '#B0B0B0' // 날짜 색상 개선
                                             },
                                             '& .likes, & .views, & .comments': {
-                                                color: alpha(darkSpaceTheme.text.secondary, 0.8)
+                                                color: '#C0C0C0' // 좋아요, 조회수, 댓글 색상 개선
                                             }
                                         }}
                                         onClick={() => navigate(`/community/detail/${post.id}`)}
                                     >
-                                        <CommunityListField post={post} />
+                                        <CommunityListFieldV2 post={post} />
                                     </Box>
                                 ))}
                             </Box>
 
-                            {/* 페이지네이션 - 스타일 적용 */}
+                            {/* 페이지네이션 - 스타일 개선 */}
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 3 }}>
                                 <Pagination
                                     count={totalPages}
@@ -366,17 +379,19 @@ export const CommunityV2: React.FC = () => {
                                     onChange={handlePageChange}
                                     sx={{
                                         '& .MuiPaginationItem-root': {
-                                            color: darkSpaceTheme.text.secondary,
-                                            borderColor: alpha(darkSpaceTheme.text.secondary, 0.2),
+                                            color: '#C0C0C0', // 페이지네이션 텍스트 색상 개선
+                                            borderColor: alpha(darkSpaceTheme.text.secondary, 0.3),
+                                            backgroundColor: 'rgba(22, 28, 45, 0.5)',
                                             '&:hover': {
-                                                backgroundColor: alpha(darkSpaceTheme.primary, 0.1)
+                                                backgroundColor: alpha(darkSpaceTheme.primary, 0.15),
+                                                color: '#FFFFFF'
                                             }
                                         },
                                         '& .Mui-selected': {
-                                            backgroundColor: alpha(darkSpaceTheme.primary, 0.2),
-                                            color: darkSpaceTheme.primary,
+                                            backgroundColor: alpha(darkSpaceTheme.primary, 0.3),
+                                            color: '#FFFFFF', // 선택된 페이지 번호 색상 개선
                                             fontWeight: 'bold',
-                                            border: `1px solid ${alpha(darkSpaceTheme.primary, 0.5)}`
+                                            border: `1px solid ${alpha(darkSpaceTheme.primary, 0.6)}`
                                         }
                                     }}
                                 />
@@ -385,10 +400,10 @@ export const CommunityV2: React.FC = () => {
                     ) : (
                         <EmptyStateBox
                             sx={{
-                                backgroundColor: alpha(darkSpaceTheme.paper, 0.7),
+                                backgroundColor: 'rgba(22, 28, 45, 0.8)',
                                 padding: '60px 20px',
                                 borderRadius: '16px',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                border: '1px solid rgba(255, 255, 255, 0.15)',
                                 textAlign: 'center'
                             }}
                         >
@@ -396,7 +411,7 @@ export const CommunityV2: React.FC = () => {
                                 sx={{
                                     width: '80px',
                                     height: '80px',
-                                    backgroundColor: alpha(darkSpaceTheme.primary, 0.1),
+                                    backgroundColor: alpha(darkSpaceTheme.primary, 0.15),
                                     borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -406,10 +421,10 @@ export const CommunityV2: React.FC = () => {
                             >
                                 <CreateIcon sx={{ fontSize: 36, color: darkSpaceTheme.primary }} />
                             </Box>
-                            <Typography variant="h6" sx={{ color: darkSpaceTheme.primary, fontWeight: 600, mt: 2 }}>
+                            <Typography variant="h6" sx={{ color: '#FFFFFF', fontWeight: 600, mt: 2 }}>
                                 등록된 게시글이 없습니다
                             </Typography>
-                            <Typography variant="body2" sx={{ color: alpha(darkSpaceTheme.text.secondary, 0.8), mt: 1 }}>
+                            <Typography variant="body2" sx={{ color: '#B0B0B0', mt: 1 }}>
                                 첫 번째 게시글을 작성해보세요!
                             </Typography>
                             <StyledButton
@@ -425,7 +440,9 @@ export const CommunityV2: React.FC = () => {
                                     borderRadius: '10px',
                                     mt: 4,
                                     '&:hover': {
-                                        backgroundColor: darkSpaceTheme.secondary
+                                        backgroundColor: darkSpaceTheme.secondary,
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: `0 6px 20px ${alpha(darkSpaceTheme.primary, 0.4)}`
                                     },
                                     transition: 'all 0.3s ease',
                                     boxShadow: `0 4px 14px ${alpha(darkSpaceTheme.primary, 0.3)}`
