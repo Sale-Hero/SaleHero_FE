@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1E40AF', // Deep professional blue
+      main: '#ffffff', // Deep professional blue
       light: '#3B82F6',
       dark: '#1E3A8A',
       contrastText: '#ffffff',

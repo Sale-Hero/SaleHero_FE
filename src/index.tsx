@@ -28,6 +28,7 @@ import {AdminRawNewsLetterManagement} from "./components/admin/rawnewsletter/Adm
 import {CommunityV2} from "./components/v2/CommunityV2";
 import {DealsV2} from "./components/v2/DealsV2";
 import {ContactV2} from "./components/v2/ContactV2";
+import {CommunityRegisterV2} from "./components/community/CommunityRegisterV2";
 
 const router = createBrowserRouter([
     {
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "community/register",
-                element: <CommunityRegister/>
+                element: <CommunityRegisterV2/>
             },
             // {
             //   path: "community/detail/:id",
