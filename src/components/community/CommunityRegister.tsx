@@ -29,20 +29,6 @@ export function CommunityRegister() {
         navigate(-1);
     };
 
-    // const handleImageAttach = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     if (event.target.files && event.target.files.length > 0) {
-    //         const newFiles = Array.from(event.target.files);
-    //         setAttachments([...attachments, ...newFiles]);
-    //     }
-    // };
-    //
-    // const handleFileAttach = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     if (event.target.files && event.target.files.length > 0) {
-    //         const newFiles = Array.from(event.target.files);
-    //         setAttachments([...attachments, ...newFiles]);
-    //     }
-    // };
-
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         if (title === "") {
