@@ -26,9 +26,10 @@ import {CommunityRegister} from "./components/community/CommunityRegister";
 import MainV2 from "./components/v2/MainV2";
 import {AdminRawNewsLetterManagement} from "./components/admin/rawnewsletter/AdminRawNewsLetterManagement";
 import {CommunityV2} from "./components/v2/CommunityV2";
-import {DealsV2} from "./components/v2/DealsV2";
+import {DealsV2} from "./components/deals/DealsV2";
 import {ContactV2} from "./components/v2/ContactV2";
 import {CommunityRegisterV2} from "./components/community/CommunityRegisterV2";
+import {DealDetailV2} from "./components/deals/DealDetailV2";
 
 const router = createBrowserRouter([
     {
@@ -66,7 +67,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "deals/:id",
-                element: <DealDetail/>
+                element: <DealDetailV2/>
             },
             {
                 path: "signin",
