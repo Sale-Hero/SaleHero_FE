@@ -315,29 +315,46 @@ export const FooterV2: React.FC = () => {
                     mt: 8,
                     pt: 3,
                     borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                    textAlign: 'center',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap'
+                    alignItems: 'flex-start',
+                    flexWrap: 'wrap',
+                    gap: 3
                 }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'rgba(255, 255, 255, 0.5)',
-                            fontSize: '0.9rem',
-                            letterSpacing: '0.03em'
-                        }}
-                    >
-                        © {new Date().getFullYear()} <Box component="span" sx={{ color: '#F29727', fontWeight: 600 }}>Sale Hero</Box>. All rights reserved.
-                    </Typography>
+                    <Box>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.9rem',
+                                letterSpacing: '0.03em',
+                                mb: 1
+                            }}
+                        >
+                            © {new Date().getFullYear()} <Box component="span" sx={{ color: '#F29727', fontWeight: 600 }}>Sale Hero</Box>. All rights reserved.
+                        </Typography>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.75rem',
+                                lineHeight: 1.6,
+                                textAlign: 'left',
+                                '& strong': {
+                                    color: '#FFCD00',
+                                    fontWeight: 600
+                                }
+                            }}
+                        >
+                            <strong>대표자명:</strong> 홍창형 | <strong>사업자번호:</strong> 516-08-03056
+                        </Typography>
+                    </Box>
 
                     <Typography
                         variant="body2"
                         sx={{
                             color: 'rgba(255, 255, 255, 0.5)',
-                            fontSize: '0.85rem',
-                            mt: { xs: 2, sm: 0 }
+                            fontSize: '0.85rem'
                         }}
                     >
                         Made with <Box component="span" sx={{ color: '#F29727' }}>❤</Box> in Seoul, South Korea
