@@ -14,6 +14,9 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import { ChatBot } from 'components/common/main/ChatBot';
+import {ComponentHelmet} from "../common/ComponentHelmet";
+import AdditionalSections from "./AdditionalSections";
 
 // 모달 관련 스타일 컴포넌트들 추가
 const ModalContent = styled(Paper)`
@@ -378,8 +381,8 @@ export default function MainV2() {
 
             {/* 추가 컴포넌트 */}
             {/*<SubscribeContainer />*/}
-            {/*<ChatBot />*/}
-            {/*<ComponentHelmet title="Sale Hero - 매일 세상의 모든 할인정보" />*/}
+            <ChatBot />
+            <ComponentHelmet title="Sale Hero - 매일 세상의 모든 할인정보" />
             {/* 정보 모달 */}
             <Modal
                 open={openModal}
