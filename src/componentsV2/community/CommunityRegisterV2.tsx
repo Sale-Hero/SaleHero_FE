@@ -4,8 +4,8 @@ import {ArrowBack as ArrowBackIcon, Send as SendIcon} from '@mui/icons-material'
 import {motion} from 'framer-motion';
 import {useNavigate} from 'react-router-dom';
 import {CommunityCategory, CommunityPostDTO} from 'types/community';
-import {FormSection, StyledContainer} from './hooks/useCommunityStyles';
-import {useCommunityActions} from "./hooks/useCommunityActions";
+import {FormSection, StyledContainer} from '../../components/community/hooks/useCommunityStyles';
+import {useCommunityActions} from "../../components/community/hooks/useCommunityActions";
 
 // 스타일 재정의 (어두운 우주 테마와 오렌지/금색 강조)
 const darkSpaceTheme = {

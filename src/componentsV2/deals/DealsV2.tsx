@@ -30,7 +30,7 @@ import {
 import { motion } from 'framer-motion';
 import { UserNewsLetterDTO } from "../../types/deal";
 import { useNavigate } from "react-router-dom";
-import {useUserNewsLetterGetter} from "./hooks/useUserNewsLetterGetter";
+import {useUserNewsLetterGetter} from "../../components/deals/hooks/useUserNewsLetterGetter";
 
 // 어두운 우주 테마 컬러 정의
 const spaceTheme = {

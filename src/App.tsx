@@ -1,13 +1,11 @@
 import {ThemeProvider, CssBaseline} from '@mui/material';
 import {Outlet, useLocation} from "react-router-dom";
-import {Header} from "./components/common/Header";
-import {Footer} from "./components/common/Footer";
 import theme from './theme';
 import {useEffect, useLayoutEffect} from 'react';
 import {AuthProvider} from "./components/common/AuthProvider";
 import {UserProvider} from "./hooks/userinfo/UserProvider";
-import {HeaderV2} from "./components/v2/HeaderV2";
-import {FooterV2} from "./components/v2/FooterV2";
+import {HeaderV2} from "./componentsV2/common/HeaderV2";
+import {FooterV2} from "./componentsV2/common/FooterV2";
 
 function App() {
     const location = useLocation();
