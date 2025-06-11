@@ -23,12 +23,12 @@ import Contact from "./components/contactus/Contact";
 import {Deals} from "./components/deals/Deals";
 import {DealDetail} from 'components/deals/DealDetail';
 import {CommunityRegister} from "./components/community/CommunityRegister";
-import MainV2 from "./components/v2/MainV2";
+import MainV2 from "./componentsV2/common/MainV2";
 import {AdminRawNewsLetterManagement} from "./components/admin/rawnewsletter/AdminRawNewsLetterManagement";
-import {CommunityV2} from "./components/v2/CommunityV2";
-import {DealsV2} from "./components/deals/DealsV2";
-import {ContactV2} from "./components/v2/ContactV2";
-import {CommunityRegisterV2} from "./components/community/CommunityRegisterV2";
+import {CommunityV2} from "./componentsV2/community/CommunityV2";
+import {DealsV2} from "./componentsV2/deals/DealsV2";
+import {ContactV2} from "./componentsV2/common/ContactV2";
+import {CommunityRegisterV2} from "./componentsV2/community/CommunityRegisterV2";
 import {DealDetailV2} from "./components/deals/DealDetailV2";
 
 const router = createBrowserRouter([
