@@ -16,7 +16,7 @@ import {
     StyledButton,
     StyledContainer
 } from 'components/community/hooks/useCommunityStyles';
-import {CommunityListFieldV2} from "../community/hooks/CommunityListFieldV2";
+import {CommunityListFieldV2} from "../../components/community/hooks/CommunityListFieldV2";
 
 // 스타일 재정의 (어두운 우주 테마와 오렌지/금색 강조)
 const darkSpaceTheme = {

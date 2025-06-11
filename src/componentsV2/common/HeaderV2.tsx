@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {useCookieFunctions} from '../common/hooks/useCookieFunctions';
+import {useCookieFunctions} from '../../components/common/hooks/useCookieFunctions';
 import {
     AppBar,
     Box,

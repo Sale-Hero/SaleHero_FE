@@ -15,8 +15,8 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import { ChatBot } from 'components/common/main/ChatBot';
-import {ComponentHelmet} from "../common/ComponentHelmet";
-import AdditionalSections from "./AdditionalSections";
+import {ComponentHelmet} from "../../components/common/ComponentHelmet";
+import {SubscribeContainerV2} from "../../components/common/main/SubscribeContainerV2";
 
 // 모달 관련 스타일 컴포넌트들 추가
 const ModalContent = styled(Paper)`
@@ -181,6 +181,7 @@ export default function MainV2() {
     const heroY = useTransform(scrollY, [0, 700], [0, 100]);
     // 모달 상태 관리
     const [openModal, setOpenModal] = useState(false);
+    const [openSubscribeModal, setOpenSubscribeModal] = useState(false);
 
     const handleOpenModal = () => setOpenModal(true);
     const handleCloseModal = () => setOpenModal(false);
@@ -194,6 +195,7 @@ export default function MainV2() {
         }}>
             {/* 3D 배경 효과 */}
             <HeroBackground/>
+            <SubscribeContainerV2 open={openSubscribeModal} onClose={() => setOpenSubscribeModal(false)} />
 
             {/* 메인 히어로 섹션 */}
             <Container maxWidth="lg" sx={{position: 'relative', zIndex: 5, pt: {xs: 10, md: 15}}}>
@@ -238,7 +240,7 @@ export default function MainV2() {
                                 </Typography>
 
                                 <Box sx={{display: 'flex', gap: 2, mt: 5, flexWrap: {xs: 'wrap', md: 'nowrap'}}}>
-                                    <HeroButton variant="contained" size="large">
+                                    <HeroButton variant="contained" size="large" onClick={() => setOpenSubscribeModal(true)}>
                                         무료로 시작하기
                                     </HeroButton>
                                     <Tooltip
