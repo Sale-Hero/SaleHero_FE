@@ -1,26 +1,26 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-    Modal,
-    Fade,
-    Paper,
+    Alert,
     Box,
-    Typography,
-    IconButton,
-    Grid,
-    TextField,
     Button,
     Checkbox,
-    FormControlLabel,
-    Divider,
     CircularProgress,
-    Alert,
-    Snackbar
+    Divider,
+    Fade,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    Modal,
+    Snackbar,
+    TextField,
+    Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { Email, LockClock } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import {Email, LockClock} from '@mui/icons-material';
+import {motion} from 'framer-motion';
 import {DayBox, GradientText, ModalContent, SubmitButton} from "./styled/SubscriberModalStyled";
-import { TermsBox } from 'components/common/main/styled/MainStyledComponents';
+import {TermsBox} from 'components/common/main/styled/MainStyledComponents';
+
 interface SubscribeContainerV2Props {
     open: boolean;
     onClose: () => void;
@@ -37,6 +37,10 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
     const [isVerified, setIsVerified] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+
+    const [verificationError, setVerificationError] = useState(''); // 에러 메세지
+    const [resendCount, setResendCount] = useState(0); // 인증 문자 다시 보내기
+    const maxResendCount = 1
 
     const weekDays = [
         { key: 'MONDAY', label: '월' },
@@ -63,6 +67,8 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         setRemainingTime(180);
         setIsVerified(false);
         setIsVerifying(false);
+        setResendCount(0);
+        setVerificationError('');
     };
 
     const handleSendVerification = async () => {
@@ -119,10 +125,44 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         }
     };
 
+    // const handleVerifyCode = async () => {
+    //     if (!verificationCode) return;
+    //
+    //     setIsVerifying(true);
+    //
+    //     try {
+    //         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-verify`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 userEmail: email,
+    //                 code: verificationCode
+    //             })
+    //         });
+    //
+    //         if (!response.ok) {
+    //             const errorData = await response.json();
+    //             throw new Error(errorData.message || '인증 코드 확인에 실패했습니다.');
+    //         }
+    //
+    //         setIsVerified(true);
+    //         setError('');
+    //
+    //     } catch (error) {
+    //         const errorMessage = error instanceof Error ? error.message : '인증 코드 확인 중 오류가 발생했습니다.';
+    //         setError(errorMessage);
+    //     } finally {
+    //         setIsVerifying(false);
+    //     }
+    // };
+
     const handleVerifyCode = async () => {
         if (!verificationCode) return;
 
         setIsVerifying(true);
+        setVerificationError(''); // 인증 코드 에러 초기화
 
         try {
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-verify`, {
@@ -138,19 +178,21 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || '인증 코드 확인에 실패했습니다.');
+                const errorMessage = errorData.errorCode?.msg || errorData.message || '인증 코드 확인에 실패했습니다.';
+                throw new Error(errorMessage);
             }
 
             setIsVerified(true);
-            setError('');
+            setVerificationError(''); // 성공시 에러 초기화
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '인증 코드 확인 중 오류가 발생했습니다.';
-            setError(errorMessage);
+            setVerificationError(errorMessage); // 인증 에러를 별도 상태에 저장
         } finally {
             setIsVerifying(false);
         }
     };
+
 
     const handleSubmit = async () => {
         if (!termsAgreed || !isVerified) {
@@ -191,6 +233,50 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    };
+
+    const handleResendVerification = async () => { // 인증 재전송 함수
+        if (resendCount >= maxResendCount) {
+            setError('재전송 횟수를 초과했습니다.');
+            return;
+        }
+
+        try {
+            setError('');
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userEmail: email })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || '이메일 재전송에 실패했습니다.');
+            }
+
+            setResendCount(prev => prev + 1);
+            setRemainingTime(180);
+            setVerificationCode('');
+
+            // 타이머 시작
+            const timer = setInterval(() => {
+                setRemainingTime(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        setIsVerificationSent(false);
+                        setVerificationCode('');
+                        return 180;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : '이메일 재전송 중 오류가 발생했습니다.';
+            setError(errorMessage);
+        }
     };
 
     return (
@@ -444,11 +530,33 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                         <Typography variant="body2" color="error" sx={{ ml: 2 }}>
                                             남은 시간: {formatTime(remainingTime)}
                                         </Typography>
+                                        <Button
+                                            onClick={handleResendVerification}
+                                            disabled={resendCount >= maxResendCount}
+                                            sx={{
+                                                ml: 'auto',
+                                                color: '#F29727',
+                                                fontSize: '0.8rem',
+                                                minWidth: 'auto',
+                                                padding: '4px 8px',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(242, 151, 39, 0.1)'
+                                                },
+                                                '&.Mui-disabled': {
+                                                    color: 'rgba(255, 255, 255, 0.3)'
+                                                }
+                                            }}
+                                        >
+                                            {resendCount >= maxResendCount ? '재전송 완료' : '다시 보내기'}
+                                        </Button>
                                     </Typography>
                                     <Box sx={{ display: 'flex', gap: 2 }}>
                                         <TextField
                                             value={verificationCode}
-                                            onChange={(e) => setVerificationCode(e.target.value)}
+                                            onChange={(e) => {
+                                                setVerificationCode(e.target.value);
+                                                setVerificationError(''); // 입력시 에러 초기화
+                                            }}
                                             placeholder="인증 코드 6자리 입력"
                                             fullWidth
                                             variant="outlined"
@@ -491,6 +599,11 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                     <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 1 }}>
                                         * 입력하신 이메일로 전송된 인증 코드를 입력해주세요.
                                     </Typography>
+                                    {verificationError && (
+                                        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                                            {verificationError}
+                                        </Typography>
+                                    )}
                                 </Box>
                             </motion.div>
                         )}
