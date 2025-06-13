@@ -16,7 +16,6 @@ import {
     Alert,
     Snackbar
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import { Email, LockClock } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -348,6 +347,9 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                                                 '&.Mui-checked': {
                                                                     color: '#F29727',
                                                                 },
+                                                                '&.Mui-disabled': {
+                                                                    color: isSelected ? '#F29727' : 'rgba(255, 255, 255, 0.3)',
+                                                                }
                                                             }}
                                                         />
                                                     }
@@ -356,7 +358,11 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                                         m: 0,
                                                         '& .MuiFormControlLabel-label': {
                                                             fontWeight: 'bold',
-                                                            fontSize: '0.9rem'
+                                                            fontSize: '0.9rem',
+                                                            color: isSelected ? '#FFA41B' : 'rgba(255, 255, 255, 0.5)',
+                                                            '&.Mui-disabled': {
+                                                                color: isSelected ? '#FFA41B' : 'rgba(255, 255, 255, 0.5)',
+                                                            }
                                                         }
                                                     }}
                                                 />

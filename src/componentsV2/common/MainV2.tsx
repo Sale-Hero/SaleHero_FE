@@ -414,7 +414,10 @@ export default function MainV2() {
                         </motion.div>
 
                         <Box sx={{ mt: 4, textAlign: 'center' }}>
-                            <HeroButton onClick={handleCloseModal}>
+                            <HeroButton onClick={() => {
+                                handleCloseModal();
+                                setOpenSubscribeModal(true);
+                            }}>
                                 무료로 시작하기
                             </HeroButton>
                         </Box>
