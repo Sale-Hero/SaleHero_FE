@@ -1,48 +1,9 @@
 import React from 'react';
 import { Box, Container, Grid, IconButton, Typography, alpha, styled } from '@mui/material';
 import { Facebook, Instagram, LinkedIn, Twitter } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import {FooterLink, GradientText} from './styled/HeaderAndFooterStyled';
 
-// 스타일드 컴포넌트
-const GradientText = styled(Typography)`
-  background: linear-gradient(90deg, #F29727 0%, #FFCD00 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: inline-block;
-`;
-
-const FooterLink = styled(RouterLink)`
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  display: block;
-  padding: 0.6rem 0;
-  transition: all 0.3s ease;
-  position: relative;
-  font-weight: 400;
-  font-size: 0.95rem;
-  
-  &:hover {
-    color: #FFCD00;
-    transform: translateX(4px);
-  }
-  
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: linear-gradient(90deg, #F29727 0%, rgba(255, 205, 0, 0) 100%);
-    transition: width 0.3s ease;
-  }
-  
-  &:hover::before {
-    width: 100%;
-  }
-`;
 
 interface commonProps {
     component?: React.ElementType;

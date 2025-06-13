@@ -2,162 +2,49 @@ import {useCallback, useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useCookieFunctions} from '../../components/common/hooks/useCookieFunctions';
 import {
-    AppBar,
+    Avatar,
+    Badge,
     Box,
     Button,
     Container,
     Drawer,
     IconButton,
     List,
-    ListItemButton,
     ListItemIcon,
     ListItemText,
+    Menu,
+    MenuItem,
     Toolbar,
     Typography,
     useMediaQuery,
     useTheme,
-    Badge,
-    Avatar,
-    Menu,
-    MenuItem,
-    alpha,
-    styled,
 } from '@mui/material';
 import {motion} from 'framer-motion';
 import {
+    ArrowForward,
+    ContactSupport,
     Forum,
-    Login,
+    Home,
     Logout,
     Menu as MenuIcon,
-    Person,
     Notifications,
-    Home,
-    ShoppingBag,
-    ContactSupport,
-    ArrowForward
+    Person,
+    ShoppingBag
 } from '@mui/icons-material';
 import logo from '../../assets/img/sale_hero_ico.png';
 import {HeaderStatus} from 'types/common';
 import {useUserInfo} from "../../hooks/hooks";
+import {
+    DrawerItemButton,
+    GlassAppBar,
+    GlassCard,
+    GradientText,
+    HeaderGradientButton,
+    HeaderGradientText,
+    MenuItemStyled,
+    NavButton
+} from './styled/HeaderAndFooterStyled';
 
-// 스타일 컴포넌트 정의
-const GlassAppBar = styled(AppBar)(({ theme }) => ({
-    background: 'rgba(7, 11, 20, 0.8)',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-}));
-
-interface GradientButtonProps {
-    component?: React.ElementType;
-    [key: string]: any;
-}
-
-const GradientButton = styled(Button)<GradientButtonProps>(({ theme }) => ({
-    background: 'linear-gradient(90deg, #F29727 0%, #FFA41B 100%)',
-    color: 'white',
-    borderRadius: '50px',
-    padding: '8px 24px',
-    fontWeight: 600,
-    textTransform: 'none',
-    boxShadow: '0 4px 20px rgba(242, 151, 39, 0.3)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 6px 25px rgba(242, 151, 39, 0.4)',
-        background: 'linear-gradient(90deg, #F29727 0%, #FFCD00 100%)',
-    }
-}));
-
-interface GlassCardProps {
-    component?: React.ElementType;
-    [key: string]: any;
-}
-
-const GlassCard = styled(Box)<GlassCardProps>(({ theme }) => ({
-    background: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '16px',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-}));
-
-const GradientText = styled(Typography)`
-    background: linear-gradient(90deg, #F29727 0%, #FFCD00 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: inline-block;
-`;
-
-const NavButton = styled(Button)(({ theme, active }: { theme: any, active: boolean }) => ({
-    color: active ? '#FFA41B' : 'rgba(255, 255, 255, 0.8)',
-    borderRadius: '12px',
-    padding: '8px 16px',
-    marginLeft: '8px',
-    marginRight: '8px',
-    fontWeight: active ? 600 : 500,
-    position: 'relative',
-    overflow: 'hidden',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-        background: 'rgba(242, 151, 39, 0.15)',
-        color: '#FFCD00',
-        '& .MuiSvgIcon-root': {
-            color: '#FFCD00',
-        },
-        '&::after': {
-            transform: 'scaleX(1)',
-        }
-    },
-    '&::after': {
-        content: '""',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        width: '100%',
-        height: '2px',
-        background: 'linear-gradient(90deg, #F29727 0%, #FFCD00 100%)',
-        transform: active ? 'scaleX(1)' : 'scaleX(0)',
-        transformOrigin: 'bottom left',
-        transition: 'transform 0.3s ease',
-    },
-    '& .MuiSvgIcon-root': {
-        color: active ? '#FFA41B' : 'rgba(255, 255, 255, 0.6)',
-        transition: 'color 0.2s ease',
-        marginRight: '6px',
-    },
-}));
-
-const MenuItemStyled = styled(MenuItem)(({ theme }) => ({
-    padding: '10px 16px',
-    margin: '4px 8px',
-    borderRadius: '8px',
-    '&:hover': {
-        background: 'rgba(242, 151, 39, 0.15)',
-    },
-}));
-
-const DrawerItemButton = styled(ListItemButton)(({ theme, active }: { theme: any, active: boolean }) => ({
-    padding: '12px 16px',
-    borderRadius: '12px',
-    margin: '8px 12px',
-    marginBottom: '8px',
-    '&:hover': {
-        background: 'rgba(242, 151, 39, 0.15)',
-        color: '#FFCD00',
-        '& .MuiListItemIcon-root': {
-            color: '#FFCD00',
-        }
-    },
-    ...(active && {
-        background: 'rgba(242, 151, 39, 0.2)',
-        color: '#FFCD00',
-        '& .MuiListItemIcon-root': {
-            color: '#FFCD00',
-        }
-    })
-}));
 
 interface MenuItem {
     label: string;
@@ -313,12 +200,12 @@ export function HeaderV2() {
                         >
                             반갑습니다
                         </Typography>
-                        <GradientText
+                        <HeaderGradientText
                             variant="subtitle2"
                             sx={{ fontWeight: 600 }}
                         >
                             {nickName || "사용자"}님
-                        </GradientText>
+                        </HeaderGradientText>
                     </Box>
                 </Box>
             )}
@@ -366,7 +253,7 @@ export function HeaderV2() {
                         로그아웃
                     </Button>
                 ) : (
-                    <GradientButton
+                    <HeaderGradientButton
                         fullWidth
                         variant="contained"
                         endIcon={<ArrowForward />}
@@ -374,7 +261,7 @@ export function HeaderV2() {
                         sx={{ py: 1.2 }}
                     >
                         로그인
-                    </GradientButton>
+                    </HeaderGradientButton>
                 )}
             </Box>
         </Box>
@@ -616,7 +503,7 @@ export function HeaderV2() {
                                     </Avatar>
                                 </IconButton>
                             ) : (
-                                <GradientButton
+                                <HeaderGradientButton
                                     endIcon={<ArrowForward />}
                                     onClick={() => handleNavigation('/signin', HeaderStatus.NONE)}
                                     component={motion.button}
@@ -624,7 +511,7 @@ export function HeaderV2() {
                                     whileTap={{ scale: 0.98 }}
                                 >
                                     로그인
-                                </GradientButton>
+                                </HeaderGradientButton>
                             )}
                         </Box>
                     </Toolbar>
