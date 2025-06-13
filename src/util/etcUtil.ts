@@ -1,3 +1,4 @@
+import {WeekDay} from "../types/modal";
 
 export const handleSaveInput = (e:any, setValue: (_: string) => void) =>{
     const input = e.target.value;
@@ -75,3 +76,12 @@ export const formatDate = (dateStr: string | null | undefined) => {
     }
 };
 
+export const weekDays: WeekDay[] = [
+    { key: 'MONDAY', label: '월' },
+    { key: 'TUESDAY', label: '화' },
+    { key: 'WEDNESDAY', label: '수' },
+    { key: 'THURSDAY', label: '목' },
+    { key: 'FRIDAY', label: '금' },
+    { key: 'SATURDAY', label: '토' },
+    { key: 'SUNDAY', label: '일' }
+];
