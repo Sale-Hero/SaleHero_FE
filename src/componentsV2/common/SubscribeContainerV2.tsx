@@ -530,11 +530,13 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                         <Typography variant="body2" color="error" sx={{ ml: 2 }}>
                                             남은 시간: {formatTime(remainingTime)}
                                         </Typography>
+                                        <Typography variant="body2" sx={{ ml: 'auto', mr: 1, color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75rem' }}>
+                                            메일이 도착하지 않았나요?
+                                        </Typography>
                                         <Button
                                             onClick={handleResendVerification}
                                             disabled={resendCount >= maxResendCount}
                                             sx={{
-                                                ml: 'auto',
                                                 color: '#F29727',
                                                 fontSize: '0.8rem',
                                                 minWidth: 'auto',
