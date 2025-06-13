@@ -1,25 +1,11 @@
 import React, {useState} from 'react';
-import {
-    Alert,
-    Box,
-    Button,
-    Checkbox,
-    CircularProgress,
-    Divider,
-    Fade,
-    FormControlLabel,
-    Grid,
-    IconButton,
-    Modal,
-    Snackbar,
-    TextField,
-    Typography
-} from '@mui/material';
+import {Alert, Fade, IconButton, Modal, Snackbar} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {Email, LockClock} from '@mui/icons-material';
-import {motion} from 'framer-motion';
-import {DayBox, GradientText, ModalContent, SubmitButton} from "./styled/SubscriberModalStyled";
-import {TermsBox} from 'components/common/main/styled/MainStyledComponents';
+import {ArrowBack} from '@mui/icons-material';
+import {ModalContent} from "./styled/SubscriberModalStyled";
+import {SubscribeStep} from "../../types/modal";
+import {EmailInputStep} from "./subscribemodal/EmailInputStep";
+import {VerificationStep} from "./subscribemodal/VerificationStep";
 
 interface SubscribeContainerV2Props {
     open: boolean;
@@ -27,30 +13,19 @@ interface SubscribeContainerV2Props {
 }
 
 export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Props) {
+    const [currentStep, setCurrentStep] = useState(SubscribeStep.EMAIL_INPUT);
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [termsAgreed, setTermsAgreed] = useState(false);
     const [marketingAgreed, setMarketingAgreed] = useState(false);
-    const [isVerificationSent, setIsVerificationSent] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [remainingTime, setRemainingTime] = useState(180);
     const [isVerified, setIsVerified] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
-
-    const [verificationError, setVerificationError] = useState(''); // 에러 메세지
-    const [resendCount, setResendCount] = useState(0); // 인증 문자 다시 보내기
-    const maxResendCount = 1
-
-    const weekDays = [
-        { key: 'MONDAY', label: '월' },
-        { key: 'TUESDAY', label: '화' },
-        { key: 'WEDNESDAY', label: '수' },
-        { key: 'THURSDAY', label: '목' },
-        { key: 'FRIDAY', label: '금' },
-        { key: 'SATURDAY', label: '토' },
-        { key: 'SUNDAY', label: '일' }
-    ];
+    const [verificationError, setVerificationError] = useState('');
+    const [resendCount, setResendCount] = useState(0);
+    const maxResendCount = 1;
 
     const handleClose = () => {
         resetForm();
@@ -58,11 +33,11 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
     };
 
     const resetForm = () => {
+        setCurrentStep(SubscribeStep.EMAIL_INPUT);
         setEmail('');
         setError('');
         setTermsAgreed(false);
         setMarketingAgreed(false);
-        setIsVerificationSent(false);
         setVerificationCode('');
         setRemainingTime(180);
         setIsVerified(false);
@@ -103,7 +78,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                 throw new Error(errorData.message || '이메일 인증 요청에 실패했습니다.');
             }
 
-            setIsVerificationSent(true);
+            setCurrentStep(SubscribeStep.VERIFICATION);
             setRemainingTime(180);
 
             // 타이머 시작
@@ -111,7 +86,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                 setRemainingTime(prev => {
                     if (prev <= 1) {
                         clearInterval(timer);
-                        setIsVerificationSent(false);
+                        setCurrentStep(SubscribeStep.EMAIL_INPUT); // 시간 초과시 첫 단계로 복귀
                         setVerificationCode('');
                         return 180;
                     }
@@ -125,44 +100,11 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         }
     };
 
-    // const handleVerifyCode = async () => {
-    //     if (!verificationCode) return;
-    //
-    //     setIsVerifying(true);
-    //
-    //     try {
-    //         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-verify`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify({
-    //                 userEmail: email,
-    //                 code: verificationCode
-    //             })
-    //         });
-    //
-    //         if (!response.ok) {
-    //             const errorData = await response.json();
-    //             throw new Error(errorData.message || '인증 코드 확인에 실패했습니다.');
-    //         }
-    //
-    //         setIsVerified(true);
-    //         setError('');
-    //
-    //     } catch (error) {
-    //         const errorMessage = error instanceof Error ? error.message : '인증 코드 확인 중 오류가 발생했습니다.';
-    //         setError(errorMessage);
-    //     } finally {
-    //         setIsVerifying(false);
-    //     }
-    // };
-
     const handleVerifyCode = async () => {
         if (!verificationCode) return;
 
         setIsVerifying(true);
-        setVerificationError(''); // 인증 코드 에러 초기화
+        setVerificationError('');
 
         try {
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-verify`, {
@@ -183,16 +125,15 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
             }
 
             setIsVerified(true);
-            setVerificationError(''); // 성공시 에러 초기화
+            setVerificationError('');
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '인증 코드 확인 중 오류가 발생했습니다.';
-            setVerificationError(errorMessage); // 인증 에러를 별도 상태에 저장
+            setVerificationError(errorMessage);
         } finally {
             setIsVerifying(false);
         }
     };
-
 
     const handleSubmit = async () => {
         if (!termsAgreed || !isVerified) {
@@ -202,7 +143,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         try {
             const requestData = {
                 userEmail: email,
-                dayOfWeek: ['MONDAY', 'WEDNESDAY', 'FRIDAY'], // 월수금 고정
+                dayOfWeek: ['MONDAY', 'WEDNESDAY', 'FRIDAY'],
                 isMarketingAgreed: marketingAgreed,
             };
 
@@ -225,7 +166,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '구독 신청 중 오류가 발생했습니다.';
-            setError(errorMessage);
+            setVerificationError(errorMessage);
         }
     };
 
@@ -235,14 +176,14 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
     };
 
-    const handleResendVerification = async () => { // 인증 재전송 함수
+    const handleResendVerification = async () => {
         if (resendCount >= maxResendCount) {
-            setError('재전송 횟수를 초과했습니다.');
+            setVerificationError('재전송 횟수를 초과했습니다.');
             return;
         }
 
         try {
-            setError('');
+            setVerificationError('');
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-request`, {
                 method: 'POST',
                 headers: {
@@ -265,7 +206,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                 setRemainingTime(prev => {
                     if (prev <= 1) {
                         clearInterval(timer);
-                        setIsVerificationSent(false);
+                        setCurrentStep(SubscribeStep.EMAIL_INPUT);
                         setVerificationCode('');
                         return 180;
                     }
@@ -275,8 +216,15 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '이메일 재전송 중 오류가 발생했습니다.';
-            setError(errorMessage);
+            setVerificationError(errorMessage);
         }
+    };
+
+    const handleBackToEmailStep = () => {
+        setCurrentStep(SubscribeStep.EMAIL_INPUT);
+        setVerificationCode('');
+        setVerificationError('');
+        setIsVerified(false);
     };
 
     return (
@@ -309,336 +257,59 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                             <CloseIcon />
                         </IconButton>
 
-                        <Box sx={{ mb: 3, zIndex: 1, position: 'relative' }}>
-                            <GradientText
-                                variant="h4"
+                        {/* 뒤로가기 버튼 (2단계에서만 표시) */}
+                        {currentStep === SubscribeStep.VERIFICATION && (
+                            <IconButton
                                 sx={{
-                                    fontWeight: 700,
-                                    mb: 1
-                                }}
-                            >
-                                세일히어로 구독하기
-                            </GradientText>
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    color: 'rgba(255,255,255,0.7)',
-                                    mb: 2
-                                }}
-                            >
-                                매주 월, 수, 금요일에 엄선된 할인 정보를 받아보세요
-                            </Typography>
-                            <Box
-                                sx={{
-                                    width: 60,
-                                    height: 4,
-                                    background: 'linear-gradient(90deg, #F29727 0%, #FFA41B 100%)',
-                                    borderRadius: 2,
-                                    mb: 4
-                                }}
-                            />
-                        </Box>
-
-                        {/* 이메일 입력 */}
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                이메일 주소
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                placeholder="이메일 주소를 입력하세요"
-                                value={email}
-                                onChange={(e) => {
-                                    setEmail(e.target.value);
-                                    setError('');
-                                }}
-                                disabled={isVerificationSent}
-                                error={!!error}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    position: 'absolute',
+                                    left: 16,
+                                    top: 16,
+                                    color: 'rgba(255,255,255,0.6)',
+                                    '&:hover': {
                                         color: 'white',
-                                        '& fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: '#F29727',
-                                        },
-                                    },
-                                    '& .MuiInputBase-input': {
-                                        color: 'white',
-                                    },
-                                    '& .MuiInputBase-input::placeholder': {
-                                        color: 'rgba(255, 255, 255, 0.5)',
-                                        opacity: 1,
+                                        background: 'rgba(255,255,255,0.1)'
                                     }
                                 }}
-                            />
-                            {error && (
-                                <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                                    {error}
-                                </Typography>
-                            )}
-                        </Box>
-
-                        {/* 수신 요일 안내 */}
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                수신 요일
-                            </Typography>
-                            <Alert
-                                severity="info"
-                                sx={{
-                                    mb: 2,
-                                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                                    color: 'rgba(255, 255, 255, 0.8)',
-                                    '& .MuiAlert-icon': {
-                                        color: '#2196f3'
-                                    }
-                                }}
+                                onClick={handleBackToEmailStep}
                             >
-                                세일히어로는 매주 <strong>월요일, 수요일, 금요일</strong>에 할인 정보를 전송합니다.
-                            </Alert>
-
-                            <Grid container spacing={1}>
-                                {weekDays.map(({ key, label }) => {
-                                    const isSelected = ['MONDAY', 'WEDNESDAY', 'FRIDAY'].includes(key);
-                                    return (
-                                        <Grid item xs={12/7} key={key}>
-                                            <DayBox
-                                                className={!isSelected ? 'disabled' : ''}
-                                                sx={{
-                                                    backgroundColor: isSelected
-                                                        ? 'rgba(242, 151, 39, 0.2)'
-                                                        : 'rgba(255, 255, 255, 0.05)',
-                                                    borderColor: isSelected
-                                                        ? 'rgba(242, 151, 39, 0.5)'
-                                                        : 'rgba(255, 255, 255, 0.1)',
-                                                    color: isSelected
-                                                        ? '#FFA41B'
-                                                        : 'rgba(255, 255, 255, 0.5)'
-                                                }}
-                                            >
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={isSelected}
-                                                            disabled={true}
-                                                            sx={{
-                                                                color: isSelected ? '#F29727' : 'rgba(255, 255, 255, 0.3)',
-                                                                '&.Mui-checked': {
-                                                                    color: '#F29727',
-                                                                },
-                                                                '&.Mui-disabled': {
-                                                                    color: isSelected ? '#F29727' : 'rgba(255, 255, 255, 0.3)',
-                                                                }
-                                                            }}
-                                                        />
-                                                    }
-                                                    label={label}
-                                                    sx={{
-                                                        m: 0,
-                                                        '& .MuiFormControlLabel-label': {
-                                                            fontWeight: 'bold',
-                                                            fontSize: '0.9rem',
-                                                            color: isSelected ? '#FFA41B' : 'rgba(255, 255, 255, 0.5)',
-                                                            '&.Mui-disabled': {
-                                                                color: isSelected ? '#FFA41B' : 'rgba(255, 255, 255, 0.5)',
-                                                            }
-                                                        }
-                                                    }}
-                                                />
-                                            </DayBox>
-                                        </Grid>
-                                    );
-                                })}
-                            </Grid>
-                        </Box>
-
-                        <Divider sx={{ my: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-
-                        {/* 약관 동의 */}
-                        <Typography variant="h6" sx={{ mb: 2 }}>
-                            약관 동의
-                        </Typography>
-
-                        <TermsBox onClick={() => !isVerificationSent && setTermsAgreed(!termsAgreed)}>
-                            <Checkbox
-                                checked={termsAgreed}
-                                onChange={(e) => setTermsAgreed(e.target.checked)}
-                                disabled={isVerificationSent}
-                                sx={{
-                                    color: '#F29727',
-                                    '&.Mui-checked': {
-                                        color: '#F29727',
-                                    },
-                                }}
-                            />
-                            <Box sx={{ ml: 1 }}>
-                                <Typography variant="body1" fontWeight="medium">
-                                    (필수) 서비스 이용약관 및 개인정보 처리방침에 동의합니다
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.5 }}>
-                                    할인 정보 메일을 받기 위해 필요한 개인정보 수집에 동의합니다.
-                                </Typography>
-                            </Box>
-                        </TermsBox>
-
-                        <TermsBox onClick={() => !isVerificationSent && setMarketingAgreed(!marketingAgreed)}>
-                            <Checkbox
-                                checked={marketingAgreed}
-                                onChange={(e) => setMarketingAgreed(e.target.checked)}
-                                disabled={isVerificationSent}
-                                sx={{
-                                    color: '#F29727',
-                                    '&.Mui-checked': {
-                                        color: '#F29727',
-                                    },
-                                }}
-                            />
-                            <Box sx={{ ml: 1 }}>
-                                <Typography variant="body1" fontWeight="medium">
-                                    (선택) 마케팅 및 이벤트 알림 수신에 동의합니다
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 0.5 }}>
-                                    할인 정보 외 이벤트, 프로모션 등의 마케팅 정보를 제공받습니다.
-                                </Typography>
-                            </Box>
-                        </TermsBox>
-
-                        {/* 인증 코드 입력 */}
-                        {isVerificationSent && !isVerified && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <Box sx={{
-                                    mt: 3,
-                                    p: 2,
-                                    bgcolor: 'rgba(255, 255, 255, 0.05)',
-                                    borderRadius: '12px',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                                }}>
-                                    <Typography variant="subtitle1" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                        <LockClock sx={{ mr: 1, color: '#F29727' }} />
-                                        이메일 인증 코드 입력
-                                        <Typography variant="body2" color="error" sx={{ ml: 2 }}>
-                                            남은 시간: {formatTime(remainingTime)}
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ ml: 'auto', mr: 1, color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75rem' }}>
-                                            메일이 도착하지 않았나요?
-                                        </Typography>
-                                        <Button
-                                            onClick={handleResendVerification}
-                                            disabled={resendCount >= maxResendCount}
-                                            sx={{
-                                                color: '#F29727',
-                                                fontSize: '0.8rem',
-                                                minWidth: 'auto',
-                                                padding: '4px 8px',
-                                                '&:hover': {
-                                                    backgroundColor: 'rgba(242, 151, 39, 0.1)'
-                                                },
-                                                '&.Mui-disabled': {
-                                                    color: 'rgba(255, 255, 255, 0.3)'
-                                                }
-                                            }}
-                                        >
-                                            {resendCount >= maxResendCount ? '재전송 완료' : '다시 보내기'}
-                                        </Button>
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', gap: 2 }}>
-                                        <TextField
-                                            value={verificationCode}
-                                            onChange={(e) => {
-                                                setVerificationCode(e.target.value);
-                                                setVerificationError(''); // 입력시 에러 초기화
-                                            }}
-                                            placeholder="인증 코드 6자리 입력"
-                                            fullWidth
-                                            variant="outlined"
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                    color: 'white',
-                                                    '& fieldset': {
-                                                        borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                    },
-                                                    '&:hover fieldset': {
-                                                        borderColor: 'rgba(255, 255, 255, 0.3)',
-                                                    },
-                                                    '&.Mui-focused fieldset': {
-                                                        borderColor: '#F29727',
-                                                    },
-                                                },
-                                                '& .MuiInputBase-input': {
-                                                    color: 'white',
-                                                },
-                                                '& .MuiInputBase-input::placeholder': {
-                                                    color: 'rgba(255, 255, 255, 0.5)',
-                                                    opacity: 1,
-                                                }
-                                            }}
-                                        />
-                                        <Button
-                                            variant="contained"
-                                            onClick={handleVerifyCode}
-                                            disabled={!verificationCode || isVerifying}
-                                            sx={{
-                                                bgcolor: '#F29727',
-                                                '&:hover': { bgcolor: '#e08a24' },
-                                                minWidth: '100px'
-                                            }}
-                                        >
-                                            {isVerifying ? <CircularProgress size={24} color="inherit" /> : '확인'}
-                                        </Button>
-                                    </Box>
-                                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', mt: 1 }}>
-                                        * 입력하신 이메일로 전송된 인증 코드를 입력해주세요.
-                                    </Typography>
-                                    {verificationError && (
-                                        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                                            {verificationError}
-                                        </Typography>
-                                    )}
-                                </Box>
-                            </motion.div>
+                                <ArrowBack />
+                            </IconButton>
                         )}
 
-                        {/* 버튼 */}
-                        <Box sx={{ mt: 4, textAlign: 'center' }}>
-                            {!isVerificationSent ? (
-                                <SubmitButton
-                                    onClick={handleSendVerification}
-                                    disabled={!termsAgreed || !email.trim()}
-                                    startIcon={<Email />}
-                                    fullWidth
-                                >
-                                    메일 인증하기
-                                </SubmitButton>
-                            ) : isVerified ? (
-                                <SubmitButton
-                                    onClick={handleSubmit}
-                                    startIcon={<Email />}
-                                    fullWidth
-                                >
-                                    구독 시작하기
-                                </SubmitButton>
-                            ) : (
-                                <SubmitButton
-                                    disabled={true}
-                                    startIcon={<Email />}
-                                    fullWidth
-                                >
-                                    인증 대기 중
-                                </SubmitButton>
-                            )}
-                        </Box>
+                        {/* 1단계: 이메일 입력 */}
+                        {currentStep === SubscribeStep.EMAIL_INPUT && (
+                            <EmailInputStep
+                                email={email}
+                                setEmail={setEmail}
+                                error={error}
+                                setError={setError}
+                                termsAgreed={termsAgreed}
+                                setTermsAgreed={setTermsAgreed}
+                                marketingAgreed={marketingAgreed}
+                                setMarketingAgreed={setMarketingAgreed}
+                                onSendVerification={handleSendVerification}
+                            />
+                        )}
+
+                        {/* 2단계: 인증 코드 입력 */}
+                        {currentStep === SubscribeStep.VERIFICATION && (
+                            <VerificationStep
+                                email={email}
+                                verificationCode={verificationCode}
+                                setVerificationCode={setVerificationCode}
+                                verificationError={verificationError}
+                                setVerificationError={setVerificationError}
+                                remainingTime={remainingTime}
+                                isVerified={isVerified}
+                                isVerifying={isVerifying}
+                                resendCount={resendCount}
+                                maxResendCount={maxResendCount}
+                                formatTime={formatTime}
+                                onVerifyCode={handleVerifyCode}
+                                onResendVerification={handleResendVerification}
+                                onSubmit={handleSubmit}
+                            />
+                        )}
                     </ModalContent>
                 </Fade>
             </Modal>
