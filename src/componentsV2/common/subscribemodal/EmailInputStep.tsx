@@ -15,13 +15,14 @@ interface Args {
     setTermsAgreed: (_:boolean) => void,
     marketingAgreed: boolean,
     setMarketingAgreed: (_:boolean) => void,
-    onSendVerification: () => void
+    onSendVerification: () => void,
+    isSendingEmail: boolean
 }
 
 export function EmailInputStep(
     {
         email, setEmail, error, setError, termsAgreed, setTermsAgreed,
-        marketingAgreed, setMarketingAgreed, onSendVerification
+        marketingAgreed, setMarketingAgreed, onSendVerification, isSendingEmail
     }: Args) {
     return (
         <motion.div

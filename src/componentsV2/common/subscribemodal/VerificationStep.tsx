@@ -19,12 +19,13 @@ interface Args {
     onVerifyCode: () => void
     onResendVerification: () => void
     onSubmit: () => void
+    isSendingEmail: boolean
 }
 
 export function VerificationStep(
     {email,verificationCode,setVerificationCode,verificationError, setVerificationError,remainingTime,
         isVerified,isVerifying, resendCount, maxResendCount, formatTime,
-        onVerifyCode, onResendVerification,onSubmit}: Args) {
+        onVerifyCode, onResendVerification,onSubmit, isSendingEmail}: Args) {
     return (
         <motion.div
             initial={{ opacity: 0, x: 20 }}
