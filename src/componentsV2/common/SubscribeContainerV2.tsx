@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {Alert, Fade, IconButton, Modal, Snackbar} from '@mui/material';
+import {Alert, Fade, IconButton, Modal, Snackbar, CircularProgress} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {ArrowBack} from '@mui/icons-material';
 import {ModalContent} from "./styled/SubscriberModalStyled";
 import {SubscribeStep} from "../../types/modal";
 import {EmailInputStep} from "./subscribemodal/EmailInputStep";
 import {VerificationStep} from "./subscribemodal/VerificationStep";
+import {ResponseDTO} from "../../types/common";
 
 interface SubscribeContainerV2Props {
     open: boolean;
@@ -25,6 +26,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [verificationError, setVerificationError] = useState('');
     const [resendCount, setResendCount] = useState(0);
+    const [isSendingEmail, setIsSendingEmail] = useState(false); // 이메일 발송 로딩 상태
     const maxResendCount = 1;
 
     const handleClose = () => {
@@ -44,6 +46,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         setIsVerifying(false);
         setResendCount(0);
         setVerificationError('');
+        setIsSendingEmail(false);
     };
 
     const handleSendVerification = async () => {
@@ -65,6 +68,8 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
 
         try {
             setError('');
+            setIsSendingEmail(true); // 로딩 시작
+
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-request`, {
                 method: 'POST',
                 headers: {
@@ -73,9 +78,11 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                 body: JSON.stringify({ userEmail: email })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '이메일 인증 요청에 실패했습니다.');
+            const responseData: ResponseDTO<string> = await response.json();
+
+            if (!responseData.success) {
+                setError(responseData.message);
+                return;
             }
 
             setCurrentStep(SubscribeStep.VERIFICATION);
@@ -96,7 +103,9 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '이메일 인증 요청 중 오류가 발생했습니다.';
-            setError(errorMessage);
+            console.log(errorMessage);
+        } finally {
+            setIsSendingEmail(false); // 로딩 종료
         }
     };
 
@@ -184,6 +193,8 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
 
         try {
             setVerificationError('');
+            setIsSendingEmail(true); // 재전송 로딩 시작
+
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-request`, {
                 method: 'POST',
                 headers: {
@@ -217,6 +228,8 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '이메일 재전송 중 오류가 발생했습니다.';
             setVerificationError(errorMessage);
+        } finally {
+            setIsSendingEmail(false); // 재전송 로딩 종료
         }
     };
 
@@ -241,6 +254,38 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
             >
                 <Fade in={open}>
                     <ModalContent>
+                        {/* 로딩 오버레이 */}
+                        {isSendingEmail && (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 1000,
+                                    borderRadius: '16px'
+                                }}
+                            >
+                                <div style={{ textAlign: 'center', color: 'white' }}>
+                                    <CircularProgress
+                                        size={40}
+                                        sx={{
+                                            color: '#FFCD00',
+                                            marginBottom: '16px'
+                                        }}
+                                    />
+                                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                                        인증 메일을 발송 중입니다...
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <IconButton
                             sx={{
                                 position: 'absolute',
@@ -288,6 +333,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                 marketingAgreed={marketingAgreed}
                                 setMarketingAgreed={setMarketingAgreed}
                                 onSendVerification={handleSendVerification}
+                                isSendingEmail={isSendingEmail} // 로딩 상태 전달
                             />
                         )}
 
@@ -308,6 +354,7 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                                 onVerifyCode={handleVerifyCode}
                                 onResendVerification={handleResendVerification}
                                 onSubmit={handleSubmit}
+                                isSendingEmail={isSendingEmail} // 재전송 로딩 상태 전달
                             />
                         )}
                     </ModalContent>
