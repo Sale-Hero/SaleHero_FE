@@ -12,3 +12,8 @@ export interface SubscribePostDTO{
     isMarketingAgreed: boolean;
     dayOfWeek: DayOfWeek[];
 }
+
+export interface UnSubscribeDTO{
+    email: string;
+    token: string;
+}
