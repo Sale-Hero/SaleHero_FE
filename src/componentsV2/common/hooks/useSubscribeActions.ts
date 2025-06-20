@@ -12,7 +12,7 @@ export function useSubscribeActions() {
                 const dto:UnSubscribeDTO = {
                     email, token
                 }
-                await dispatch(unSubscribeAsync(dto));
+                return await dispatch(unSubscribeAsync(dto)).unwrap();
             } catch (e) {
                 console.error("데이터 로딩 실패:", e);
             }

@@ -19,8 +19,8 @@ export function UnSubscribe() {
         }
 
         unSubscribe({email, token})
-            .then(() => {
-                alert('구독이 취소되었습니다.');
+            .then((result) => {
+                alert(result?.message || '구독이 취소되었습니다.');
                 navigate('/');
             })
             .catch(() => {
@@ -29,9 +29,24 @@ export function UnSubscribe() {
             });
     }, []);
 
-    return(
-        <>
-            구독 취소중입니다...
-        </>
-    )
+    return (
+        <div style={{minHeight: '100vh'}} className="flex items-center justify-center bg-gray-50 px-4">
+            <div className="text-center">
+                {/* 로딩 스피너 */}
+                <div className="flex justify-center mb-12">
+                    <div style={{width: '6rem', height: '6rem'}} className="border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+
+                {/* 메시지 */}
+                <div>
+                    <h1 style={{fontSize: '3rem'}} className="font-semibold text-gray-800 mb-6">
+                        구독 취소중입니다
+                    </h1>
+                    <p style={{fontSize: '1.25rem'}} className="text-gray-600">
+                        잠시만 기다려주세요
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
 }
