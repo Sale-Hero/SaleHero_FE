@@ -191,7 +191,7 @@ export function AdminNewsletterManagement() {
 
     // 데이터 그리드 컬럼 정의
     const columns: GridColDef[] = [
-        { field: 'title', headerName: '제목', width: 200 },
+        { field: 'title', headerName: '제목', flex: 1 },
         {
             field: 'isSent',
             headerName: '발송 상태',
@@ -203,14 +203,6 @@ export function AdminNewsletterManagement() {
                     size="small"
                 />
             )
-        },
-        {
-            field: 'sentAt',
-            headerName: '발송일',
-            width: 130,
-            renderCell: (params) => {
-                return <span>{params.row.sentAt === null ? '발송 대기' : formatShortDate(params.row.sentAt)}</span>;
-            }
         },
         {
             field: 'createdAt',
