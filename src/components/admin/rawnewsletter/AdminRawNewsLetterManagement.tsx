@@ -365,6 +365,10 @@ export function AdminRawNewsLetterManagement() {
                                     onRowSelectionModelChange={handleSelectionChange}
                                     rowSelectionModel={selectedRawNewsletterIds}
                                     sx={{
+                                        '& .MuiDataGrid-columnHeaders': {
+                                            backgroundColor: '#f5f5f5',
+                                            color: '#000'
+                                        },
                                         '& .MuiDataGrid-cell:focus': {
                                             outline: 'none',
                                         },
