@@ -234,7 +234,17 @@ export function AdminRawNewsLetterManagement() {
 
     // 데이터 그리드 컬럼 정의
     const columns: GridColDef[] = [
-        { field: 'title', headerName: '제목', width: 300 },
+        { field: 'title', headerName: '제목', flex: 1.5 },
+        {
+            field: 'content',
+            headerName: '내용',
+            flex: 3,
+            renderCell: (params) => (
+                <Typography noWrap sx={{ width: '100%', fontStyle: 'italic', color: 'text.secondary' }}>
+                    {params.value}
+                </Typography>
+            )
+        },
         {
             field: 'createdAt',
             headerName: '작성일',
