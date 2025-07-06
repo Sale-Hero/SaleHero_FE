@@ -396,13 +396,28 @@ export function AdminRawNewsLetterManagement() {
 
                                 <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
                                     <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} aria-label="content view tabs">
-                                        <Tab label="텍스트 보기" id="tab-0" />
-                                        <Tab label="HTML 미리보기" id="tab-1" />
+                                        <Tab label="HTML 미리보기" id="tab-0" />
+                                        <Tab label="텍스트 보기" id="tab-1" />
                                     </Tabs>
                                 </Box>
 
-                                {/* 텍스트 보기 */}
+                                {/* HTML 미리보기 */}
                                 {activeTab === 0 && (
+                                    <Box sx={{
+                                        my: 2,
+                                        p: 2,
+                                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                                        borderRadius: 1,
+                                        minHeight: '200px',
+                                        maxHeight: '400px',
+                                        overflow: 'auto'
+                                    }}>
+                                        <div dangerouslySetInnerHTML={{ __html: selectedRawNewsletter.content }} />
+                                    </Box>
+                                )}
+
+                                {/* 텍스트 보기 */}
+                                {activeTab === 1 && (
                                     <Box sx={{
                                         my: 2,
                                         p: 2,
@@ -415,21 +430,6 @@ export function AdminRawNewsLetterManagement() {
                                         <Typography variant="body1" style={{ whiteSpace: 'pre-wrap' }}>
                                             {selectedRawNewsletter.content}
                                         </Typography>
-                                    </Box>
-                                )}
-
-                                {/* HTML 미리보기 */}
-                                {activeTab === 1 && (
-                                    <Box sx={{
-                                        my: 2,
-                                        p: 2,
-                                        border: '1px solid rgba(0, 0, 0, 0.12)',
-                                        borderRadius: 1,
-                                        minHeight: '200px',
-                                        maxHeight: '400px',
-                                        overflow: 'auto'
-                                    }}>
-                                        <div dangerouslySetInnerHTML={{ __html: selectedRawNewsletter.content }} />
                                     </Box>
                                 )}
 
