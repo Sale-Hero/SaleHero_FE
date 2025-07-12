@@ -1,7 +1,7 @@
-import { List, ListItem, ListItemIcon, ListItemText, Paper, Typography, Box } from '@mui/material';
-import { Person, Article, Email, Dashboard, Code, Newspaper } from '@mui/icons-material';
+import {Box, List, ListItem, ListItemIcon, ListItemText, Paper, Typography} from '@mui/material';
+import {Article, Dashboard, LocalOffer, Newspaper, Person} from '@mui/icons-material';
 import {Link, useLocation, useNavigate} from 'react-router-dom';
-import { motion } from 'framer-motion';
+import {motion} from 'framer-motion';
 
 export function AdminNavbar() {
     const location = useLocation();
@@ -13,6 +13,7 @@ export function AdminNavbar() {
         { icon: Article, text: '게시글 관리', path: '/admin/posts' },
         { icon: Newspaper, text: '뉴스레터(로우)', path: '/admin/raw-newsletter' },
         { icon: Newspaper, text: '뉴스레터', path: '/admin/newsletter' },
+        { icon: LocalOffer, text: '할인 정보', path: '/admin/article' },
     ];
 
     return (
