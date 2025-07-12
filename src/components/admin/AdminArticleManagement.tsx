@@ -52,8 +52,8 @@ export function AdminArticleManagement() {
         title: '',
         content: '',
         summary: '',
-        category: ArticleCategory.NOTICE,
-        isVisible: 'Y',
+        category: ArticleCategory.PROMOTION,
+        isVisible: 'N',
     });
 
     // API 호출 훅 사용
@@ -132,7 +132,7 @@ export function AdminArticleManagement() {
             title: '',
             content: '',
             summary: '',
-            category: ArticleCategory.NOTICE,
+            category: ArticleCategory.PROMOTION,
             isVisible: 'Y',
         });
         setIsEditing(false);
@@ -144,7 +144,7 @@ export function AdminArticleManagement() {
             title: '',
             content: '',
             summary: '',
-            category: ArticleCategory.NOTICE,
+            category: ArticleCategory.PROMOTION,
             isVisible: 'Y',
         });
         setOpenFormDialog(true);
