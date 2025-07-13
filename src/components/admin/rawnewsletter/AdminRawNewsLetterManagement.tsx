@@ -16,8 +16,13 @@ import {
     Tabs,
     TextField,
     Typography,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    SelectChangeEvent
 } from '@mui/material';
-import {Delete, Edit, Merge, Search} from '@mui/icons-material';
+import {Add, Delete, Edit, Merge, Search} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../../util/etcUtil";
@@ -26,6 +31,8 @@ import {RawNewsLetterDTO, RawNewsLetterPutDTO} from "../../../types/rawNewsLette
 import {useRawNewsLetterActions} from "./hooks/useRawNewsLetterActions";
 import {NewsLetterDeleteDTO} from "../../../types/adminNewsLetter";
 import {useNewsLetterActions} from "../newsletter/hooks/useAdminNewsLetterActions";
+import {ArticleCategory, ArticleDTO} from "../../../types/adminArticle";
+import {useArticleActions} from "../hooks/useAdminArticleActions";
 
 export function AdminRawNewsLetterManagement() {
     const [selectedRawNewsletter, setSelectedRawNewsletter] = useState<RawNewsLetterDTO | null>(null);
@@ -37,6 +44,17 @@ export function AdminRawNewsLetterManagement() {
     const [selectedRawNewsletterIds, setSelectedRawNewsletterIds] = useState<number[]>([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<number>(0);
+
+    // 아티클 추가 모달 관련 상태
+    const [openArticleDialog, setOpenArticleDialog] = useState<boolean>(false);
+    const [selectedRawNewsletterForArticle, setSelectedRawNewsletterForArticle] = useState<RawNewsLetterDTO | null>(null);
+    const [articleFormData, setArticleFormData] = useState<ArticleDTO>({
+        title: '',
+        content: '',
+        summary: '',
+        category: ArticleCategory.PROMOTION,
+        isVisible: 'Y',
+    });
 
     const [searchWord, setSearchWord] = useState<string>('');
     const [paginationModel, setPaginationModel] = useState({
@@ -59,6 +77,7 @@ export function AdminRawNewsLetterManagement() {
     const { getRawNewsLetters, rawNewsLetter, loading: fetchLoading } = useRawNewsLetterGetter();
     const { saveMergedNewsletter } = useNewsLetterActions();
     const { modifyRawNewsLetters, deleteRawNewsLetter } = useRawNewsLetterActions();
+    const { saveArticle, loading: articleLoading } = useArticleActions();
 
     // 로딩 상태
     const [loading, setLoading] = useState<boolean>(false);
@@ -227,6 +246,86 @@ export function AdminRawNewsLetterManagement() {
         }
     };
 
+    // 아티클 추가 모달 열기 핸들러
+    const handleOpenArticleDialog = () => {
+        if (selectedRawNewsletterIds.length === 1) {
+            const selectedNewsletter = rawNewsLetter?.content.find(
+                item => item.id === selectedRawNewsletterIds[0]
+            );
+            if (selectedNewsletter) {
+                setSelectedRawNewsletterForArticle(selectedNewsletter);
+                setArticleFormData({
+                    title: selectedNewsletter.title,
+                    content: selectedNewsletter.content,
+                    summary: selectedNewsletter.content.substring(0, 100) + '...',
+                    category: ArticleCategory.PROMOTION,
+                    isVisible: 'Y',
+                });
+                setOpenArticleDialog(true);
+            }
+        } else {
+            alert('하나의 뉴스레터를 선택해주세요.');
+        }
+    };
+
+    // 아티클 폼 입력 변경 핸들러
+    const handleArticleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setArticleFormData({
+            ...articleFormData,
+            [name]: value
+        });
+    };
+
+    // 아티클 카테고리 변경 핸들러
+    const handleArticleCategoryChange = (e: SelectChangeEvent) => {
+        setArticleFormData({
+            ...articleFormData,
+            category: e.target.value as ArticleCategory
+        });
+    };
+
+    // 아티클 공개 여부 변경 핸들러
+    const handleArticleVisibleChange = (e: SelectChangeEvent) => {
+        setArticleFormData({
+            ...articleFormData,
+            isVisible: e.target.value as string
+        });
+    };
+
+    // 아티클 추가 모달 닫기 핸들러
+    const handleCloseArticleDialog = () => {
+        setOpenArticleDialog(false);
+        setSelectedRawNewsletterForArticle(null);
+        setArticleFormData({
+            title: '',
+            content: '',
+            summary: '',
+            category: ArticleCategory.PROMOTION,
+            isVisible: 'Y',
+        });
+    };
+
+    // 아티클 폼 제출 핸들러
+    const handleSubmitArticleForm = async () => {
+        setLoading(true);
+        try {
+            const success = await saveArticle(articleFormData);
+            if (success) {
+                handleCloseArticleDialog();
+                await onRefresh();
+                alert('아티클이 성공적으로 추가되었습니다.');
+            } else {
+                alert('아티클 추가에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('아티클 추가 중 오류 발생:', error);
+            alert('아티클 추가 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // 병합된 HTML 미리보기 생성
     const getMergedHtmlPreview = () => {
         return mergeSelectedNewsletters.map(newsletter => newsletter.content).join('<hr /><br />');
@@ -317,6 +416,15 @@ export function AdminRawNewsLetterManagement() {
                                 선택한 뉴스레터 삭제 ({selectedRawNewsletterIds.length})
                             </Button>
                         )}
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Add />}
+                            onClick={handleOpenArticleDialog}
+                            disabled={selectedRawNewsletterIds.length !== 1}
+                        >
+                            아티클로 추가
+                        </Button>
                     </Box>
                 </Box>
 
@@ -597,6 +705,90 @@ export function AdminRawNewsLetterManagement() {
                             disabled={loading}
                         >
                             삭제
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* 아티클 추가 대화상자 */}
+                <Dialog
+                    open={openArticleDialog}
+                    onClose={handleCloseArticleDialog}
+                    maxWidth="md"
+                    fullWidth
+                >
+                    <DialogTitle>아티클 추가</DialogTitle>
+                    <DialogContent dividers>
+                        <Box sx={{ p: 2 }}>
+                            <TextField
+                                fullWidth
+                                label="제목"
+                                name="title"
+                                value={articleFormData.title}
+                                onChange={handleArticleInputChange}
+                                margin="normal"
+                                variant="outlined"
+                                required
+                            />
+                            <TextField
+                                fullWidth
+                                label="요약"
+                                name="summary"
+                                value={articleFormData.summary}
+                                onChange={handleArticleInputChange}
+                                margin="normal"
+                                variant="outlined"
+                                multiline
+                                rows={3}
+                                required
+                            />
+                            <TextField
+                                fullWidth
+                                label="내용"
+                                name="content"
+                                value={articleFormData.content}
+                                onChange={handleArticleInputChange}
+                                margin="normal"
+                                variant="outlined"
+                                multiline
+                                rows={10}
+                                required
+                            />
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel id="article-category-label">카테고리</InputLabel>
+                                <Select
+                                    labelId="article-category-label"
+                                    value={articleFormData.category}
+                                    label="카테고리"
+                                    onChange={handleArticleCategoryChange}
+                                >
+                                    {(Object.values(ArticleCategory) as string[]).map((cat) => (
+                                        <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel id="article-visible-label">공개 여부</InputLabel>
+                                <Select
+                                    labelId="article-visible-label"
+                                    value={articleFormData.isVisible}
+                                    label="공개 여부"
+                                    onChange={handleArticleVisibleChange}
+                                >
+                                    <MenuItem value="Y">공개</MenuItem>
+                                    <MenuItem value="N">비공개</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseArticleDialog}>취소</Button>
+                        <Button
+                            onClick={handleSubmitArticleForm}
+                            color="primary"
+                            variant="contained"
+                            disabled={!articleFormData.title || !articleFormData.content || !articleFormData.summary || loading}
+                        >
+                            추가
                         </Button>
                     </DialogActions>
                 </Dialog>
