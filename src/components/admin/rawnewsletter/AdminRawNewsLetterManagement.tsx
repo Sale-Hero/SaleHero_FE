@@ -31,7 +31,7 @@ import {RawNewsLetterDTO, RawNewsLetterPutDTO} from "../../../types/rawNewsLette
 import {useRawNewsLetterActions} from "./hooks/useRawNewsLetterActions";
 import {NewsLetterDeleteDTO} from "../../../types/adminNewsLetter";
 import {useNewsLetterActions} from "../newsletter/hooks/useAdminNewsLetterActions";
-import {ArticleCategory, ArticleDTO} from "../../../types/adminArticle";
+import {ArticleCategory, AdminArticlePostDTO} from "../../../types/adminArticle";
 import {useArticleActions} from "../hooks/useAdminArticleActions";
 
 export function AdminRawNewsLetterManagement() {
@@ -48,7 +48,7 @@ export function AdminRawNewsLetterManagement() {
     // 아티클 추가 모달 관련 상태
     const [openArticleDialog, setOpenArticleDialog] = useState<boolean>(false);
     const [selectedRawNewsletterForArticle, setSelectedRawNewsletterForArticle] = useState<RawNewsLetterDTO | null>(null);
-    const [articleFormData, setArticleFormData] = useState<ArticleDTO>({
+    const [articleFormData, setArticleFormData] = useState<AdminArticlePostDTO>({
         title: '',
         content: '',
         summary: '',

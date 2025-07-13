@@ -23,7 +23,7 @@ export interface ArticleResponseDTO {
     updatedAt: string;
 }
 
-export interface ArticleDTO {
+export interface AdminArticlePostDTO {
     title: string;
     content: string;
     summary: string;

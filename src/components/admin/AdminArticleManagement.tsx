@@ -28,7 +28,7 @@ import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../util/etcUtil";
 import {useAdminArticleGetter} from "./hooks/useAdminArticleGetter";
-import {ArticleDeleteDTO, ArticleDTO, ArticleResponseDTO, ArticleCategory} from "../../types/adminArticle";
+import {ArticleDeleteDTO, AdminArticlePostDTO, ArticleResponseDTO, ArticleCategory} from "../../types/adminArticle";
 import {useArticleActions} from "./hooks/useAdminArticleActions";
 
 export function AdminArticleManagement() {
@@ -48,7 +48,7 @@ export function AdminArticleManagement() {
     });
 
     // 새 아티클 또는 편집용 폼 상태
-    const [formData, setFormData] = useState<ArticleDTO>({
+    const [formData, setFormData] = useState<AdminArticlePostDTO>({
         title: '',
         content: '',
         summary: '',
@@ -185,7 +185,7 @@ export function AdminArticleManagement() {
     };
 
     const handleSubmitForm = async () => {
-        const success = await saveArticle(formData, isEditing ? selectedArticle?.id : undefined);
+        const success = await saveArticle(formData);
         if (success) {
             handleCloseFormDialog();
             await onRefresh();
