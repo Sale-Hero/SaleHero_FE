@@ -1,4 +1,4 @@
-import {ThemeProvider, CssBaseline} from '@mui/material';
+import {ThemeProvider, CssBaseline, Box} from '@mui/material';
 import {Outlet, useLocation} from "react-router-dom";
 import theme from './theme';
 import {useEffect, useLayoutEffect} from 'react';
@@ -10,6 +10,9 @@ import {FooterV2} from "./componentsV2/common/FooterV2";
 function App() {
     const location = useLocation();
     const isAdminRoute = location.pathname.startsWith('/admin');
+    const darkBgPaths = ['/', '/community', '/deals', '/contact'];
+    const useDarkBg = darkBgPaths.some(path => location.pathname === path || (path !== '/' && location.pathname.startsWith(path)));
+
 
     // 페이지 이동 시 스크롤 처리
     useEffect(() => {
@@ -29,11 +32,11 @@ function App() {
             <CssBaseline/>
             <AuthProvider>
                 <UserProvider>
-                    <div className="App">
+                    <Box sx={useDarkBg ? { background: 'linear-gradient(135deg, #070B14 0%, #121A2B 100%)', color: 'white', minHeight: '100vh' } : {}}>
                         {!isAdminRoute && <HeaderV2/>}
                         <Outlet/>
                         {!isAdminRoute && <FooterV2/>}
-                    </div>
+                    </Box>
                 </UserProvider>
             </AuthProvider>
         </ThemeProvider>
