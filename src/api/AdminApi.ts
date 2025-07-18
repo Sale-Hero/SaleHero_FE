@@ -1,7 +1,7 @@
 import {MainApi} from "../api/MainApi";
 import {AdminNewsLetterSearchDTO, NewsLetterDeleteDTO} from "../types/adminNewsLetter";
 import {RawNewsLetterPutDTO, RawNewsLetterSearchDTO} from "../types/rawNewsLetter";
-import {AdminArticlePostDTO, AdminArticleSearchDTO} from "../types/adminArticle";
+import {AdminArticlePostDTO, AdminArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
 
 export class AdminApi {
     static url = `${process.env.REACT_APP_BASE_URL}/admin`;
@@ -39,6 +39,6 @@ export class AdminApi {
     static putAdminArticle = ({dto, articleId}: { dto:AdminArticlePostDTO, articleId: number }) => () =>
         MainApi.api.put(`${AdminApi.url}/article/${articleId}`, dto);
 
-    static deleteAdminArticle = (articleId: number ) => () =>
-        MainApi.api.delete(`${AdminApi.url}/article/${articleId}`);
+    static deleteAdminArticle = (dto: ArticleDeleteDTO) => () =>
+        MainApi.api.delete(`${AdminApi.url}/article`, {data: dto});
 }
