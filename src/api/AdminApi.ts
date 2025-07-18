@@ -35,4 +35,10 @@ export class AdminApi {
 
     static postAdminArticle = (dto: AdminArticlePostDTO) => () =>
         MainApi.api.post(`${AdminApi.url}/article`, dto);
+
+    static putAdminArticle = ({dto, articleId}: { dto:AdminArticlePostDTO, articleId: number }) => () =>
+        MainApi.api.put(`${AdminApi.url}/article/${articleId}`, dto);
+
+    static deleteAdminArticle = (articleId: number ) => () =>
+        MainApi.api.delete(`${AdminApi.url}/article/${articleId}`);
 }

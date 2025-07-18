@@ -30,3 +30,12 @@ export const getAdminArticlesAsync = createAsyncThunk("admin/getAdminArticles",
 
 export const postAdminArticleAsync = createAsyncThunk("admin/postAdminArticle",
     (dto: AdminArticlePostDTO) => executePromise(AdminApi.postAdminArticle(dto)));
+
+export const putAdminArticleAsync = createAsyncThunk("admin/putAdminArticle",
+    ({dto, articleId}: { dto:AdminArticlePostDTO, articleId: number }) => executePromise(AdminApi.putAdminArticle({
+        dto,
+        articleId
+    })));
+
+export const deleteAdminArticleAsync = createAsyncThunk("admin/deleteAdminArticle",
+    (articleId: number) => executePromise(AdminApi.deleteAdminArticle(articleId)));
