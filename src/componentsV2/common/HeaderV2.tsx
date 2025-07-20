@@ -63,8 +63,8 @@ const menuItems: MenuItem[] = [
     {
         label: '할인정보',
         icon: <ShoppingBag/>,
-        path: '/deals',
-        status: HeaderStatus.DEALS,
+        path: '/articles',
+        status: HeaderStatus.ARTICLES,
     },
     {
         label: '커뮤니티',
@@ -77,7 +77,13 @@ const menuItems: MenuItem[] = [
         icon: <ContactSupport/>,
         path: '/contact',
         status: HeaderStatus.CONTACT,
-    }
+    },
+    {
+        label: '데일리 할인정보',
+        icon: <ShoppingBag/>,
+        path: '/deals',
+        status: HeaderStatus.DEALS,
+    },
 ];
 
 export function HeaderV2() {
