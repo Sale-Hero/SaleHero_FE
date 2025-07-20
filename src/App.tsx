@@ -10,7 +10,7 @@ import {FooterV2} from "./componentsV2/common/FooterV2";
 function App() {
     const location = useLocation();
     const isAdminRoute = location.pathname.startsWith('/admin');
-    const darkBgPaths = ['/', '/community', '/deals', '/contact'];
+    const darkBgPaths = ['/', '/community', '/articles','/deals', '/contact'];
     const useDarkBg = darkBgPaths.some(path => location.pathname === path || (path !== '/' && location.pathname.startsWith(path)));
 
 

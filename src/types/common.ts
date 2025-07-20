@@ -88,6 +88,7 @@ export enum HeaderStatus {
     COMMUNITY = "COMMUNITY",
     DEALS = "DEALS",
     CONTACT = "CONTACT",
+    ARTICLES = "ARTICLES",
     NONE = "NONE",
 }
 
