@@ -60,11 +60,10 @@ export function AdminArticleManagement() {
     const { getAdminArticles, article } = useAdminArticleGetter();
     const {
         deleteArticles,
+        updateArticle,
         saveArticle,
         loading
     } = useArticleActions();
-
-    console.log(article)
 
     // 데이터 리프레시 함수 추가
     const onRefresh = useCallback(() => {
@@ -185,10 +184,38 @@ export function AdminArticleManagement() {
     };
 
     const handleSubmitForm = async () => {
-        const success = await saveArticle(formData);
-        if (success) {
-            handleCloseFormDialog();
-            await onRefresh();
+        try {
+            // 1. 필수 데이터 검증
+            if (!formData) {
+                alert("필수 정보값 미입력");
+                return;
+            }
+
+            // 2. 수정 모드 검증
+            const isUpdateMode = isEditing && selectedArticle?.id;
+
+            if (isEditing && !selectedArticle?.id) {
+                alert("수정할 게시글 정보가 없습니다");
+                return;
+            }
+
+            // 3. API 호출
+            const success = await (isUpdateMode
+                    ? updateArticle({formData, articleId: selectedArticle.id})
+                    : saveArticle(formData)
+            );
+
+            // 4. 결과 처리
+            if (success) {
+                handleCloseFormDialog();
+                await onRefresh();
+            } else {
+                alert("저장에 실패했습니다. 다시 시도해주세요.");
+            }
+
+        } catch (error) {
+            console.error('저장 중 오류:', error);
+            alert("오류가 발생했습니다. 다시 시도해주세요.");
         }
     };
 
