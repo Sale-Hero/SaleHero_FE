@@ -1,35 +1,28 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    alpha,
     Box,
-    Container,
-    Typography,
+    Button,
     Card,
     CardContent,
-    Grid,
     Chip,
-    TextField,
-    InputAdornment,
-    Button,
-    Pagination,
+    Container,
     Divider,
-    Tabs,
+    Grid,
+    InputAdornment,
+    Pagination,
     Tab,
-    alpha,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
+    Tabs,
+    TextField,
+    Typography,
     useMediaQuery,
     useTheme
 } from '@mui/material';
-import {
-    Search as SearchIcon,
-    FilterList as FilterListIcon,
-    Visibility as VisibilityIcon
-} from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import {FilterList as FilterListIcon, Search as SearchIcon, Visibility as VisibilityIcon} from '@mui/icons-material';
+import {motion} from 'framer-motion';
 import {ArticleCategory, ArticleResponseDTO} from 'types/adminArticle';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
+import {useArticleGetter} from './hooks/useArticleGetter';
 
 
 // 더미 데이터
@@ -101,7 +94,7 @@ function formatDate(dateString: string): string {
 }
 
 export function Article() {
-    const [articles] = useState<ArticleResponseDTO[]>(dummyArticles);
+    const {getUserArticles, article, totalElements} = useArticleGetter();
     const [searchTerm, setSearchTerm] = useState('');
     const [tabValue, setTabValue] = useState<ArticleCategory | 'ALL'>('ALL');
     const [page, setPage] = useState(1);
@@ -109,15 +102,27 @@ export function Article() {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const itemsPerPage = 4;
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
-    // 필터링
-    const filtered = articles.filter(
-        a => (tabValue === 'ALL' || a.category === tabValue) &&
-            (a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             a.content.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-    const currentPageItems = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    // API 호출
+    useEffect(() => {
+        setLoading(true);
+        getUserArticles({
+            page: page,
+            size: itemsPerPage
+        }).finally(() => setLoading(false));
+    }, [getUserArticles, page, itemsPerPage]);
+
+    // 리스트 데이터 (카테고리/검색어 필터 프론트에서)
+    const allArticles = article?.content || [];
+    const filteredByCategory = tabValue === 'ALL' ? allArticles : allArticles.filter(a => a.category === tabValue);
+    const articles = searchTerm
+        ? filteredByCategory.filter(a =>
+            a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            a.content.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        : filteredByCategory;
+    const totalPages = article ? Math.ceil(article.totalElement / itemsPerPage) : 1;
 
     // 요약 추출
     const extractSummary = (content: string, summary?: string) => {
@@ -321,131 +326,144 @@ export function Article() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <Grid container spacing={3}>
-                            {currentPageItems.map((article, index) => (
-                                <Grid item xs={12} key={article.id}>
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    >
-                                        <Card
-                                            sx={{
-                                                borderRadius: 3,
-                                                overflow: 'hidden',
-                                                backgroundColor: alpha(spaceTheme.paper, 0.7),
-                                                boxShadow: `0 8px 32px ${alpha('#000', 0.2)}`,
-                                                transition: 'all 0.3s ease',
-                                                border: `1px solid ${alpha(spaceTheme.text.primary, 0.1)}`,
-                                                '&:hover': {
-                                                    transform: 'translateY(-5px)',
-                                                    boxShadow: `0 12px 28px ${alpha(spaceTheme.primary, 0.2)}`,
-                                                    borderColor: alpha(spaceTheme.primary, 0.3),
-                                                },
-                                                cursor: 'pointer'
-                                            }}
-                                            onClick={() => navigate(`/articles/${article.id}`)}
+                        {loading ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', my: 8 }}>
+                                <Typography sx={{ color: spaceTheme.primary }}>로딩중...</Typography>
+                            </Box>
+                        ) : articles.length === 0 ? (
+                            <Box sx={{ textAlign: 'center', p: 8, color: spaceTheme.text.secondary }}>
+                                <Typography variant="h6">검색 결과가 없습니다</Typography>
+                                <Typography variant="body2" sx={{ mt: 1 }}>
+                                    다른 검색어나 카테고리를 선택해보세요
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Grid container spacing={3}>
+                                {articles.map((article, index) => (
+                                    <Grid item xs={12} key={article.id}>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.5, delay: index * 0.1 }}
                                         >
-                                            <CardContent sx={{ p: 0 }}>
-                                                <Box sx={{ p: 3 }}>
-                                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <Chip
-                                                                label={article.category}
-                                                                size="small"
+                                            <Card
+                                                sx={{
+                                                    borderRadius: 3,
+                                                    overflow: 'hidden',
+                                                    backgroundColor: alpha(spaceTheme.paper, 0.7),
+                                                    boxShadow: `0 8px 32px ${alpha('#000', 0.2)}`,
+                                                    transition: 'all 0.3s ease',
+                                                    border: `1px solid ${alpha(spaceTheme.text.primary, 0.1)}`,
+                                                    '&:hover': {
+                                                        transform: 'translateY(-5px)',
+                                                        boxShadow: `0 12px 28px ${alpha(spaceTheme.primary, 0.2)}`,
+                                                        borderColor: alpha(spaceTheme.primary, 0.3),
+                                                    },
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => navigate(`/articles/${article.id}`)}
+                                            >
+                                                <CardContent sx={{ p: 0 }}>
+                                                    <Box sx={{ p: 3 }}>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Chip
+                                                                    label={article.category}
+                                                                    size="small"
+                                                                    sx={{
+                                                                        backgroundColor: alpha(spaceTheme.primary, 0.2),
+                                                                        color: spaceTheme.primary,
+                                                                        fontWeight: 600,
+                                                                        borderRadius: '50px',
+                                                                        px: 1
+                                                                    }}
+                                                                />
+                                                                <Typography variant="caption" sx={{ color: spaceTheme.text.tertiary }}>
+                                                                    {formatDate(article.createdAt)}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Typography
+                                                                variant="caption"
                                                                 sx={{
-                                                                    backgroundColor: alpha(spaceTheme.primary, 0.2),
-                                                                    color: spaceTheme.primary,
-                                                                    fontWeight: 600,
-                                                                    borderRadius: '50px',
-                                                                    px: 1
+                                                                    color: spaceTheme.text.tertiary,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 0.5
                                                                 }}
-                                                            />
-                                                            <Typography variant="caption" sx={{ color: spaceTheme.text.tertiary }}>
-                                                                {formatDate(article.createdAt)}
+                                                            >
+                                                                <VisibilityIcon fontSize="small" sx={{ mr: 0.5 }} />
+                                                                {article.viewCount}
                                                             </Typography>
                                                         </Box>
+
                                                         <Typography
-                                                            variant="caption"
+                                                            variant="h6"
+                                                            component="h2"
+                                                            gutterBottom
                                                             sx={{
-                                                                color: spaceTheme.text.tertiary,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: 0.5
-                                                            }}
-                                                        >
-                                                            <VisibilityIcon fontSize="small" sx={{ mr: 0.5 }} />
-                                                            {article.viewCount}
-                                                        </Typography>
-                                                    </Box>
-
-                                                    <Typography
-                                                        variant="h6"
-                                                        component="h2"
-                                                        gutterBottom
-                                                        sx={{
-                                                            fontWeight: 600,
-                                                            fontSize: { xs: '1.1rem', md: '1.25rem' },
-                                                            cursor: 'pointer',
-                                                            color: spaceTheme.text.primary,
-                                                            transition: 'color 0.2s ease',
-                                                            '&:hover': {
-                                                                color: spaceTheme.primary,
-                                                            }
-                                                        }}
-                                                    >
-                                                        {article.title}
-                                                    </Typography>
-
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{
-                                                            mb: 2,
-                                                            lineHeight: 1.7,
-                                                            color: spaceTheme.text.secondary,
-                                                        }}
-                                                    >
-                                                        {extractSummary(article.content, article.summary)}
-                                                    </Typography>
-
-                                                    <Divider sx={{
-                                                        my: 2,
-                                                        borderColor: spaceTheme.divider
-                                                    }} />
-
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                    >
-                                                        <Button
-                                                            variant="outlined"
-                                                            onClick={() => navigate(`/articles/${article.id}`)}
-                                                            sx={{
-                                                                borderColor: alpha(spaceTheme.primary, 0.5),
-                                                                color: spaceTheme.primary,
-                                                                '&:hover': {
-                                                                    backgroundColor: alpha(spaceTheme.primary, 0.1),
-                                                                    borderColor: spaceTheme.primary
-                                                                },
-                                                                px: 4,
-                                                                py: 1,
-                                                                borderRadius: '50px',
                                                                 fontWeight: 600,
-                                                                transition: 'all 0.3s ease'
+                                                                fontSize: { xs: '1.1rem', md: '1.25rem' },
+                                                                cursor: 'pointer',
+                                                                color: spaceTheme.text.primary,
+                                                                transition: 'color 0.2s ease',
+                                                                '&:hover': {
+                                                                    color: spaceTheme.primary,
+                                                                }
                                                             }}
                                                         >
-                                                            자세히 보기
-                                                        </Button>
+                                                            {article.title}
+                                                        </Typography>
+
+                                                        <Typography
+                                                            variant="body2"
+                                                            sx={{
+                                                                mb: 2,
+                                                                lineHeight: 1.7,
+                                                                color: spaceTheme.text.secondary,
+                                                            }}
+                                                        >
+                                                            {extractSummary(article.content, article.summary)}
+                                                        </Typography>
+
+                                                        <Divider sx={{
+                                                            my: 2,
+                                                            borderColor: spaceTheme.divider
+                                                        }} />
+
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                justifyContent: 'center'
+                                                            }}
+                                                        >
+                                                            <Button
+                                                                variant="outlined"
+                                                                onClick={e => { e.stopPropagation(); navigate(`/articles/${article.id}`); }}
+                                                                sx={{
+                                                                    borderColor: alpha(spaceTheme.primary, 0.5),
+                                                                    color: spaceTheme.primary,
+                                                                    '&:hover': {
+                                                                        backgroundColor: alpha(spaceTheme.primary, 0.1),
+                                                                        borderColor: spaceTheme.primary
+                                                                    },
+                                                                    px: 4,
+                                                                    py: 1,
+                                                                    borderRadius: '50px',
+                                                                    fontWeight: 600,
+                                                                    transition: 'all 0.3s ease'
+                                                                }}
+                                                            >
+                                                                자세히 보기
+                                                            </Button>
+                                                        </Box>
                                                     </Box>
-                                                </Box>
-                                            </CardContent>
-                                        </Card>
-                                    </motion.div>
-                                </Grid>
-                            ))}
-                        </Grid>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
                     </motion.div>
 
                     {/* 페이지네이션 */}

@@ -1,6 +1,6 @@
 import { PageSearchDTO } from "./common";
 
-export interface AdminArticleSearchDTO extends PageSearchDTO {
+export interface ArticleSearchDTO extends PageSearchDTO {
     // query?: string;
 }
 
