@@ -3,7 +3,7 @@ import {executePromise} from "../util/sliceUtil";
 import {AdminApi} from "../api/AdminApi";
 import {AdminNewsLetterSearchDTO, NewsLetterDeleteDTO} from "../types/adminNewsLetter";
 import {RawNewsLetterPutDTO, RawNewsLetterSearchDTO} from "../types/rawNewsLetter";
-import {AdminArticlePostDTO, AdminArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
+import {AdminArticlePostDTO, ArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
 
 export const getCurrentCountAsync = createAsyncThunk("admin/getCurrentCount",
     (token:string) => executePromise(AdminApi.getCurrentCount(token)));
@@ -26,7 +26,7 @@ export const deleteRawNewsLetterAsync = createAsyncThunk("admin/deleteRawNewsLet
 
 // 아티클
 export const getAdminArticlesAsync = createAsyncThunk("admin/getAdminArticles",
-    (dto: AdminArticleSearchDTO) => executePromise(AdminApi.getAdminArticles(dto)));
+    (dto: ArticleSearchDTO) => executePromise(AdminApi.getAdminArticles(dto)));
 
 export const postAdminArticleAsync = createAsyncThunk("admin/postAdminArticle",
     (dto: AdminArticlePostDTO) => executePromise(AdminApi.postAdminArticle(dto)));

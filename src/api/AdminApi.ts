@@ -1,7 +1,7 @@
 import {MainApi} from "../api/MainApi";
 import {AdminNewsLetterSearchDTO, NewsLetterDeleteDTO} from "../types/adminNewsLetter";
 import {RawNewsLetterPutDTO, RawNewsLetterSearchDTO} from "../types/rawNewsLetter";
-import {AdminArticlePostDTO, AdminArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
+import {AdminArticlePostDTO, ArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
 
 export class AdminApi {
     static url = `${process.env.REACT_APP_BASE_URL}/admin`;
@@ -30,7 +30,7 @@ export class AdminApi {
 
 
     // 아티클
-    static getAdminArticles = (dto: AdminArticleSearchDTO) => () =>
+    static getAdminArticles = (dto: ArticleSearchDTO) => () =>
         MainApi.api.get(`${AdminApi.url}/article${MainApi.toParamStringFromObject(dto)}`);
 
     static postAdminArticle = (dto: AdminArticlePostDTO) => () =>

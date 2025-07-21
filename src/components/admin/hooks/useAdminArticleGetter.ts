@@ -1,7 +1,7 @@
 import {useDispatch} from "react-redux";
 import {useCallback, useState} from "react";
 import {PageResponse} from "../../../types/common";
-import {AdminArticleSearchDTO, ArticleResponseDTO} from "../../../types/adminArticle";
+import {ArticleSearchDTO, ArticleResponseDTO} from "../../../types/adminArticle";
 import {getAdminArticlesAsync} from "../../../slice/AdminSlice";
 
 export function useAdminArticleGetter() {
@@ -10,7 +10,7 @@ export function useAdminArticleGetter() {
     const [totalElements, setTotalElements] = useState(0);
 
     const getAdminArticles = useCallback(async (
-        dto: AdminArticleSearchDTO
+        dto: ArticleSearchDTO
     ) => {
         const result = await dispatch(getAdminArticlesAsync(dto)).unwrap();
         setArticle(result);
