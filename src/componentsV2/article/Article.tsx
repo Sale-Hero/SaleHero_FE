@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import {ArticleCategory, ArticleResponseDTO} from 'types/adminArticle';
+import { useNavigate } from 'react-router-dom';
 
 
 // 더미 데이터
@@ -85,15 +86,29 @@ const spaceTheme = {
     divider: 'rgba(255, 255, 255, 0.1)'
 };
 
+// 날짜 포맷 함수
+function formatDate(dateString: string): string {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 export function Article() {
     const [articles] = useState<ArticleResponseDTO[]>(dummyArticles);
     const [searchTerm, setSearchTerm] = useState('');
     const [tabValue, setTabValue] = useState<ArticleCategory | 'ALL'>('ALL');
     const [page, setPage] = useState(1);
-    const [selectedArticle, setSelectedArticle] = useState<ArticleResponseDTO | null>(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const itemsPerPage = 4;
+    const navigate = useNavigate();
 
     // 필터링
     const filtered = articles.filter(
@@ -327,22 +342,29 @@ export function Article() {
                                                     boxShadow: `0 12px 28px ${alpha(spaceTheme.primary, 0.2)}`,
                                                     borderColor: alpha(spaceTheme.primary, 0.3),
                                                 },
+                                                cursor: 'pointer'
                                             }}
+                                            onClick={() => navigate(`/articles/${article.id}`)}
                                         >
                                             <CardContent sx={{ p: 0 }}>
                                                 <Box sx={{ p: 3 }}>
                                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-                                                        <Chip
-                                                            label={article.category}
-                                                            size="small"
-                                                            sx={{
-                                                                backgroundColor: alpha(spaceTheme.primary, 0.2),
-                                                                color: spaceTheme.primary,
-                                                                fontWeight: 600,
-                                                                borderRadius: '50px',
-                                                                px: 1
-                                                            }}
-                                                        />
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Chip
+                                                                label={article.category}
+                                                                size="small"
+                                                                sx={{
+                                                                    backgroundColor: alpha(spaceTheme.primary, 0.2),
+                                                                    color: spaceTheme.primary,
+                                                                    fontWeight: 600,
+                                                                    borderRadius: '50px',
+                                                                    px: 1
+                                                                }}
+                                                            />
+                                                            <Typography variant="caption" sx={{ color: spaceTheme.text.tertiary }}>
+                                                                {formatDate(article.createdAt)}
+                                                            </Typography>
+                                                        </Box>
                                                         <Typography
                                                             variant="caption"
                                                             sx={{
@@ -371,7 +393,6 @@ export function Article() {
                                                                 color: spaceTheme.primary,
                                                             }
                                                         }}
-                                                        onClick={() => setSelectedArticle(article)}
                                                     >
                                                         {article.title}
                                                     </Typography>
@@ -400,7 +421,7 @@ export function Article() {
                                                     >
                                                         <Button
                                                             variant="outlined"
-                                                            onClick={() => setSelectedArticle(article)}
+                                                            onClick={() => navigate(`/articles/${article.id}`)}
                                                             sx={{
                                                                 borderColor: alpha(spaceTheme.primary, 0.5),
                                                                 color: spaceTheme.primary,
@@ -452,27 +473,6 @@ export function Article() {
                             />
                         </Box>
                     )}
-
-                    {/* 상세 모달 */}
-                    <Dialog open={!!selectedArticle} onClose={() => setSelectedArticle(null)} maxWidth="md" fullWidth>
-                        <DialogTitle>{selectedArticle?.title}</DialogTitle>
-                        <DialogContent dividers>
-                            <Box sx={{ mb: 2 }}>
-                                <Chip label={selectedArticle?.category} sx={{ mr: 1 }} />
-                                <Typography variant="caption" sx={{ color: spaceTheme.text.tertiary }}>
-                                    <VisibilityIcon fontSize="small" sx={{ mr: 0.5 }} />
-                                    {selectedArticle?.viewCount}
-                                </Typography>
-                            </Box>
-                            <Divider sx={{ mb: 2 }} />
-                            <Box sx={{ minHeight: 200 }}>
-                                <div dangerouslySetInnerHTML={{ __html: selectedArticle?.content || '' }} />
-                            </Box>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={() => setSelectedArticle(null)}>닫기</Button>
-                        </DialogActions>
-                    </Dialog>
                 </motion.div>
             </Container>
         </Box>
