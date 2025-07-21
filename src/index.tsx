@@ -33,6 +33,7 @@ import {DealDetailV2} from "./components/deals/DealDetailV2";
 import {UnSubscribe} from "./componentsV2/common/UnSubscribe";
 import {AdminArticleManagement} from "./components/admin/AdminArticleManagement";
 import {Article} from "./componentsV2/article/Article";
+import {ArticleDetail} from "./componentsV2/article/ArticleDetail";
 
 const router = createBrowserRouter([
     {
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
             {
                 path: "articles",
                 element: <Article/>
+            },
+            {
+                path: "articles/:id",
+                element: <ArticleDetail/>
             },
             {
                 path: "signin",
