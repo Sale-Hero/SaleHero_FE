@@ -94,7 +94,7 @@ function formatDate(dateString: string): string {
 }
 
 export function Article() {
-    const {getUserArticles, article, totalElements} = useArticleGetter();
+    const {getUserArticles, articleList, totalElements} = useArticleGetter();
     const [searchTerm, setSearchTerm] = useState('');
     const [tabValue, setTabValue] = useState<ArticleCategory | 'ALL'>('ALL');
     const [page, setPage] = useState(1);
@@ -114,7 +114,7 @@ export function Article() {
     }, [getUserArticles, page, itemsPerPage]);
 
     // 리스트 데이터 (카테고리/검색어 필터 프론트에서)
-    const allArticles = article?.content || [];
+    const allArticles = articleList?.content || [];
     const filteredByCategory = tabValue === 'ALL' ? allArticles : allArticles.filter(a => a.category === tabValue);
     const articles = searchTerm
         ? filteredByCategory.filter(a =>
@@ -122,7 +122,7 @@ export function Article() {
             a.content.toLowerCase().includes(searchTerm.toLowerCase())
         )
         : filteredByCategory;
-    const totalPages = article ? Math.ceil(article.totalElement / itemsPerPage) : 1;
+    const totalPages = articleList ? Math.ceil(articleList.totalElement / itemsPerPage) : 1;
 
     // 요약 추출
     const extractSummary = (content: string, summary?: string) => {

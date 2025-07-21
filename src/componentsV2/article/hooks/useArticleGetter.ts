@@ -6,20 +6,20 @@ import {getUserArticlesAsync} from "../../../slice/ArticleSlice";
 
 export function useArticleGetter() {
     const dispatch = useDispatch<any>();
-    const [article, setArticle] = useState<PageResponse<ArticleResponseDTO>>();
+    const [articleList, setArticleList] = useState<PageResponse<ArticleResponseDTO>>();
     const [totalElements, setTotalElements] = useState(0);
 
     const getUserArticles = useCallback(async (
         dto: ArticleSearchDTO
     ) => {
         const result = await dispatch(getUserArticlesAsync(dto)).unwrap();
-        setArticle(result);
+        setArticleList(result);
         setTotalElements(result.totalElement);
     }, [dispatch]);
 
     return {
         getUserArticles,
-        article,
+        articleList,
         totalElements,
     };
 }
