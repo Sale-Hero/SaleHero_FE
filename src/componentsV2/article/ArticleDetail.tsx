@@ -1,20 +1,9 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-    Box,
-    Breadcrumbs,
-    Button,
-    Card,
-    CardContent,
-    Chip,
-    Container,
-    Link,
-    Typography,
-    alpha
-} from '@mui/material';
-import { ArrowBack as ArrowBackIcon, Home as HomeIcon } from '@mui/icons-material';
-import { motion } from 'framer-motion';
-import { ArticleCategory, ArticleResponseDTO } from 'types/adminArticle';
+import React, {useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
+import {alpha, Box, Breadcrumbs, Button, Card, CardContent, Chip, Container, Link, Typography} from '@mui/material';
+import {ArrowBack as ArrowBackIcon, Home as HomeIcon} from '@mui/icons-material';
+import {motion} from 'framer-motion';
+import {useArticleGetter} from './hooks/useArticleGetter';
 
 const spaceTheme = {
     primary: '#F9A825',
@@ -41,25 +30,22 @@ function formatDate(dateString: string): string {
     });
 }
 
-// 더미 데이터 (실제 API 연동 시 삭제)
-const dummyArticle: ArticleResponseDTO = {
-    id: 1,
-    title: '치킨 50% 할인 이벤트',
-    content: '<p>치킨을 반값에 즐기세요! <b>오늘만!</b></p>',
-    summary: '치킨 반값 이벤트 안내',
-    category: ArticleCategory.CHICKEN,
-    viewCount: 123,
-    isVisible: 'Y',
-    isDeleted: 'N',
-    createdAt: '2024-06-01T12:00:00',
-    updatedAt: '2024-06-01T12:00:00',
-};
-
 export function ArticleDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    // 실제로는 id로 API에서 데이터 받아와야 함
-    const article = dummyArticle;
+    const { getUserArticleDetail, articleDetail } = useArticleGetter();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (id) {
+            setLoading(true);
+            setError(null);
+            getUserArticleDetail(Number(id))
+                .catch(() => setError('아티클을 불러오지 못했습니다.'))
+                .finally(() => setLoading(false));
+        }
+    }, [id, getUserArticleDetail]);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -143,7 +129,7 @@ export function ArticleDetail() {
                                 color: spaceTheme.primary
                             }}
                         >
-                            {article?.title || '로딩중...'}
+                            {articleDetail?.title || '로딩중...'}
                         </Typography>
                     </Breadcrumbs>
 
@@ -166,179 +152,195 @@ export function ArticleDetail() {
                         목록으로 돌아가기
                     </Button>
 
-                    <Card
-                        elevation={0}
-                        sx={{
-                            borderRadius: 3,
-                            overflow: 'hidden',
-                            border: '1px solid rgba(255, 255, 255, 0.15)',
-                            backgroundColor: spaceTheme.paper,
-                            backdropFilter: 'blur(10px)',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                        }}
-                    >
-                        {/* 상단 헤더 영역 */}
-                        <Box
+                    {loading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 8 }}>
+                            <Typography sx={{ color: spaceTheme.primary }}>로딩중...</Typography>
+                        </Box>
+                    ) : error ? (
+                        <Box sx={{ textAlign: 'center', p: 8, color: spaceTheme.text.secondary }}>
+                            <Typography variant="h6">{error}</Typography>
+                            <Button variant="contained" onClick={handleGoBack} sx={{ mt: 2 }}>돌아가기</Button>
+                        </Box>
+                    ) : !articleDetail ? (
+                        <Box sx={{ textAlign: 'center', p: 8, color: spaceTheme.text.secondary }}>
+                            <Typography variant="h6">아티클을 찾을 수 없습니다.</Typography>
+                            <Button variant="contained" onClick={handleGoBack} sx={{ mt: 2 }}>돌아가기</Button>
+                        </Box>
+                    ) : (
+                        <Card
+                            elevation={0}
                             sx={{
-                                p: { xs: 3, md: 4 },
-                                backgroundColor: 'rgba(249, 168, 37, 0.1)',
-                                borderBottom: `1px solid ${alpha(spaceTheme.primary, 0.3)}`
+                                borderRadius: 3,
+                                overflow: 'hidden',
+                                border: '1px solid rgba(255, 255, 255, 0.15)',
+                                backgroundColor: spaceTheme.paper,
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                             }}
                         >
-                            <Chip
-                                label={article?.category}
-                                size="small"
-                                sx={{
-                                    backgroundColor: spaceTheme.primary,
-                                    color: '#000',
-                                    fontWeight: 600,
-                                    mb: 2,
-                                    borderRadius: '50px',
-                                }}
-                            />
-
-                            <Typography
-                                variant="h4"
-                                component="h1"
-                                sx={{
-                                    fontWeight: 600,
-                                    fontSize: { xs: '1.5rem', md: '2rem' },
-                                    mb: 2,
-                                    color: '#FFFFFF'
-                                }}
-                            >
-                                {article?.title}
-                            </Typography>
-
+                            {/* 상단 헤더 영역 */}
                             <Box
                                 sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    color: '#B0B0B0',
-                                    fontSize: '0.875rem'
+                                    p: { xs: 3, md: 4 },
+                                    backgroundColor: 'rgba(249, 168, 37, 0.1)',
+                                    borderBottom: `1px solid ${alpha(spaceTheme.primary, 0.3)}`
                                 }}
                             >
-                                <Typography variant="body2" sx={{ color: '#B0B0B0' }}>
-                                    {formatDate(article?.createdAt || '')}
-                                </Typography>
-                            </Box>
-                        </Box>
-
-                        {/* 본문 영역 */}
-                        <CardContent sx={{p: { xs: 3, md: 5 } }}>
-                            <Box
-                                sx={{
-                                    color: '#E0E0E0',
-                                    '& *': { 
-                                        color: '#E0E0E0 !important'
-                                    },
-                                    '& img': {
-                                        maxWidth: '100%',
-                                        height: 'auto',
-                                        borderRadius: 1,
-                                    },
-                                    '& a': {
-                                        color: spaceTheme.primary,
-                                        textDecoration: 'none',
-                                        '&:hover': {
-                                            textDecoration: 'underline',
-                                            color: spaceTheme.secondary
-                                        }
-                                    },
-                                    '& h1, & h2, & h3, & h4, & h5, & h6': {
-                                        color: '#FFFFFF',
-                                        my: 2,
-                                    },
-                                    '& p': {
-                                        mb: 2,
-                                        lineHeight: 1.7,
-                                        color: '#E0E0E0'
-                                    },
-                                    '& ul, & ol': {
-                                        pl: 3,
-                                        mb: 2,
-                                        '& li': {
-                                            color: '#E0E0E0'
-                                        }
-                                    },
-                                    '& li': {
-                                        mb: 1,
-                                    },
-                                    '& table': {
-                                        borderCollapse: 'collapse',
-                                        width: '100%',
-                                        mb: 3,
-                                        borderRadius: 1,
-                                        overflow: 'hidden',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                                    },
-                                    '& th, & td': {
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                                        p: 2,
-                                    },
-                                    '& th': {
-                                        backgroundColor: alpha(spaceTheme.primary, 0.2),
+                                <Chip
+                                    label={articleDetail?.category}
+                                    size="small"
+                                    sx={{
+                                        backgroundColor: spaceTheme.primary,
+                                        color: '#000',
                                         fontWeight: 600,
-                                        color: '#FFFFFF'
-                                    },
-                                    '& td': {
-                                        color: '#E0E0E0'
-                                    },
-                                    '& blockquote': {
-                                        borderLeft: `4px solid ${spaceTheme.primary}`,
-                                        pl: 2,
-                                        py: 1,
-                                        my: 2,
-                                        backgroundColor: alpha(spaceTheme.primary, 0.1),
-                                        borderRadius: '0 4px 4px 0',
-                                    },
-                                    '& code': {
-                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                        color: spaceTheme.secondary,
-                                        p: 0.5,
-                                        borderRadius: 0.5,
-                                        fontFamily: 'monospace',
-                                    },
-                                }}
-                            >
-                                <div dangerouslySetInnerHTML={{ __html: article?.content || '' }} />
-                            </Box>
-                        </CardContent>
+                                        mb: 2,
+                                        borderRadius: '50px',
+                                    }}
+                                />
 
-                        {/* 하단 액션 영역 */}
-                        <Box
-                            sx={{
-                                p: 3,
-                                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                                backgroundColor: 'rgba(22, 28, 45, 0.5)',
-                                display: 'flex',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            <Button
-                                variant="contained"
-                                onClick={handleGoBack}
+                                <Typography
+                                    variant="h4"
+                                    component="h1"
+                                    sx={{
+                                        fontWeight: 600,
+                                        fontSize: { xs: '1.5rem', md: '2rem' },
+                                        mb: 2,
+                                        color: '#FFFFFF'
+                                    }}
+                                >
+                                    {articleDetail?.title}
+                                </Typography>
+
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: '#B0B0B0',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <Typography variant="body2" sx={{ color: '#B0B0B0' }}>
+                                        {formatDate(articleDetail?.createdAt || '')}
+                                    </Typography>
+                                </Box>
+                            </Box>
+
+                            {/* 본문 영역 */}
+                            <CardContent sx={{p: { xs: 3, md: 5 } }}>
+                                <Box
+                                    sx={{
+                                        color: '#E0E0E0',
+                                        '& *': {
+                                            color: '#E0E0E0 !important'
+                                        },
+                                        '& img': {
+                                            maxWidth: '100%',
+                                            height: 'auto',
+                                            borderRadius: 1,
+                                        },
+                                        '& a': {
+                                            color: spaceTheme.primary,
+                                            textDecoration: 'none',
+                                            '&:hover': {
+                                                textDecoration: 'underline',
+                                                color: spaceTheme.secondary
+                                            }
+                                        },
+                                        '& h1, & h2, & h3, & h4, & h5, & h6': {
+                                            color: '#FFFFFF',
+                                            my: 2,
+                                        },
+                                        '& p': {
+                                            mb: 2,
+                                            lineHeight: 1.7,
+                                            color: '#E0E0E0'
+                                        },
+                                        '& ul, & ol': {
+                                            pl: 3,
+                                            mb: 2,
+                                            '& li': {
+                                                color: '#E0E0E0'
+                                            }
+                                        },
+                                        '& li': {
+                                            mb: 1,
+                                        },
+                                        '& table': {
+                                            borderCollapse: 'collapse',
+                                            width: '100%',
+                                            mb: 3,
+                                            borderRadius: 1,
+                                            overflow: 'hidden',
+                                            backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                                        },
+                                        '& th, & td': {
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            p: 2,
+                                        },
+                                        '& th': {
+                                            backgroundColor: alpha(spaceTheme.primary, 0.2),
+                                            fontWeight: 600,
+                                            color: '#FFFFFF'
+                                        },
+                                        '& td': {
+                                            color: '#E0E0E0'
+                                        },
+                                        '& blockquote': {
+                                            borderLeft: `4px solid ${spaceTheme.primary}`,
+                                            pl: 2,
+                                            py: 1,
+                                            my: 2,
+                                            backgroundColor: alpha(spaceTheme.primary, 0.1),
+                                            borderRadius: '0 4px 4px 0',
+                                        },
+                                        '& code': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                            color: spaceTheme.secondary,
+                                            p: 0.5,
+                                            borderRadius: 0.5,
+                                            fontFamily: 'monospace',
+                                        },
+                                    }}
+                                >
+                                    <div dangerouslySetInnerHTML={{ __html: articleDetail?.content || '' }} />
+                                </Box>
+                            </CardContent>
+
+                            {/* 하단 액션 영역 */}
+                            <Box
                                 sx={{
-                                    borderRadius: '50px',
-                                    px: 4,
-                                    backgroundColor: spaceTheme.primary,
-                                    color: '#000',
-                                    fontWeight: 600,
-                                    '&:hover': {
-                                        backgroundColor: spaceTheme.secondary,
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: `0 6px 20px ${alpha(spaceTheme.primary, 0.4)}`
-                                    },
-                                    boxShadow: `0 4px 14px ${alpha(spaceTheme.primary, 0.3)}`,
-                                    transition: 'all 0.3s ease'
+                                    p: 3,
+                                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                                    backgroundColor: 'rgba(22, 28, 45, 0.5)',
+                                    display: 'flex',
+                                    justifyContent: 'center'
                                 }}
                             >
-                                목록으로 돌아가기
-                            </Button>
-                        </Box>
-                    </Card>
+                                <Button
+                                    variant="contained"
+                                    onClick={handleGoBack}
+                                    sx={{
+                                        borderRadius: '50px',
+                                        px: 4,
+                                        backgroundColor: spaceTheme.primary,
+                                        color: '#000',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            backgroundColor: spaceTheme.secondary,
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: `0 6px 20px ${alpha(spaceTheme.primary, 0.4)}`
+                                        },
+                                        boxShadow: `0 4px 14px ${alpha(spaceTheme.primary, 0.3)}`,
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    목록으로 돌아가기
+                                </Button>
+                            </Box>
+                        </Card>
+                    )}
                 </motion.div>
             </Container>
         </Box>
     );
-} 
+}
