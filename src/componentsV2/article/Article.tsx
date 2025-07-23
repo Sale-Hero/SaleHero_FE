@@ -126,8 +126,10 @@ export function Article() {
 
     // 요약 추출
     const extractSummary = (content: string, summary?: string) => {
-        if (summary) return summary;
-        const stripped = content.replace(/<[^>]*>/g, ' ');
+        // if (summary) return summary; // 요약 미사용중인 관계로 제거
+
+        // HTML 태그 제거 + 연속 공백/개행 정리
+        const stripped = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         return stripped.substring(0, 150) + (stripped.length > 150 ? '...' : '');
     };
 
