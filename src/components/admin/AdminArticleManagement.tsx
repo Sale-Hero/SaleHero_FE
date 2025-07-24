@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     Box,
     Button,
@@ -10,25 +10,25 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    FormControl,
     IconButton,
     InputAdornment,
+    InputLabel,
+    MenuItem,
+    Select,
+    SelectChangeEvent,
     Stack,
     Tab,
     Tabs,
     TextField,
-    Typography,
-    MenuItem,
-    Select,
-    FormControl,
-    InputLabel,
-    SelectChangeEvent
+    Typography
 } from '@mui/material';
-import {Add, Delete, Edit, Search} from '@mui/icons-material';
+import {Delete, Edit, Search} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../util/etcUtil";
 import {useAdminArticleGetter} from "./hooks/useAdminArticleGetter";
-import {ArticleDeleteDTO, AdminArticlePostDTO, ArticleResponseDTO, ArticleCategory} from "../../types/adminArticle";
+import {AdminArticlePostDTO, ArticleCategory, ArticleDeleteDTO, ArticleResponseDTO} from "../../types/adminArticle";
 import {useArticleActions} from "./hooks/useAdminArticleActions";
 
 export function AdminArticleManagement() {
@@ -40,6 +40,7 @@ export function AdminArticleManagement() {
     const [selectedArticleIds, setSelectedArticleIds] = useState<number[]>([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<number>(0);
+    const [categoryTab, setCategoryTab] = useState<'ALL' | ArticleCategory>('ALL');
 
     const [searchWord, setSearchWord] = useState<string>('');
     const [paginationModel, setPaginationModel] = useState({
@@ -281,6 +282,10 @@ export function AdminArticleManagement() {
         },
     ];
 
+    // 리스트 데이터 (카테고리 필터 프론트에서)
+    const allArticles = article?.content || [];
+    const filteredArticles = categoryTab === 'ALL' ? allArticles : allArticles.filter(a => a.category === categoryTab);
+
     return (
         <Container maxWidth="lg">
             <motion.div
@@ -288,28 +293,18 @@ export function AdminArticleManagement() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
-                    <Typography variant="h4">아티클 관리</Typography>
-                    <Box>
-                        {selectedArticleIds.length > 0 && (
-                            <Button
-                                variant="contained"
-                                color="error"
-                                onClick={() => setDeleteDialogOpen(true)}
-                                sx={{ mr: 2 }}
-                            >
-                                선택한 아티클 삭제 ({selectedArticleIds.length})
-                            </Button>
-                        )}
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<Add />}
-                            onClick={handleAddArticle}
-                        >
-                            아티클 추가
-                        </Button>
-                    </Box>
+                {/* 카테고리 탭 */}
+                <Box sx={{ mb: 2 }}>
+                    <Tabs
+                        value={categoryTab}
+                        onChange={(_, v) => setCategoryTab(v)}
+                        sx={{ minWidth: 300 }}
+                    >
+                        <Tab label="전체" value="ALL" />
+                        <Tab label="프로모션" value={ArticleCategory.PROMOTION} />
+                        <Tab label="치킨" value={ArticleCategory.CHICKEN} />
+                        <Tab label="피자" value={ArticleCategory.PIZZA} />
+                    </Tabs>
                 </Box>
 
                 {/* 검색 입력란 */}
@@ -344,12 +339,11 @@ export function AdminArticleManagement() {
                         <CardContent>
                             <Box sx={{ height: 600 }}>
                                 <DataGrid
-                                    rows={article.content}
+                                    rows={filteredArticles}
                                     columns={columns}
-                                    rowCount={article.totalElement}
+                                    rowCount={filteredArticles.length}
                                     paginationModel={paginationModel}
-                                    paginationMode="server"
-                                    onPaginationModelChange={handlePaginationModelChange}
+                                    paginationMode="client"
                                     pageSizeOptions={[10, 25, 50]}
                                     loading={loading}
                                     checkboxSelection
