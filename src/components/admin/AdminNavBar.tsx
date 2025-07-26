@@ -14,6 +14,7 @@ export function AdminNavbar() {
         { icon: Newspaper, text: '뉴스레터(로우)', path: '/admin/raw-newsletter' },
         { icon: Newspaper, text: '뉴스레터', path: '/admin/newsletter' },
         { icon: LocalOffer, text: '할인 정보', path: '/admin/article' },
+        { icon: Article, text: '공지사항', path: '/admin/announcement' },
     ];
 
     return (
