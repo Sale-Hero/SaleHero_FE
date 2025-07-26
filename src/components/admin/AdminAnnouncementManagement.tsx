@@ -23,7 +23,7 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {Delete, Edit, Search} from '@mui/icons-material';
+import {Delete, Edit, Search, Add} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../util/etcUtil";
@@ -210,6 +210,14 @@ export function AdminAnnouncementManagement() {
                         }}
                         sx={{ mr: 1 }}
                     />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<Add />}
+                        onClick={handleAdd}
+                    >
+                        공지사항 추가
+                    </Button>
                 </Box>
 
                 <Card>
