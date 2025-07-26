@@ -27,25 +27,15 @@ import {Delete, Edit, Search} from '@mui/icons-material';
 import {DataGrid, GridColDef, GridRowSelectionModel} from '@mui/x-data-grid';
 import {motion} from 'framer-motion';
 import {formatDate} from "../../util/etcUtil";
-import {useDispatch} from "react-redux";
-import {PageResponse} from "../../types/common";
 import {
     AdminAnnouncementPostDTO,
     AnnouncementCategory,
-    AnnouncementDeleteDTO,
-    AnnouncementDTO,
-    AnnouncementSearchDTO
+    AnnouncementDeleteDTO, AnnouncementDTO,
 } from "../../types/adminAnnouncement";
-import {
-    deleteAdminAnnouncementAsync,
-    getAdminAnnouncementsAsync,
-    postAdminAnnouncementAsync,
-    putAdminAnnouncementAsync
-} from "../../slice/AdminSlice";
 import {useAdminAnnouncementGetter} from "./hooks/useAdminAnnouncementGetter";
+import {useAnnouncementActions} from "./hooks/useAdminAnnouncementActions";
 
 export function AdminAnnouncementManagement() {
-    const dispatch = useDispatch<any>();
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementDTO | null>(null);
     const [openViewDialog, setOpenViewDialog] = useState<boolean>(false);
     const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
@@ -53,7 +43,6 @@ export function AdminAnnouncementManagement() {
 
     const [selectedAnnouncementIds, setSelectedAnnouncementIds] = useState<number[]>([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-    const [activeTab, setActiveTab] = useState<number>(0);
     const [categoryTab, setCategoryTab] = useState<'ALL' | AnnouncementCategory>('ALL');
 
     const [searchWord, setSearchWord] = useState<string>('');
@@ -62,24 +51,23 @@ export function AdminAnnouncementManagement() {
         pageSize: 15,
     });
 
-    const [announcements, setAnnouncements] = useState<PageResponse<AnnouncementDTO>>();
-    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState<AdminAnnouncementPostDTO>({
+        title: '',
+        content: '',
+        category: AnnouncementCategory.ARTICLE,
+        isVisible: 'Y',
+    });
 
-    const { getAdminAnnouncements, adminAnnouncementList } = useAdminAnnouncementGetter();
+    const { getAdminAnnouncements, announcements, loading: fetchLoading } = useAdminAnnouncementGetter();
+    const { saveAnnouncement, updateAnnouncement, deleteAnnouncements, loading: actionLoading } = useAnnouncementActions();
 
     const onRefresh = useCallback(() => {
-        setLoading(true);
-        const dto: AnnouncementSearchDTO = {
+        getAdminAnnouncements({
             page: paginationModel.page + 1,
             size: paginationModel.pageSize,
             query: searchWord
-        };
-        dispatch(getAdminAnnouncementsAsync(dto))
-            .then((result: any) => {
-                setAnnouncements(result.payload);
-            })
-            .finally(() => setLoading(false));
-    }, [dispatch, paginationModel, searchWord]);
+        });
+    }, [getAdminAnnouncements, paginationModel, searchWord]);
 
     useEffect(() => {
         onRefresh();
@@ -121,6 +109,17 @@ export function AdminAnnouncementManagement() {
         setOpenFormDialog(true);
     };
 
+    const handleAdd = () => {
+        setIsEditing(false);
+        setFormData({
+            title: '',
+            content: '',
+            category: AnnouncementCategory.ARTICLE,
+            isVisible: 'Y',
+        });
+        setOpenFormDialog(true);
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -136,7 +135,7 @@ export function AdminAnnouncementManagement() {
 
     const handleDelete = async () => {
         const dto: AnnouncementDeleteDTO = { idxList: selectedAnnouncementIds };
-        await dispatch(deleteAdminAnnouncementAsync(dto));
+        await deleteAnnouncements(dto);
         onRefresh();
         setSelectedAnnouncementIds([]);
         setDeleteDialogOpen(false);
@@ -144,20 +143,13 @@ export function AdminAnnouncementManagement() {
 
     const handleSubmitForm = async () => {
         if (isEditing && selectedAnnouncement) {
-            await dispatch(putAdminAnnouncementAsync({ dto: formData, announcementId: selectedAnnouncement.id }));
+            await updateAnnouncement({ formData, announcementId: selectedAnnouncement.id });
         } else {
-            await dispatch(postAdminAnnouncementAsync(formData));
+            await saveAnnouncement(formData);
         }
         onRefresh();
         setOpenFormDialog(false);
     };
-
-    const [formData, setFormData] = useState<AdminAnnouncementPostDTO>({
-        title: '',
-        content: '',
-        category: AnnouncementCategory.ARTICLE,
-        isVisible: 'Y',
-    });
 
     const columns: GridColDef[] = [
         { field: 'title', headerName: '제목', flex: 1 },
@@ -198,7 +190,7 @@ export function AdminAnnouncementManagement() {
                 <Tabs value={categoryTab} onChange={(_, v) => setCategoryTab(v)} sx={{ mb: 2 }}>
                     <Tab label="전체" value="ALL" />
                     <Tab label="할인정보" value={AnnouncementCategory.ARTICLE} />
-                    <Tab label="커뮤니티" value={AnnouncementCategory.COMMUNITY} />
+                    <Tab label="이벤트" value={AnnouncementCategory.COMMUNITY} />
                 </Tabs>
 
                 <Box sx={{ display: 'flex', mb: 2 }}>
@@ -230,7 +222,7 @@ export function AdminAnnouncementManagement() {
                                 paginationModel={paginationModel}
                                 onPaginationModelChange={handlePaginationModelChange}
                                 pageSizeOptions={[15, 30, 50]}
-                                loading={loading}
+                                loading={fetchLoading || actionLoading}
                                 checkboxSelection
                                 onRowSelectionModelChange={handleSelectionChange}
                                 rowSelectionModel={selectedAnnouncementIds}

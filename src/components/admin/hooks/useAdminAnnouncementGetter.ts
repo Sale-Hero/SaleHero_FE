@@ -1,26 +1,37 @@
 import {useDispatch} from "react-redux";
 import {useCallback, useState} from "react";
 import {PageResponse} from "../../../types/common";
-import {ArticleSearchDTO} from "../../../types/adminArticle";
-import {getAdminAnnouncementsAsync} from "../../../slice/AdminSlice";
-import {AnnouncementDTO} from "../../../types/adminAnnouncement";
+import {AnnouncementDTO, AnnouncementSearchDTO} from "../../../types/adminAnnouncement";
+import { getAdminAnnouncementsAsync } from "slice/AdminSlice";
 
 export function useAdminAnnouncementGetter() {
     const dispatch = useDispatch<any>();
-    const [adminAnnouncementList, setAdminAnnouncementList] = useState<PageResponse<AnnouncementDTO>>();
-    const [totalElements, setTotalElements] = useState(0);
+    const [announcements, setAnnouncements] = useState<PageResponse<AnnouncementDTO>>();
+    const [totalElements, setTotalElements] = useState(0)
+    const [loading, setLoading] = useState(false);
 
     const getAdminAnnouncements = useCallback(async (
-        dto: ArticleSearchDTO
-    ) => {
-        const result = await dispatch(getAdminAnnouncementsAsync(dto)).unwrap();
-        setAdminAnnouncementList(result);
-        setTotalElements(result.totalElement);
-    }, [dispatch]);
+            dto: AnnouncementSearchDTO
+        ) => {
+            setLoading(true);
+            try {
+                const result: PageResponse<AnnouncementDTO> = await dispatch(
+                    getAdminAnnouncementsAsync(dto)).unwrap();
+                setAnnouncements(result);
+                setTotalElements(result.totalElement);
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setLoading(false);
+            }
+        },
+        [dispatch]
+    );
 
     return {
         getAdminAnnouncements,
-        adminAnnouncementList,
+        announcements,
         totalElements,
-    };
+        loading
+    }
 }
