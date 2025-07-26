@@ -34,6 +34,7 @@ import {UnSubscribe} from "./componentsV2/common/UnSubscribe";
 import {AdminArticleManagement} from "./components/admin/AdminArticleManagement";
 import {Article} from "./componentsV2/article/Article";
 import {ArticleDetail} from "./componentsV2/article/ArticleDetail";
+import {AdminAnnouncementManagement} from "./components/admin/AdminAnnouncementManagement";
 
 const router = createBrowserRouter([
     {
@@ -131,6 +132,10 @@ const router = createBrowserRouter([
                     {
                         path: "article",
                         element: <AdminArticleManagement />
+                    },
+                    {
+                        path: "announcement",
+                        element: <AdminAnnouncementManagement />
                     },
                     {
                         path: "mails",
