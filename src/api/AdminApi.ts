@@ -2,6 +2,7 @@ import {MainApi} from "../api/MainApi";
 import {AdminNewsLetterSearchDTO, NewsLetterDeleteDTO} from "../types/adminNewsLetter";
 import {RawNewsLetterPutDTO, RawNewsLetterSearchDTO} from "../types/rawNewsLetter";
 import {AdminArticlePostDTO, ArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
+import {AdminAnnouncementPostDTO, AnnouncementDeleteDTO, AnnouncementSearchDTO} from "../types/adminAnnouncement";
 
 export class AdminApi {
     static url = `${process.env.REACT_APP_BASE_URL}/admin`;
@@ -41,4 +42,17 @@ export class AdminApi {
 
     static deleteAdminArticle = (dto: ArticleDeleteDTO) => () =>
         MainApi.api.delete(`${AdminApi.url}/article`, {data: dto});
+
+    // 공지사항
+    static getAdminAnnouncements = (dto: AnnouncementSearchDTO) => () =>
+        MainApi.api.get(`${AdminApi.url}/announcements${MainApi.toParamStringFromObject(dto)}`);
+
+    static postAdminAnnouncement = (dto: AdminAnnouncementPostDTO) => () =>
+        MainApi.api.post(`${AdminApi.url}/announcements`, dto);
+
+    static putAdminAnnouncement = ({dto, announcementId}: { dto:AdminAnnouncementPostDTO, announcementId: number }) => () =>
+        MainApi.api.put(`${AdminApi.url}/announcements/${announcementId}`, dto);
+
+    static deleteAdminAnnouncement = (dto: AnnouncementDeleteDTO) => () =>
+        MainApi.api.delete(`${AdminApi.url}/announcements`, {data: dto});
 }

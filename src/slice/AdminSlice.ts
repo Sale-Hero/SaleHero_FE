@@ -4,6 +4,11 @@ import {AdminApi} from "../api/AdminApi";
 import {AdminNewsLetterSearchDTO, NewsLetterDeleteDTO} from "../types/adminNewsLetter";
 import {RawNewsLetterPutDTO, RawNewsLetterSearchDTO} from "../types/rawNewsLetter";
 import {AdminArticlePostDTO, ArticleSearchDTO, ArticleDeleteDTO} from "../types/adminArticle";
+import {
+    AdminAnnouncementPostDTO,
+    AnnouncementDeleteDTO,
+    AnnouncementSearchDTO
+} from "../types/adminAnnouncement";
 
 export const getCurrentCountAsync = createAsyncThunk("admin/getCurrentCount",
     (token:string) => executePromise(AdminApi.getCurrentCount(token)));
@@ -39,3 +44,21 @@ export const putAdminArticleAsync = createAsyncThunk("admin/putAdminArticle",
 
 export const deleteAdminArticleAsync = createAsyncThunk("admin/deleteAdminArticle",
     (dto: ArticleDeleteDTO) => executePromise(AdminApi.deleteAdminArticle(dto)));
+
+
+
+// Announcement
+export const getAdminAnnouncementsAsync = createAsyncThunk("admin/getAdminAnnouncements",
+    (dto: AnnouncementSearchDTO) => executePromise(AdminApi.getAdminAnnouncements(dto)));
+
+export const postAdminAnnouncementAsync = createAsyncThunk("admin/postAdminAnnouncement",
+    (dto: AdminAnnouncementPostDTO) => executePromise(AdminApi.postAdminAnnouncement(dto)));
+
+export const putAdminAnnouncementAsync = createAsyncThunk("admin/putAdminAnnouncement",
+    ({dto, announcementId}: { dto:AdminAnnouncementPostDTO, announcementId: number }) => executePromise(AdminApi.putAdminAnnouncement({
+        dto,
+        announcementId
+    })));
+
+export const deleteAdminAnnouncementAsync = createAsyncThunk("admin/deleteAdminAnnouncement",
+    (dto: AnnouncementDeleteDTO) => executePromise(AdminApi.deleteAdminAnnouncement(dto)));
