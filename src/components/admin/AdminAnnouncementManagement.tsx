@@ -166,18 +166,6 @@ export function AdminAnnouncementManagement() {
                 />
             )
         },
-        {
-            field: 'isDeleted',
-            headerName: '삭제 여부',
-            width: 100,
-            renderCell: (params) => (
-                <Chip
-                    label={params.value === 'Y' ? '삭제' : '정상'}
-                    color={params.value === 'Y' ? 'error' : 'success'}
-                    size="small"
-                />
-            )
-        },
         { field: 'viewCount', headerName: '조회수', width: 100 },
         { field: 'createdAt', headerName: '작성일', width: 180, renderCell: (params) => <span>{formatDate(params.row.createdAt)}</span> },
         {
