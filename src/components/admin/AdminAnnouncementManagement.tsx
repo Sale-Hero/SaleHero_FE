@@ -187,6 +187,30 @@ export function AdminAnnouncementManagement() {
     return (
         <Container maxWidth="lg">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4 }}>
+                    <Typography variant="h4">공지사항 관리</Typography>
+                    <Box>
+                        {selectedAnnouncementIds.length > 0 && (
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={() => setDeleteDialogOpen(true)}
+                                sx={{ mr: 2 }}
+                            >
+                                선택한 공지사항 삭제 ({selectedAnnouncementIds.length})
+                            </Button>
+                        )}
+                        {/*<Button*/}
+                        {/*    variant="contained"*/}
+                        {/*    color="primary"*/}
+                        {/*    startIcon={<Add />}*/}
+                        {/*    onClick={handleAddNewsletter}*/}
+                        {/*>*/}
+                        {/*    뉴스레터 추가*/}
+                        {/*</Button>*/}
+                    </Box>
+                </Box>
+
                 <Tabs value={categoryTab} onChange={(_, v) => setCategoryTab(v)} sx={{ mb: 2 }}>
                     <Tab label="전체" value="ALL" />
                     <Tab label="할인정보" value={AnnouncementCategory.ARTICLE} />
