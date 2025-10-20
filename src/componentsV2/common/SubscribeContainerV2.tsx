@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Alert, Fade, IconButton, Modal, Snackbar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography} from '@mui/material';
+import {Alert, Fade, IconButton, Modal, Snackbar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {ArrowBack} from '@mui/icons-material';
 import {useNavigate} from 'react-router-dom';
@@ -362,62 +362,83 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
             <Dialog
                 open={openPrepareDialog}
                 onClose={handleCancelPrepare}
+                maxWidth="sm"
                 PaperProps={{
                     sx: {
-                        borderRadius: '16px',
-                        padding: '16px',
+                        borderRadius: '20px',
+                        padding: '32px',
                         background: 'linear-gradient(135deg, #070B14 0%, #121A2B 100%)',
                         color: 'white',
-                        border: '1px solid rgba(255,255,255,0.1)'
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                        minWidth: '420px'
                     }
                 }}
             >
-                <DialogTitle sx={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '1.5rem',
-                    color: 'white'
-                }}>
-                    기능 준비중입니다
-                </DialogTitle>
-                <DialogContent sx={{ textAlign: 'center', py: 2 }}>
-                    <Typography variant="h6" sx={{ mb: 2, color: 'rgba(255,255,255,0.9)' }}>
-                        할인정보를 무료로 보실래요?
+                <DialogContent sx={{ textAlign: 'center', p: 0 }}>
+                    {/* 메인 메시지 */}
+                    <Typography 
+                        variant="h4" 
+                        sx={{ 
+                            mb: 2, 
+                            fontWeight: 600,
+                            color: 'white',
+                            fontSize: '1.8rem'
+                        }}
+                    >
+                        할인정보 보러 갈까요?
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                        현재 메일 구독 기능을 준비 중입니다.<br/>
-                        대신 할인정보 페이지에서 다양한 할인 소식을 확인해보세요!
+
+                    {/* 서브 메시지 */}
+                    <Typography 
+                        variant="body1" 
+                        sx={{ 
+                            mb: 4, 
+                            color: 'rgba(255,255,255,0.7)',
+                            lineHeight: 1.5,
+                            fontSize: '1rem'
+                        }}
+                    >
+                        구독 기능 업데이트 중이니<br/>
+                        할인 소식부터 먼저 확인해보세요
                     </Typography>
                 </DialogContent>
-                <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
-                    <Button
+
+                <DialogActions sx={{ justifyContent: 'center', gap: 2, pt: 0 }}>
+                    <Button 
                         onClick={handleCancelPrepare}
-                        sx={{
-                            color: 'rgba(255,255,255,0.7)',
-                            borderColor: 'rgba(255,255,255,0.3)',
+                        sx={{ 
+                            color: 'rgba(255,255,255,0.6)',
+                            borderRadius: '8px',
+                            px: 3,
+                            py: 1,
+                            fontSize: '0.95rem',
+                            textTransform: 'none',
                             '&:hover': {
-                                borderColor: 'rgba(255,255,255,0.5)',
                                 background: 'rgba(255,255,255,0.05)'
                             }
                         }}
-                        variant="outlined"
                     >
                         취소
                     </Button>
-                    <Button
+                    <Button 
                         onClick={handleConfirmPrepare}
-                        sx={{
+                        sx={{ 
                             background: 'linear-gradient(90deg, #F29727 0%, #FFA41B 100%)',
                             color: 'white',
-                            fontWeight: 'bold',
+                            fontWeight: 500,
+                            borderRadius: '8px',
                             px: 3,
+                            py: 1,
+                            fontSize: '0.95rem',
+                            textTransform: 'none',
                             '&:hover': {
                                 background: 'linear-gradient(90deg, #E8861A 0%, #F29727 100%)',
                             }
                         }}
                         variant="contained"
                     >
-                        확인
+                        보러가기
                     </Button>
                 </DialogActions>
             </Dialog>
