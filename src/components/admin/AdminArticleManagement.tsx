@@ -221,7 +221,33 @@ export function AdminArticleManagement() {
     };
 
     const columns: GridColDef[] = [
-        { field: 'title', headerName: '제목', flex: 1 },
+        { 
+            field: 'title', 
+            headerName: '제목', 
+            flex: 1,
+            renderCell: (params) => (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2">
+                        {params.value}
+                    </Typography>
+                    {params.row.isDeleted === 'Y' && (
+                        <Chip
+                            label="삭제됨"
+                            size="small"
+                            sx={{
+                                backgroundColor: '#ffebee',
+                                color: '#d32f2f',
+                                fontSize: '0.7rem',
+                                height: '20px',
+                                '& .MuiChip-label': {
+                                    padding: '0 6px'
+                                }
+                            }}
+                        />
+                    )}
+                </Box>
+            )
+        },
         { field: 'summary', headerName: '요약', flex: 1 },
         { field: 'category', headerName: '카테고리', width: 120 },
         {
