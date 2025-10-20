@@ -67,6 +67,9 @@ export function AdminRawNewsLetterManagement() {
         id: 0,
         title: '',
         content: '',
+        category: ArticleCategory.PROMOTION,
+        articleUrl: '',
+        keyword: '',
     });
 
     // 병합용 상태
@@ -137,6 +140,9 @@ export function AdminRawNewsLetterManagement() {
             id: rawNewsletter.id,
             title: rawNewsletter.title,
             content: rawNewsletter.content,
+            category: ArticleCategory.PROMOTION,
+            articleUrl: '',
+            keyword: '',
         });
         setOpenFormDialog(true);
     };
@@ -190,6 +196,9 @@ export function AdminRawNewsLetterManagement() {
             id: 0,
             title: '',
             content: '',
+            category: ArticleCategory.PROMOTION,
+            articleUrl: '',
+            keyword: '',
         });
     };
 
@@ -211,6 +220,14 @@ export function AdminRawNewsLetterManagement() {
         setFormData({
             ...formData,
             [name]: value
+        });
+    };
+
+    // 카테고리 변경 핸들러
+    const handleCategoryChange = (e: SelectChangeEvent) => {
+        setFormData({
+            ...formData,
+            category: e.target.value as ArticleCategory
         });
     };
 
@@ -593,6 +610,37 @@ export function AdminRawNewsLetterManagement() {
                                 multiline
                                 rows={10}
                                 required
+                            />
+                            <FormControl fullWidth margin="normal">
+                                <InputLabel id="category-label">카테고리</InputLabel>
+                                <Select
+                                    labelId="category-label"
+                                    value={formData.category}
+                                    label="카테고리"
+                                    onChange={handleCategoryChange}
+                                >
+                                    {(Object.values(ArticleCategory) as string[]).map((cat) => (
+                                        <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <TextField
+                                fullWidth
+                                label="기사 URL"
+                                name="articleUrl"
+                                value={formData.articleUrl}
+                                onChange={handleInputChange}
+                                margin="normal"
+                                variant="outlined"
+                            />
+                            <TextField
+                                fullWidth
+                                label="키워드"
+                                name="keyword"
+                                value={formData.keyword}
+                                onChange={handleInputChange}
+                                margin="normal"
+                                variant="outlined"
                             />
                         </Box>
                     </DialogContent>
