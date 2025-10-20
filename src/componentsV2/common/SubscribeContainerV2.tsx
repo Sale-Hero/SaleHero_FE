@@ -1,12 +1,12 @@
 import React, {useState} from 'react';
-import {Alert, Fade, IconButton, Modal, Snackbar, CircularProgress} from '@mui/material';
+import {Alert, Fade, IconButton, Modal, Snackbar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {ArrowBack} from '@mui/icons-material';
+import {useNavigate} from 'react-router-dom';
 import {ModalContent} from "./styled/SubscriberModalStyled";
 import {SubscribeStep} from "../../types/modal";
 import {EmailInputStep} from "./subscribemodal/EmailInputStep";
 import {VerificationStep} from "./subscribemodal/VerificationStep";
-import {ResponseDTO} from "../../types/common";
 
 interface SubscribeContainerV2Props {
     open: boolean;
@@ -14,6 +14,8 @@ interface SubscribeContainerV2Props {
 }
 
 export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Props) {
+    const navigate = useNavigate();
+    const [openPrepareDialog, setOpenPrepareDialog] = useState(false);
     const [currentStep, setCurrentStep] = useState(SubscribeStep.EMAIL_INPUT);
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
@@ -50,63 +52,8 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
     };
 
     const handleSendVerification = async () => {
-        if (!email.trim()) {
-            setError('이메일을 입력해주세요.');
-            return;
-        }
-
-        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!emailRegex.test(email)) {
-            setError('올바른 이메일 형식이 아닙니다.');
-            return;
-        }
-
-        if (!termsAgreed) {
-            setError('필수 약관에 동의해주세요.');
-            return;
-        }
-
-        try {
-            setError('');
-            setIsSendingEmail(true); // 로딩 시작
-
-            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/mail-request`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userEmail: email })
-            });
-
-            const responseData: ResponseDTO<string> = await response.json();
-
-            if (!responseData.success) {
-                setError(responseData.message);
-                return;
-            }
-
-            setCurrentStep(SubscribeStep.VERIFICATION);
-            setRemainingTime(180);
-
-            // 타이머 시작
-            const timer = setInterval(() => {
-                setRemainingTime(prev => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        setCurrentStep(SubscribeStep.EMAIL_INPUT); // 시간 초과시 첫 단계로 복귀
-                        setVerificationCode('');
-                        return 180;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '이메일 인증 요청 중 오류가 발생했습니다.';
-            console.log(errorMessage);
-        } finally {
-            setIsSendingEmail(false); // 로딩 종료
-        }
+        // 기능 준비중 팝업 표시
+        setOpenPrepareDialog(true);
     };
 
     const handleVerifyCode = async () => {
@@ -238,6 +185,16 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
         setVerificationCode('');
         setVerificationError('');
         setIsVerified(false);
+    };
+
+    const handleConfirmPrepare = () => {
+        setOpenPrepareDialog(false);
+        handleClose();
+        navigate('/articles');
+    };
+
+    const handleCancelPrepare = () => {
+        setOpenPrepareDialog(false);
     };
 
     return (
@@ -400,6 +357,70 @@ export function SubscribeContainerV2({ open, onClose }: SubscribeContainerV2Prop
                     <br />매주 월, 수, 금요일에 할인 정보를 받아보실 수 있습니다.
                 </Alert>
             </Snackbar>
+
+            {/* 기능 준비중 다이얼로그 */}
+            <Dialog
+                open={openPrepareDialog}
+                onClose={handleCancelPrepare}
+                PaperProps={{
+                    sx: {
+                        borderRadius: '16px',
+                        padding: '16px',
+                        background: 'linear-gradient(135deg, #070B14 0%, #121A2B 100%)',
+                        color: 'white',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }
+                }}
+            >
+                <DialogTitle sx={{
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '1.5rem',
+                    color: 'white'
+                }}>
+                    기능 준비중입니다
+                </DialogTitle>
+                <DialogContent sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="h6" sx={{ mb: 2, color: 'rgba(255,255,255,0.9)' }}>
+                        할인정보를 무료로 보실래요?
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                        현재 메일 구독 기능을 준비 중입니다.<br/>
+                        대신 할인정보 페이지에서 다양한 할인 소식을 확인해보세요!
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+                    <Button
+                        onClick={handleCancelPrepare}
+                        sx={{
+                            color: 'rgba(255,255,255,0.7)',
+                            borderColor: 'rgba(255,255,255,0.3)',
+                            '&:hover': {
+                                borderColor: 'rgba(255,255,255,0.5)',
+                                background: 'rgba(255,255,255,0.05)'
+                            }
+                        }}
+                        variant="outlined"
+                    >
+                        취소
+                    </Button>
+                    <Button
+                        onClick={handleConfirmPrepare}
+                        sx={{
+                            background: 'linear-gradient(90deg, #F29727 0%, #FFA41B 100%)',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            px: 3,
+                            '&:hover': {
+                                background: 'linear-gradient(90deg, #E8861A 0%, #F29727 100%)',
+                            }
+                        }}
+                        variant="contained"
+                    >
+                        확인
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }
