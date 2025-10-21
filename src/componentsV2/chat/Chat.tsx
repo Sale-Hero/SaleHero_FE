@@ -1,0 +1,127 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useChat } from './hooks/useChat';
+import { RootState } from '../../store';
+import { Box, TextField, Button, Typography, Paper } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+
+const WEBSOCKET_URL = 'http://localhost:8080/ws-chat'; // 백엔드 WebSocket 엔드포인트
+const CHAT_TOPIC = '/topic/chat';
+const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
+
+const Chat = () => {
+    const [messageInput, setMessageInput] = useState('');
+    const messages = useSelector((state: RootState) => state.chat.messages);
+    const { sendMessage } = useChat({
+        websocketUrl: WEBSOCKET_URL,
+        topic: CHAT_TOPIC,
+        sendMessageDestination: SEND_MESSAGE_DESTINATION,
+    });
+
+    const messageContainerRef = useRef<HTMLDivElement>(null);
+
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (messageInput.trim()) {
+            sendMessage(messageInput);
+            setMessageInput('');
+        }
+    };
+
+    useEffect(() => {
+        if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    return (
+        <Paper elevation={3} sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'calc(100vh - 200px)',
+            maxWidth: '800px',
+            margin: '0 auto',
+            overflow: 'hidden',
+        }}>
+            <Box sx={{
+                padding: '16px',
+                backgroundColor: '#f5f5f5',
+                borderBottom: '1px solid #e0e0e0',
+            }}>
+                <Typography variant="h6" component="h2">
+                    익명 채팅방
+                </Typography>
+            </Box>
+            <Box ref={messageContainerRef} sx={{
+                flexGrow: 1,
+                padding: '16px',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                backgroundColor: '#f9f9f9',
+            }}>
+                {messages.map((msg, index) => (
+                    <Box key={index} sx={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        backgroundColor: '#e9ecef',
+                        padding: '8px 12px',
+                        borderRadius: '18px',
+                        maxWidth: '80%',
+                        wordBreak: 'break-word',
+                    }}>
+                        <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: '8px', color: '#333' }}>
+                            {msg.sender}:
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#555' }}>
+                            {msg.content}
+                        </Typography>
+                    </Box>
+                ))}
+            </Box>
+            <Box component="form" onSubmit={handleSendMessage} sx={{
+                display: 'flex',
+                padding: '16px',
+                borderTop: '1px solid #e0e0e0',
+                alignItems: 'center',
+            }}>
+                <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="특가 정보가 궁금하신가요?"
+                    size="small"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    multiline
+                    maxRows={4}
+                    sx={{
+                        mr: 1,
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                                borderColor: 'rgba(255, 205, 0, 0.5)',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: '#FFCD00',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: '#F29727',
+                            },
+                        }
+                    }}
+                />
+                <Button type="submit" variant="contained" endIcon={<SendIcon />} sx={{
+                    backgroundColor: '#FFCD00',
+                    color: 'black',
+                    '&:hover': {
+                        backgroundColor: '#F29727',
+                    }
+                }}>
+                    전송
+                </Button>
+            </Box>
+        </Paper>
+    );
+};
+
+export default Chat;
