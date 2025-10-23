@@ -35,6 +35,7 @@ import {AdminArticleManagement} from "./components/admin/AdminArticleManagement"
 import {Article} from "./componentsV2/article/Article";
 import {ArticleDetail} from "./componentsV2/article/ArticleDetail";
 import {AdminAnnouncementManagement} from "./components/admin/AdminAnnouncementManagement";
+import Chat from "./componentsV2/chat/Chat";
 
 const router = createBrowserRouter([
     {
@@ -99,6 +100,10 @@ const router = createBrowserRouter([
                 element: <PrivacyPolicy/>
             },
             {
+                path: "chat",
+                element: <Chat/>
+            },
+            {
                 path: "unsubscribe/:email",
                 element: <UnSubscribe/>
             },
@@ -131,11 +136,11 @@ const router = createBrowserRouter([
                     },
                     {
                         path: "article",
-                        element: <AdminArticleManagement />
+                        element: <AdminArticleManagement/>
                     },
                     {
                         path: "announcement",
-                        element: <AdminAnnouncementManagement />
+                        element: <AdminAnnouncementManagement/>
                     },
                     {
                         path: "mails",
