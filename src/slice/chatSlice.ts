@@ -1,13 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-// chat_guide.md에 정의된 메시지 형식 (DTO)
-export interface ChatMessageDto {
-  type: 'CHAT' | 'JOIN' | 'LEAVE';
-  sender: string;
-  content: string;
-}
-
-export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+import { ChatMessageDto, ConnectionStatus } from '../types/chat';
 
 interface ChatState {
   messages: ChatMessageDto[];
@@ -16,7 +8,7 @@ interface ChatState {
 
 const initialState: ChatState = {
   messages: [],
-  connectionStatus: 'disconnected',
+  connectionStatus: ConnectionStatus.DISCONNECTED,
 };
 
 const chatSlice = createSlice({

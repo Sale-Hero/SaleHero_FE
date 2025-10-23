@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { Client, Stomp } from '@stomp/stompjs';
 import { useDispatch } from 'react-redux';
 import { addMessage, setConnectionStatus } from '../../../../src/slice/chatSlice';
-import { ChatMessageDto, MessageType } from '../../../../src/types/chat';
+import { ChatMessageDto, MessageType, ConnectionStatus } from '../../../../src/types/chat';
 
 interface UseChatProps {
   websocketUrl: string;
@@ -32,13 +32,13 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
   }, [sendMessageDestination, dispatch]);
 
   const connect = useCallback(() => {
-    dispatch(setConnectionStatus('connecting'));
+    dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
     const socket = new SockJS(websocketUrl);
     const stompClient = Stomp.over(socket);
 
     stompClient.onConnect = (frame) => {
       console.log('Connected: ' + frame);
-      dispatch(setConnectionStatus('connected'));
+      dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
       stompClient.subscribe(topic, (message) => {
         const chatMessage: ChatMessageDto = JSON.parse(message.body);
         dispatch(addMessage(chatMessage));
@@ -48,12 +48,12 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     stompClient.onStompError = (frame) => {
       console.error('Broker reported error: ' + frame.headers['message']);
       console.error('Additional details: ' + frame.body);
-      dispatch(setConnectionStatus('error'));
+      dispatch(setConnectionStatus(ConnectionStatus.ERROR));
     };
 
     stompClient.onDisconnect = () => {
       console.log('Disconnected. Attempting to reconnect...');
-      dispatch(setConnectionStatus('disconnected'));
+      dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -73,7 +73,7 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
       }
       if (stompClientRef.current && stompClientRef.current.connected) {
         console.log('Disconnecting STOMP client.');
-        sendMessage('님이 퇴장하셨습니다.', 'LEAVE');
+        sendMessage('님이 퇴장하셨습니다.', MessageType.LEAVE);
         stompClientRef.current.deactivate();
       }
     };
