@@ -29,6 +29,7 @@ jobs:
       - name: Install and Build Frontend
         run: |
           yarn install
+          yarn add --dev @types/lodash @types/node @types/sockjs-client
           pwd
           yarn build
 
