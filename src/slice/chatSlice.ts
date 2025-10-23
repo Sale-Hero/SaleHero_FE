@@ -7,12 +7,16 @@ export interface ChatMessageDto {
   content: string;
 }
 
+export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+
 interface ChatState {
   messages: ChatMessageDto[];
+  connectionStatus: ConnectionStatus;
 }
 
 const initialState: ChatState = {
   messages: [],
+  connectionStatus: 'disconnected',
 };
 
 const chatSlice = createSlice({
@@ -22,11 +26,14 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<ChatMessageDto>) => {
       state.messages.push(action.payload);
     },
+    setConnectionStatus: (state, action: PayloadAction<ConnectionStatus>) => {
+      state.connectionStatus = action.payload;
+    },
     clearMessages: (state) => {
       state.messages = [];
     },
   },
 });
 
-export const { addMessage, clearMessages } = chatSlice.actions;
+export const { addMessage, setConnectionStatus, clearMessages } = chatSlice.actions;
 export default chatSlice.reducer;
