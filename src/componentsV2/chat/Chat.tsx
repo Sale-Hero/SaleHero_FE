@@ -2,10 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
+import { ConnectionStatus, MessageType } from '../../types/chat';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 
-const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`; // 백엔드 WebSocket 엔드포인트
+// const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`; // 백엔드 WebSocket 엔드포인트
+// const WEBSOCKET_URL = `http://localhost:8880/ws-chat`; // 백엔드 WebSocket 엔드포인트
+const WEBSOCKET_URL = `https://salehero.kr/ws-chat`; // 백엔드 테스트용 WebSocket 엔드포인트
 const CHAT_TOPIC = '/topic/chat';
 const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
@@ -53,10 +56,9 @@ const Chat = () => {
                 <Typography variant="h6" component="h2">
                     익명 채팅방
                 </Typography>
-                {connectionStatus === 'connecting' && <Typography variant="caption" sx={{ color: 'orange' }}>connecting...</Typography>}
-                {connectionStatus === 'error' && <Typography variant="caption" sx={{ color: 'red' }}>error</Typography>}
-                {connectionStatus === 'disconnected' && <Typography variant="caption" sx={{ color: 'grey' }}>disconnected</Typography>}
-            </Box>
+                {connectionStatus === ConnectionStatus.CONNECTING && <Typography variant="caption" sx={{ color: 'orange' }}>connecting...</Typography>}
+                {connectionStatus === ConnectionStatus.ERROR && <Typography variant="caption" sx={{ color: 'red' }}>error</Typography>}
+                {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>disconnected</Typography>}            </Box>
             <Box ref={messageContainerRef} sx={{
                 flexGrow: 1,
                 padding: '16px',
@@ -67,7 +69,7 @@ const Chat = () => {
                 backgroundColor: '#f9f9f9',
             }}>
                 {messages.map((msg, index) => {
-                    if (msg.type === 'JOIN' || msg.type === 'LEAVE') {
+                    if (msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE) {
                         return (
                             <Typography
                                 key={index}
