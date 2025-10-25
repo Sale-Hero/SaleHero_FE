@@ -28,7 +28,9 @@ jobs:
       # 프론트엔드 의존성 설치 및 빌드
       - name: Install and Build Frontend
         run: |
-          yarn install
+          npx update-browserslist-db@latest
+          yarn cache clean
+          yarn install --check-files
           pwd
           yarn build
 
