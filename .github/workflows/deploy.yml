@@ -28,8 +28,8 @@ jobs:
       # 프론트엔드 의존성 설치 및 빌드
       - name: Install and Build Frontend
         run: |
-          yarn cache clean
-          yarn install --check-files
+          yarn install
+          yarn add --dev @types/lodash @types/node @types/sockjs-client
           pwd
           yarn build
 

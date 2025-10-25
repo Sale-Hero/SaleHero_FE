@@ -1,5 +1,5 @@
 {
-  "name": "Daily_Sale",
+  "name": "SaleHero",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -17,7 +17,6 @@
     "@testing-library/user-event": "^13.2.1",
     "@types/d3-geo": "^3.1.0",
     "axios": "^1.7.9",
-    "craco-sass-resources-loader": "^1.1.0",
     "d3-geo": "^3.1.1",
     "date-fns": "2.x",
     "dompurify": "^3.2.4",
