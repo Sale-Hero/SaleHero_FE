@@ -112,7 +112,7 @@ const Chat = () => {
                                 wordBreak: 'break-word',
                             }}>
                                 <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: '8px', color: '#333' }}>
-                                    {msg.sender}:
+                                    {`익명의 ${msg.sender}`}:
                                 </Typography>
                                 <Typography variant="body1" sx={{ color: '#555' }}>
                                     {msg.content}
@@ -131,7 +131,7 @@ const Chat = () => {
                 <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="특가 정보가 궁금하신가요?"
+                    placeholder="메시지를 입력하세요..."
                     size="small"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -155,6 +155,7 @@ const Chat = () => {
                 <Button type="submit" variant="contained" endIcon={<SendIcon />} sx={{
                     backgroundColor: '#FFCD00',
                     color: 'black',
+                    whiteSpace: 'nowrap',
                     '&:hover': {
                         backgroundColor: '#F29727',
                     }
