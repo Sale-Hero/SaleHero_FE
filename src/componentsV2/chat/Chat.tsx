@@ -135,6 +135,12 @@ const Chat = () => {
                     size="small"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage(e);
+                        }
+                    }}
                     multiline
                     maxRows={4}
                     sx={{
