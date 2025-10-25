@@ -3,12 +3,10 @@ import { useSelector } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
 import { ConnectionStatus, MessageType } from '../../types/chat';
-import { Box, TextField, Button, Typography, Paper } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper, CircularProgress } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 
-// const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`; // 백엔드 WebSocket 엔드포인트
-// const WEBSOCKET_URL = `http://localhost:8880/ws-chat`; // 백엔드 WebSocket 엔드포인트
-const WEBSOCKET_URL = `https://salehero.kr/api/ws-chat`; // 백엔드 테스트용 WebSocket 엔드포인트
+const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`; // 백엔드 WebSocket 엔드포인트
 const CHAT_TOPIC = '/topic/chat';
 const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
@@ -56,11 +54,12 @@ const Chat = () => {
                 <Typography variant="h6" component="h2">
                     익명 채팅방
                 </Typography>
-                {connectionStatus === ConnectionStatus.CONNECTING && <Typography variant="caption" sx={{ color: 'orange' }}>connecting...</Typography>}
                 {connectionStatus === ConnectionStatus.ERROR && <Typography variant="caption" sx={{ color: 'red' }}>error</Typography>}
-                {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>disconnected</Typography>}            </Box>
+                {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>disconnected</Typography>}
+            </Box>
             <Box ref={messageContainerRef} sx={{
                 flexGrow: 1,
+                position: 'relative', // For positioning the loading indicator
                 padding: '16px',
                 overflowY: 'auto',
                 display: 'flex',
@@ -68,42 +67,60 @@ const Chat = () => {
                 gap: '12px',
                 backgroundColor: '#f9f9f9',
             }}>
-                {messages.map((msg, index) => {
-                    if (msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE) {
+                {connectionStatus === ConnectionStatus.CONNECTING ? (
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 2,
+                    }}>
+                        <CircularProgress sx={{ color: '#FFCD00' }} />
+                        <Typography variant="h6" sx={{ color: 'orange' }}>
+                            연결중입니다...
+                        </Typography>
+                    </Box>
+                ) : (
+                    messages.map((msg, index) => {
+                        if (msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE) {
+                            return (
+                                <Typography
+                                    key={index}
+                                    variant="body2"
+                                    sx={{
+                                        textAlign: 'center',
+                                        color: 'grey.600',
+                                        fontStyle: 'italic',
+                                        width: '100%',
+                                    }}
+                                >
+                                    {msg.content}
+                                </Typography>
+                            );
+                        }
                         return (
-                            <Typography
-                                key={index}
-                                variant="body2"
-                                sx={{
-                                    textAlign: 'center',
-                                    color: 'grey.600',
-                                    fontStyle: 'italic',
-                                    width: '100%',
-                                }}
-                            >
-                                {msg.content}
-                            </Typography>
+                            <Box key={index} sx={{
+                                display: 'flex',
+                                alignItems: 'baseline',
+                                backgroundColor: '#e9ecef',
+                                padding: '8px 12px',
+                                borderRadius: '18px',
+                                maxWidth: '80%',
+                                wordBreak: 'break-word',
+                            }}>
+                                <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: '8px', color: '#333' }}>
+                                    {msg.sender}:
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#555' }}>
+                                    {msg.content}
+                                </Typography>
+                            </Box>
                         );
-                    }
-                    return (
-                        <Box key={index} sx={{
-                            display: 'flex',
-                            alignItems: 'baseline',
-                            backgroundColor: '#e9ecef',
-                            padding: '8px 12px',
-                            borderRadius: '18px',
-                            maxWidth: '80%',
-                            wordBreak: 'break-word',
-                        }}>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: '8px', color: '#333' }}>
-                                {msg.sender}:
-                            </Typography>
-                            <Typography variant="body1" sx={{ color: '#555' }}>
-                                {msg.content}
-                            </Typography>
-                        </Box>
-                    );
-                })}
+                    })
+                )}
             </Box>
             <Box component="form" onSubmit={handleSendMessage} sx={{
                 display: 'flex',
