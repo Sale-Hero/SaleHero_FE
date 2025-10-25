@@ -1,12 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
 import { ConnectionStatus, MessageType } from '../../types/chat';
-import { Box, TextField, Button, Typography, Paper, CircularProgress } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper, CircularProgress, Avatar, useTheme } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import { UserContext } from '../../hooks/userinfo/UserContext';
+import { motion } from 'framer-motion';
 
-const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`; // 백엔드 WebSocket 엔드포인트
+const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`;
 const CHAT_TOPIC = '/topic/chat';
 const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
@@ -14,6 +16,8 @@ const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
     const messages = useSelector((state: RootState) => state.chat.messages);
     const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
+    const { nickName } = useContext(UserContext);
+    const theme = useTheme();
 
     const { sendMessage } = useChat({
         websocketUrl: WEBSOCKET_URL,
@@ -38,34 +42,36 @@ const Chat = () => {
     }, [messages]);
 
     return (
-        <Paper elevation={3} sx={{
+        <Paper elevation={0} sx={{
             display: 'flex',
             flexDirection: 'column',
-            height: 'calc(100vh - 200px)',
-            maxWidth: '800px',
-            margin: '0 auto',
+            height: 'calc(100vh - 120px)',
+            maxWidth: '1024px',
+            margin: '20px auto',
             overflow: 'hidden',
+            borderRadius: theme.shape.borderRadius,
+            border: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.background.default,
         }}>
             <Box sx={{
-                padding: '16px',
-                backgroundColor: '#f5f5f5',
-                borderBottom: '1px solid #e0e0e0',
+                padding: '16px 24px',
+                backgroundColor: theme.palette.background.paper,
+                borderBottom: `1px solid ${theme.palette.divider}`,
             }}>
-                <Typography variant="h6" component="h2">
-                    익명 채팅방
+                <Typography variant="h5" component="h2" fontWeight={600} color={theme.palette.text.primary}>
+                    커뮤니티 채팅
                 </Typography>
-                {connectionStatus === ConnectionStatus.ERROR && <Typography variant="caption" sx={{ color: 'red' }}>error</Typography>}
-                {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>disconnected</Typography>}
+                {connectionStatus === ConnectionStatus.ERROR && <Typography variant="caption" sx={{ color: 'red' }}>연결 오류</Typography>}
+                {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>연결 끊김</Typography>}
             </Box>
             <Box ref={messageContainerRef} sx={{
                 flexGrow: 1,
-                position: 'relative', // For positioning the loading indicator
-                padding: '16px',
+                position: 'relative',
+                padding: '24px',
                 overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
-                backgroundColor: '#f9f9f9',
+                gap: '20px',
             }}>
                 {connectionStatus === ConnectionStatus.CONNECTING ? (
                     <Box sx={{
@@ -79,7 +85,7 @@ const Chat = () => {
                         gap: 2,
                     }}>
                         <CircularProgress sx={{ color: '#FFCD00' }} />
-                        <Typography variant="h6" sx={{ color: 'orange' }}>
+                        <Typography variant="h6" sx={{ color: theme.palette.text.secondary }}>
                             연결중입니다...
                         </Typography>
                     </Box>
@@ -92,7 +98,7 @@ const Chat = () => {
                                     variant="body2"
                                     sx={{
                                         textAlign: 'center',
-                                        color: 'grey.600',
+                                        color: theme.palette.text.secondary,
                                         fontStyle: 'italic',
                                         width: '100%',
                                     }}
@@ -101,32 +107,66 @@ const Chat = () => {
                                 </Typography>
                             );
                         }
+                        const isCurrentUser = msg.sender === nickName;
                         return (
-                            <Box key={index} sx={{
-                                display: 'flex',
-                                alignItems: 'baseline',
-                                backgroundColor: '#e9ecef',
-                                padding: '8px 12px',
-                                borderRadius: '18px',
-                                maxWidth: '80%',
-                                wordBreak: 'break-word',
-                            }}>
-                                <Typography variant="body1" sx={{ fontWeight: 'bold', marginRight: '8px', color: '#333' }}>
-                                    {`익명의 ${msg.sender}`}:
-                                </Typography>
-                                <Typography variant="body1" sx={{ color: '#555' }}>
-                                    {msg.content}
-                                </Typography>
-                            </Box>
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',
+                                    width: '100%',
+                                }}
+                            >
+                                <Box sx={{
+                                    display: 'flex',
+                                    gap: '10px',
+                                    maxWidth: '70%',
+                                    alignItems: 'flex-start',
+                                    flexDirection: isCurrentUser ? 'row-reverse' : 'row',
+                                }}>
+                                    <Avatar sx={{
+                                        bgcolor: isCurrentUser ? theme.palette.primary.main : theme.palette.secondary.main,
+                                        width: 32,
+                                        height: 32,
+                                        fontSize: '0.875rem',
+                                    }}>
+                                        {msg.sender ? msg.sender.charAt(0).toUpperCase() : 'U'}
+                                    </Avatar>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: isCurrentUser ? 'flex-end' : 'flex-start' }}>
+                                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5 }}>
+                                            {msg.sender || '익명'}
+                                        </Typography>
+                                        <Paper
+                                            elevation={1}
+                                            sx={{
+                                                padding: '10px 14px',
+                                                borderRadius: isCurrentUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                                                backgroundColor: isCurrentUser ? theme.palette.primary.main : theme.palette.background.paper,
+                                                color: isCurrentUser ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                                                wordBreak: 'break-word',
+                                                boxShadow: theme.shadows[1],
+                                            }}
+                                        >
+                                            <Typography variant="body1">
+                                                {msg.content}
+                                            </Typography>
+                                        </Paper>
+                                    </Box>
+                                </Box>
+                            </motion.div>
                         );
                     })
                 )}
             </Box>
             <Box component="form" onSubmit={handleSendMessage} sx={{
                 display: 'flex',
-                padding: '16px',
-                borderTop: '1px solid #e0e0e0',
+                padding: '16px 24px',
+                borderTop: `1px solid ${theme.palette.divider}`,
                 alignItems: 'center',
+                backgroundColor: theme.palette.background.paper,
             }}>
                 <TextField
                     fullWidth
@@ -142,28 +182,42 @@ const Chat = () => {
                         }
                     }}
                     multiline
-                    maxRows={4}
+                    maxRows={5}
                     sx={{
-                        mr: 1,
+                        mr: 2,
                         '& .MuiOutlinedInput-root': {
+                            borderRadius: theme.shape.borderRadius,
                             '& fieldset': {
-                                borderColor: 'rgba(255, 205, 0, 0.5)',
+                                borderColor: theme.palette.divider,
                             },
                             '&:hover fieldset': {
-                                borderColor: '#FFCD00',
+                                borderColor: theme.palette.primary.light,
                             },
                             '&.Mui-focused fieldset': {
-                                borderColor: '#F29727',
+                                borderColor: theme.palette.primary.main,
+                                borderWidth: '1px',
                             },
                         }
                     }}
                 />
-                <Button type="submit" variant="contained" endIcon={<SendIcon />} sx={{
-                    backgroundColor: '#FFCD00',
-                    color: 'black',
-                    whiteSpace: 'nowrap',
+                <Button type="submit" variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim()} sx={{
+                    py: 1.2,
+                    px: 3,
+                    borderRadius: theme.shape.borderRadius,
+                    color: 'white',
+                    background: `linear-gradient(45deg, ${theme.palette.warning.dark} 30%, ${theme.palette.warning.light} 90%)`,
+                    boxShadow: `0 4px 10px rgba(242, 151, 39, 0.2)`,
                     '&:hover': {
-                        backgroundColor: '#F29727',
+                        background: `linear-gradient(45deg, ${theme.palette.warning.main} 30%, ${theme.palette.warning.dark} 90%)`,
+                        boxShadow: `0 6px 12px rgba(242, 151, 39, 0.3)`,
+                        transform: 'translateY(-2px)'
+                    },
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap',
+                    '&.Mui-disabled': {
+                        background: theme.palette.action.disabledBackground,
+                        boxShadow: 'none',
+                        color: theme.palette.action.disabled,
                     }
                 }}>
                     전송
