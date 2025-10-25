@@ -8,7 +8,7 @@ import SendIcon from '@mui/icons-material/Send';
 
 // const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`; // 백엔드 WebSocket 엔드포인트
 // const WEBSOCKET_URL = `http://localhost:8880/ws-chat`; // 백엔드 WebSocket 엔드포인트
-const WEBSOCKET_URL = `https://salehero.kr/ws-chat`; // 백엔드 테스트용 WebSocket 엔드포인트
+const WEBSOCKET_URL = `https://salehero.kr/api/ws-chat`; // 백엔드 테스트용 WebSocket 엔드포인트
 const CHAT_TOPIC = '/topic/chat';
 const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
