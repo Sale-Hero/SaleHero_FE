@@ -26,6 +26,7 @@ const Chat = () => {
     });
 
     const messageContainerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,11 +42,12 @@ const Chat = () => {
         if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }
-        // Re-enable input after the message round-trip is complete.
+        // Re-enable input and re-focus after the message round-trip is complete.
         if (isSending) {
             setIsSending(false);
+            inputRef.current?.focus();
         }
-    }, [messages]);
+    }, [messages, isSending]);
 
     return (
         <Paper elevation={0} sx={{
@@ -195,6 +197,7 @@ const Chat = () => {
                     disabled={isSending}
                     multiline
                     maxRows={5}
+                    inputRef={inputRef}
                     sx={{
                         mr: 2,
                         '& .MuiOutlinedInput-root': {
