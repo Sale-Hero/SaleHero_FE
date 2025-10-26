@@ -193,7 +193,10 @@ const Chat = () => {
                     placeholder="메시지를 입력하세요..."
                     size="small"
                     value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
+                    onChange={(e) => {
+                        if (isSendingRef.current) return;
+                        setMessageInput(e.target.value);
+                    }}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
