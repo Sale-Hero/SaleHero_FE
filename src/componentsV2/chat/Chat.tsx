@@ -13,6 +13,7 @@ const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
 const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
+    const [isSending, setIsSending] = useState(false);
     const messages = useSelector((state: RootState) => state.chat.messages);
     const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
     const myChatName = useSelector((state: RootState) => state.chat.myChatName);
@@ -28,8 +29,10 @@ const Chat = () => {
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (messageInput.trim()) {
-            sendMessage(messageInput);
+        const messageToSend = messageInput.trim();
+        if (messageToSend && !isSending) {
+            setIsSending(true);
+            sendMessage(messageToSend);
             setMessageInput('');
         }
     };
@@ -37,6 +40,10 @@ const Chat = () => {
     useEffect(() => {
         if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+        }
+        // Re-enable input after the message round-trip is complete.
+        if (isSending) {
+            setIsSending(false);
         }
     }, [messages]);
 
@@ -175,7 +182,7 @@ const Chat = () => {
                 <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="메시지를 입력하세요..."
+                    placeholder={isSending ? "전송 중..." : "메시지를 입력하세요..."}
                     size="small"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -185,6 +192,7 @@ const Chat = () => {
                             handleSendMessage(e);
                         }
                     }}
+                    disabled={isSending}
                     multiline
                     maxRows={5}
                     sx={{
@@ -204,7 +212,7 @@ const Chat = () => {
                         }
                     }}
                 />
-                <Button type="submit" variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim()} sx={{
+                <Button type="submit" variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim() || isSending} sx={{
                     py: 1.2,
                     px: 3,
                     borderRadius: theme.shape.borderRadius,
