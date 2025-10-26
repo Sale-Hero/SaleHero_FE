@@ -1,9 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import SockJS from 'sockjs-client';
-import { Client, Stomp } from '@stomp/stompjs';
+import { Client, Stomp, IFrame } from '@stomp/stompjs';
 import { useDispatch } from 'react-redux';
-import { addMessage, setConnectionStatus } from '../../../../src/slice/chatSlice';
-import { ChatMessageDto, MessageType, ConnectionStatus } from '../../../../src/types/chat';
+import { addMessage, setConnectionStatus, setMyChatName } from '../../../slice/chatSlice';
+import { ChatMessageDto, MessageType, ConnectionStatus } from '../../../types/chat';
+import { useTokens } from '../../../config/useTokens';
 
 interface UseChatProps {
   websocketUrl: string;
@@ -15,6 +16,7 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
   const stompClientRef = useRef<Client | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dispatch = useDispatch();
+  const { accessToken } = useTokens();
 
   const sendMessage = useCallback((content: string, type: MessageType = MessageType.CHAT) => {
     if (stompClientRef.current && stompClientRef.current.connected) {
@@ -36,11 +38,26 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     const socket = new SockJS(websocketUrl);
     const stompClient = Stomp.over(socket);
 
-    stompClient.onConnect = (frame) => {
-      console.log('Connected: ' + frame);
+    if (accessToken) {
+      stompClient.connectHeaders = {
+        Authorization: `Bearer ${accessToken}`,
+      };
+    }
+
+    stompClient.onConnect = (frame: IFrame) => {
       dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
+
+      const sessionId = frame.headers['session'];
+
       stompClient.subscribe(topic, (message) => {
         const chatMessage: ChatMessageDto = JSON.parse(message.body);
+
+        if (chatMessage.type === MessageType.JOIN && chatMessage.sessionId === sessionId) {
+          if (chatMessage.sender) {
+            dispatch(setMyChatName(chatMessage.sender));
+          }
+        }
+
         dispatch(addMessage(chatMessage));
       });
     };
@@ -57,12 +74,12 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      reconnectTimeoutRef.current = setTimeout(connect, 5000); // 5초 후 재연결 시도
+      reconnectTimeoutRef.current = setTimeout(connect, 5000);
     };
 
     stompClient.activate();
     stompClientRef.current = stompClient;
-  }, [websocketUrl, topic, dispatch, sendMessageDestination]);
+  }, [websocketUrl, topic, dispatch, sendMessageDestination, accessToken]);
 
   useEffect(() => {
     connect();
