@@ -13,7 +13,6 @@ const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
 const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
-    const [isSending, setIsSending] = useState(false);
     const messages = useSelector((state: RootState) => state.chat.messages);
     const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
     const myChatName = useSelector((state: RootState) => state.chat.myChatName);
@@ -27,12 +26,16 @@ const Chat = () => {
 
     const messageContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const isSendingRef = useRef(false);
+    const messagesLengthRef = useRef(messages.length);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSendingRef.current) return;
+
         const messageToSend = messageInput.trim();
-        if (messageToSend && !isSending) {
-            setIsSending(true);
+        if (messageToSend) {
+            isSendingRef.current = true;
             sendMessage(messageToSend);
             setMessageInput('');
         }
@@ -42,12 +45,15 @@ const Chat = () => {
         if (messageContainerRef.current) {
             messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }
-        // Re-enable input and re-focus after the message round-trip is complete.
-        if (isSending) {
-            setIsSending(false);
+
+        // Check if a message was just sent and the message list has updated.
+        if (isSendingRef.current && messages.length > messagesLengthRef.current) {
+            isSendingRef.current = false;
             inputRef.current?.focus();
         }
-    }, [messages, isSending]);
+
+        messagesLengthRef.current = messages.length;
+    }, [messages]);
 
     return (
         <Paper elevation={0} sx={{
@@ -184,7 +190,7 @@ const Chat = () => {
                 <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder={isSending ? "전송 중..." : "메시지를 입력하세요..."}
+                    placeholder="메시지를 입력하세요..."
                     size="small"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -194,7 +200,6 @@ const Chat = () => {
                             handleSendMessage(e);
                         }
                     }}
-                    disabled={isSending}
                     multiline
                     maxRows={5}
                     inputRef={inputRef}
@@ -215,7 +220,7 @@ const Chat = () => {
                         }
                     }}
                 />
-                <Button type="submit" variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim() || isSending} sx={{
+                <Button type="submit" variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim()} sx={{
                     py: 1.2,
                     px: 3,
                     borderRadius: theme.shape.borderRadius,
