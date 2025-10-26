@@ -1,11 +1,10 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
 import { ConnectionStatus, MessageType } from '../../types/chat';
 import { Box, TextField, Button, Typography, Paper, CircularProgress, Avatar, useTheme } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import { UserContext } from '../../hooks/userinfo/UserContext';
 import { motion } from 'framer-motion';
 
 const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`;
@@ -16,7 +15,7 @@ const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
     const messages = useSelector((state: RootState) => state.chat.messages);
     const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
-    const { nickName } = useContext(UserContext);
+    const myChatName = useSelector((state: RootState) => state.chat.myChatName);
     const theme = useTheme();
 
     const { sendMessage } = useChat({
@@ -107,7 +106,7 @@ const Chat = () => {
                                 </Typography>
                             );
                         }
-                        const isCurrentUser = msg.sender === nickName;
+                        const isCurrentUser = myChatName !== null && msg.sender === myChatName;
                         return (
                             <motion.div
                                 key={index}
@@ -136,8 +135,13 @@ const Chat = () => {
                                         {msg.sender ? msg.sender.charAt(0).toUpperCase() : 'U'}
                                     </Avatar>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: isCurrentUser ? 'flex-end' : 'flex-start' }}>
-                                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5 }}>
+                                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             {msg.sender || '익명'}
+                                            {msg.createdAt && (
+                                                <Typography variant="caption" sx={{ color: theme.palette.text.disabled, fontSize: '0.7rem' }}>
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </Typography>
+                                            )}
                                         </Typography>
                                         <Paper
                                             elevation={1}
