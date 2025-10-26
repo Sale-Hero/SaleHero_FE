@@ -6,8 +6,10 @@ export enum MessageType {
 
 export interface ChatMessageDto {
   type: MessageType;
-  sender: string;
+  sender: string | null;
   content: string;
+  createdAt?: string;
+  sessionId?: string;
 }
 
 export enum ConnectionStatus {
