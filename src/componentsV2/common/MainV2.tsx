@@ -47,7 +47,7 @@ export default function MainV2() {
             {/* 메인 히어로 섹션 */}
             <Container maxWidth="lg" sx={{position: 'relative', zIndex: 5, pt: {xs: 10, md: 15}}}>
                 <motion.div
-                    style={{
+                    style={isMobile ? { opacity: 1, y: 0 } : { // 모바일일 경우 애니메이션 제거
                         opacity: heroOpacity,
                         y: heroY
                     }}
@@ -64,13 +64,14 @@ export default function MainV2() {
                                             sx={{
                                                 fontWeight: 800,
                                                 mb: 2,
-                                                fontSize: {xs: '2.5rem', md: '2.2rem'},
-                                                lineHeight: 1.2
+                                                fontSize: {xs: '2.2rem', md: '2.2rem'}, // xs 폰트 사이즈 조정
+                                                lineHeight: 1.2,
+                                                textAlign: { xs: 'center', md: 'left' }
                                             }}
                                 >
                                     세상의 <GradientText sx={{
                                     fontWeight: 800,
-                                    fontSize: {xs: '3.5rem', md: '3.5rem'},
+                                    fontSize: {xs: '2.8rem', md: '3.5rem'}, // xs 폰트 사이즈 조정
                                 }}>모든 할인</GradientText>을 한눈에
                                 </Typography>
 
@@ -86,8 +87,8 @@ export default function MainV2() {
                                     실시간 가격 추적과 맞춤형 알림으로 스마트한 쇼핑 경험을 시작하세요.
                                 </Typography>
 
-                                <Box sx={{display: 'flex', gap: 2, mt: 5, flexWrap: {xs: 'wrap', md: 'nowrap'}}}>
-                                    <HeroButton variant="contained" size="large" onClick={() => setOpenSubscribeModal(true)}>
+                                <Box sx={{display: 'flex', gap: 2, mt: 5, flexDirection: { xs: 'column', md: 'row' }}}>
+                                    <HeroButton variant="contained" size="large" onClick={() => setOpenSubscribeModal(true)} sx={{ width: { xs: '100%', md: 'auto' } }}>
                                         무료로 시작하기
                                     </HeroButton>
                                     <Tooltip
@@ -100,6 +101,7 @@ export default function MainV2() {
                                             size="large"
                                             onClick={handleOpenModal}  // 이 부분이 변경됨
                                             sx={{
+                                                width: { xs: '100%', md: 'auto' },
                                                 borderRadius: '50px',
                                                 padding: '0.8rem 2rem',
                                                 textTransform: 'none',
@@ -119,12 +121,14 @@ export default function MainV2() {
                                 <Box sx={{
                                     display: 'flex',
                                     alignItems: 'center',
+                                    flexDirection: { xs: 'column', md: 'row' }, // 모바일에서 세로 정렬
+                                    textAlign: { xs: 'center', md: 'left' }, // 모바일에서 텍스트 중앙 정렬
                                     mt: 6,
                                     p: 2,
                                     borderRadius: 2,
                                     background: 'rgba(255,255,255,0.05)'
                                 }}>
-                                    <Box sx={{display: 'flex'}}>
+                                    <Box sx={{display: 'flex', mb: { xs: 1.5, md: 0 } }}>
                                         {['👨‍💼', '👩‍💼', '👨‍💻'].map((emoji, i) => (
                                             <Box key={i} sx={{
                                                 ml: i !== 0 ? -1 : 0,
@@ -142,7 +146,7 @@ export default function MainV2() {
                                             </Box>
                                         ))}
                                     </Box>
-                                    <Typography variant="body2" sx={{ml: 2, color: 'rgba(255,255,255,0.7)'}}>
+                                    <Typography variant="body2" sx={{ml: { xs: 0, md: 2 }, color: 'rgba(255,255,255,0.7)'}}>
                                         <strong>10,000+</strong> 사용자들이 이미 Sale Hero와 함께 스마트한 쇼핑을 시작했습니다
                                     </Typography>
                                 </Box>
@@ -166,8 +170,8 @@ export default function MainV2() {
                                         src={hero_3d}
                                         alt="Sale Hero App"
                                         sx={{
-                                            width: '240px',
-                                            height: '240px',
+                                            width: { xs: '200px', md: '240px' }, // 모바일에서 크기 조정
+                                            height: { xs: '200px', md: '240px' }, // 모바일에서 크기 조정
                                             objectFit: 'contain',
                                             borderRadius: '24px',
                                             boxShadow: '0 20px 80px rgba(0,0,0,0.3)',
@@ -180,13 +184,14 @@ export default function MainV2() {
                                         <HeroDealHighlight />
                                     </Box>
 
-                                    {/* 앱 기능 표시 효과 */}
+                                    {/* 앱 기능 표시 효과 (모바일에서 숨김) */}
                                     <Box
                                         component={motion.div}
                                         initial={{opacity: 0, x: 50}}
                                         animate={{opacity: 1, x: 0}}
                                         transition={{delay: 0.6, duration: 0.8}}
                                         sx={{
+                                            display: { xs: 'none', md: 'block' }, // 모바일에서 숨김
                                             position: 'absolute',
                                             bottom: {xs: '-5%', md: '10%'},
                                             right: {xs: '5%', md: '-10%'},
@@ -233,10 +238,9 @@ export default function MainV2() {
                 </Box>
             </Container>
 
-            {/* 주요 할인 정보 미리보기 섹션 */}
-            <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 5, pb: { xs: 8, md: 12 } }}>
+            {/* 주요 할인 정보 미리보기 섹션 */}{/* <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 5, pb: { xs: 8, md: 12 } }}>
                 <DealsPreview />
-            </Container>
+            </Container> */}
 
             {/* 추가 컴포넌트 */}
             {/*<SubscribeContainer />*/}

@@ -131,7 +131,7 @@ export function HeroDealHighlight() {
                                     borderColor: '#F29727'
                                 }
                             }}>
-                                전체 아티클 보기
+                                전체 할인정보 보기
                             </Button>
                         </Link>
                     </Box>
