@@ -17,6 +17,8 @@ import { ChatBot } from 'components/common/main/ChatBot';
 import {ComponentHelmet} from "../../components/common/ComponentHelmet";
 import {SubscribeContainerV2} from "./SubscribeContainerV2";
 import {EmailPreview, FeatureBox, FloatingBlob, GlassCard, GradientText, HeroButton, HighlightTag, ModalContent} from './styled/MainComponentStyled';
+import { DealsPreview } from '../deals/DealsPreview';
+import { HeroDealHighlight } from './HeroDealHighlight';
 
 export default function MainV2() {
     const theme = useTheme();
@@ -173,6 +175,11 @@ export default function MainV2() {
                                         }}
                                     />
 
+                                    {/* 오늘의 핫딜 카드 */}
+                                    <Box sx={{ position: 'absolute', top: '20%', right: { xs: '5%', md: '0' }, display: { xs: 'none', md: 'block' } }}>
+                                        <HeroDealHighlight />
+                                    </Box>
+
                                     {/* 앱 기능 표시 효과 */}
                                     <Box
                                         component={motion.div}
@@ -224,6 +231,11 @@ export default function MainV2() {
                         ))}
                     </Grid>
                 </Box>
+            </Container>
+
+            {/* 주요 할인 정보 미리보기 섹션 */}
+            <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 5, pb: { xs: 8, md: 12 } }}>
+                <DealsPreview />
             </Container>
 
             {/* 추가 컴포넌트 */}
