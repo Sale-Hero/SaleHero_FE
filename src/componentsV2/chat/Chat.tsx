@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
 import { ConnectionStatus, MessageType } from '../../types/chat';
 import { Box, TextField, Button, Typography, Paper, CircularProgress, Avatar, useTheme } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { motion } from 'framer-motion';
+import { getChatHistoryAsync } from '../../slice/chatSlice';
 
 const WEBSOCKET_URL = `${process.env.REACT_APP_BASE_URL}/ws-chat`;
 const CHAT_TOPIC = '/topic/chat';
@@ -13,6 +14,7 @@ const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
 const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
+    const dispatch = useDispatch<any>();
     const messages = useSelector((state: RootState) => state.chat.messages);
     const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
     const myChatName = useSelector((state: RootState) => state.chat.myChatName);
@@ -28,6 +30,11 @@ const Chat = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const isSendingRef = useRef(false);
     const messagesLengthRef = useRef(messages.length);
+
+    useEffect(() => {
+        // Fetch chat history when the component mounts
+        dispatch(getChatHistoryAsync());
+    }, [dispatch]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
