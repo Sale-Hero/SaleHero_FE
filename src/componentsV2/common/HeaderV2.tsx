@@ -22,6 +22,7 @@ import {
 import {motion} from 'framer-motion';
 import {
     ArrowForward,
+    Chat,
     ContactSupport,
     Forum,
     Home,
@@ -84,6 +85,12 @@ const menuItems: MenuItem[] = [
         path: '/deals',
         status: HeaderStatus.DEALS,
     },
+    {
+        label: '익명채팅',
+        icon: <Chat/>,
+        path: '/chat',
+        status: HeaderStatus.CHAT,
+    },
 ];
 
 export function HeaderV2() {
@@ -106,6 +113,8 @@ export function HeaderV2() {
             setHeaderStatus(HeaderStatus.DEALS);
         } else if (path.includes('/contact')) {
             setHeaderStatus(HeaderStatus.CONTACT);
+        } else if (path.includes('/chat')) {
+            setHeaderStatus(HeaderStatus.CHAT);
         } else {
             setHeaderStatus(HeaderStatus.NONE);
         }

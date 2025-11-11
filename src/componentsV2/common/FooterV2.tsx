@@ -152,11 +152,6 @@ export const FooterV2: React.FC = () => {
                                     </FooterLink>
                                 </Box>
                                 <Box component="li">
-                                    <FooterLink to="/chat">
-                                        익명 채팅
-                                    </FooterLink>
-                                </Box>
-                                <Box component="li">
                                     <FooterLink to="/faq">
                                         자주 묻는 질문
                                     </FooterLink>
