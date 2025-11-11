@@ -14,7 +14,6 @@ interface UseChatProps {
 
 export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChatProps) => {
   const stompClientRef = useRef<Client | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dispatch = useDispatch();
   const { accessToken } = useTokens();
 
@@ -31,70 +30,57 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     } else {
       console.warn('STOMP client not connected. Message not sent.');
     }
-  }, [sendMessageDestination, dispatch]);
-
-  const connect = useCallback(() => {
-    dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
-    const socket = new SockJS(websocketUrl);
-    const stompClient = Stomp.over(socket);
-
-    if (accessToken) {
-      stompClient.connectHeaders = {
-        Authorization: `Bearer ${accessToken}`,
-      };
-    }
-
-    stompClient.onConnect = (frame: IFrame) => {
-      dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
-
-      const sessionId = frame.headers['session'];
-
-      stompClient.subscribe(topic, (message) => {
-        const chatMessage: ChatMessageDto = JSON.parse(message.body);
-
-        if (chatMessage.type === MessageType.JOIN && chatMessage.sessionId === sessionId) {
-          if (chatMessage.sender) {
-            dispatch(setMyChatName(chatMessage.sender));
-          }
-        }
-
-        dispatch(addMessage(chatMessage));
-      });
-    };
-
-    stompClient.onStompError = (frame) => {
-      console.error('Broker reported error: ' + frame.headers['message']);
-      console.error('Additional details: ' + frame.body);
-      dispatch(setConnectionStatus(ConnectionStatus.ERROR));
-    };
-
-    stompClient.onDisconnect = () => {
-      console.log('Disconnected. Attempting to reconnect...');
-      dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      reconnectTimeoutRef.current = setTimeout(connect, 5000);
-    };
-
-    stompClient.activate();
-    stompClientRef.current = stompClient;
-  }, [websocketUrl, topic, dispatch, sendMessageDestination, accessToken]);
+  }, [sendMessageDestination]);
 
   useEffect(() => {
-    connect();
+    if (!stompClientRef.current) {
+      const socket = new SockJS(websocketUrl);
+      const client = Stomp.over(socket);
+
+      client.onConnect = (frame: IFrame) => {
+        dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
+        const sessionId = frame.headers['session'];
+        client.subscribe(topic, (message) => {
+          const chatMessage: ChatMessageDto = JSON.parse(message.body);
+          if (chatMessage.type === MessageType.JOIN && chatMessage.sessionId === sessionId) {
+            if (chatMessage.sender) {
+              dispatch(setMyChatName(chatMessage.sender));
+            }
+          }
+          dispatch(addMessage(chatMessage));
+        });
+      };
+
+      client.onStompError = (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+        dispatch(setConnectionStatus(ConnectionStatus.ERROR));
+      };
+
+      client.onDisconnect = () => {
+        console.log('Disconnected.');
+        dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
+      };
+
+      stompClientRef.current = client;
+    }
+
+    const client = stompClientRef.current;
+
+    if (accessToken && !client.connected) {
+      console.log('Connecting STOMP client...');
+      dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
+      client.connectHeaders = { Authorization: `Bearer ${accessToken}` };
+      client.activate();
+    }
 
     return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (stompClientRef.current && stompClientRef.current.connected) {
-        console.log('Disconnecting STOMP client.');
-        sendMessage('님이 퇴장하셨습니다.', MessageType.LEAVE);
+      if (stompClientRef.current?.connected) {
+        console.log('Deactivating STOMP client on cleanup.');
         stompClientRef.current.deactivate();
       }
     };
-  }, [connect, sendMessage]);
+  }, [accessToken, dispatch, topic, websocketUrl]);
 
   return { sendMessage };
 };

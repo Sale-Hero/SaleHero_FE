@@ -1,5 +1,13 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { ChatMessageDto, ConnectionStatus } from '../types/chat';
+import { executePromise } from '../util/sliceUtil';
+import { CommunityAPI } from '../api/CommunityAPI';
+
+// Async thunk for fetching chat history
+export const getChatHistoryAsync = createAsyncThunk(
+  'chat/getHistory',
+  () => executePromise(CommunityAPI.getChatHistory())
+);
 
 interface ChatState {
   messages: ChatMessageDto[];
@@ -20,6 +28,9 @@ const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<ChatMessageDto>) => {
       state.messages.push(action.payload);
     },
+    setMessages: (state, action: PayloadAction<ChatMessageDto[]>) => {
+      state.messages = action.payload;
+    },
     setConnectionStatus: (state, action: PayloadAction<ConnectionStatus>) => {
       state.connectionStatus = action.payload;
     },
@@ -31,7 +42,15 @@ const chatSlice = createSlice({
       state.myChatName = null;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getChatHistoryAsync.fulfilled, (state, action) => {
+        // The payload is an object like { content: [...] }. Extract the array.
+        // Also ensure that if the payload or content is null/undefined, we default to an empty array.
+        state.messages = action.payload?.content || [];
+      });
+  },
 });
 
-export const { addMessage, setConnectionStatus, setMyChatName, clearMessages } = chatSlice.actions;
+export const { addMessage, setMessages, setConnectionStatus, setMyChatName, clearMessages } = chatSlice.actions;
 export default chatSlice.reducer;
