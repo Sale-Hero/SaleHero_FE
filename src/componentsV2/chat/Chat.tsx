@@ -14,11 +14,13 @@ const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 
 const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
+    const [countdown, setCountdown] = useState(0);
     const dispatch = useDispatch<any>();
     const messages = useSelector((state: RootState) => state.chat.messages);
     const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
     const myChatName = useSelector((state: RootState) => state.chat.myChatName);
     const theme = useTheme();
+    const isBlocked = countdown > 0;
 
     const { sendMessage } = useChat({
         websocketUrl: WEBSOCKET_URL,
@@ -30,18 +32,45 @@ const Chat = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const isSendingRef = useRef(false);
     const messagesLengthRef = useRef(messages.length);
+    const messageTimestampsRef = useRef<number[]>([]);
 
     useEffect(() => {
         // Fetch chat history when the component mounts
         dispatch(getChatHistoryAsync());
     }, [dispatch]);
 
+    useEffect(() => {
+        let timer: NodeJS.Timeout | undefined;
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown(prev => prev > 0 ? prev - 1 : 0);
+            }, 1000);
+        }
+
+        return () => {
+            if (timer) {
+                clearInterval(timer);
+            }
+        };
+    }, [countdown]);
+
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (isSendingRef.current) return;
+        if (isSendingRef.current || isBlocked) return;
+
+        const now = Date.now();
+        messageTimestampsRef.current = messageTimestampsRef.current.filter(
+            timestamp => now - timestamp < 1000
+        );
+
+        if (messageTimestampsRef.current.length >= 3) {
+            setCountdown(5);
+            return;
+        }
 
         const messageToSend = messageInput.trim();
         if (messageToSend) {
+            messageTimestampsRef.current.push(now);
             isSendingRef.current = true;
             sendMessage(messageToSend);
             setMessageInput('');
@@ -61,6 +90,8 @@ const Chat = () => {
 
         messagesLengthRef.current = messages.length;
     }, [messages]);
+
+    const blockMessageText = `메시지를 너무 빨리 보냈습니다. ${countdown}초 후에 다시 시도하세요.`;
 
     return (
         <Paper elevation={0} sx={{
@@ -112,146 +143,187 @@ const Chat = () => {
                     </Box>
                 ) : (
                     messages.map((msg, index) => {
-                        if (msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE) {
+                        const previousMsg = messages[index - 1];
+                        const showDateSeparator =
+                            !previousMsg ||
+                            (msg.createdAt && previousMsg.createdAt && new Date(msg.createdAt).toDateString() !== new Date(previousMsg.createdAt).toDateString());
+
+                        const messageContent = () => {
+                            if (msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE) {
+                                return (
+                                    <Typography
+                                        key={index}
+                                        variant="body2"
+                                        sx={{
+                                            textAlign: 'center',
+                                            color: theme.palette.text.secondary,
+                                            fontStyle: 'italic',
+                                            width: '100%',
+                                        }}
+                                    >
+                                        {msg.content}
+                                    </Typography>
+                                );
+                            }
+                            const isCurrentUser = myChatName !== null && msg.sender === myChatName;
                             return (
-                                <Typography
+                                <motion.div
                                     key={index}
-                                    variant="body2"
-                                    sx={{
-                                        textAlign: 'center',
-                                        color: theme.palette.text.secondary,
-                                        fontStyle: 'italic',
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',
                                         width: '100%',
                                     }}
                                 >
-                                    {msg.content}
-                                </Typography>
-                            );
-                        }
-                        const isCurrentUser = myChatName !== null && msg.sender === myChatName;
-                        return (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',
-                                    width: '100%',
-                                }}
-                            >
-                                <Box sx={{
-                                    display: 'flex',
-                                    gap: '10px',
-                                    maxWidth: '70%',
-                                    alignItems: 'flex-start',
-                                    flexDirection: isCurrentUser ? 'row-reverse' : 'row',
-                                }}>
-                                    <Avatar sx={{
-                                        bgcolor: isCurrentUser ? theme.palette.primary.main : theme.palette.secondary.main,
-                                        width: 32,
-                                        height: 32,
-                                        fontSize: '0.875rem',
+                                    <Box sx={{
+                                        display: 'flex',
+                                        gap: '10px',
+                                        maxWidth: '70%',
+                                        alignItems: 'flex-start',
+                                        flexDirection: isCurrentUser ? 'row-reverse' : 'row',
                                     }}>
-                                        {msg.sender ? msg.sender.charAt(0).toUpperCase() : 'U'}
-                                    </Avatar>
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: isCurrentUser ? 'flex-end' : 'flex-start' }}>
-                                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {msg.sender || '익명'}
-                                            {msg.createdAt && (
-                                                <Typography variant="caption" sx={{ color: theme.palette.text.disabled, fontSize: '0.7rem' }}>
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </Typography>
-                                            )}
-                                        </Typography>
-                                        <Paper
-                                            elevation={1}
-                                            sx={{
-                                                padding: '10px 14px',
-                                                borderRadius: isCurrentUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                                                backgroundColor: isCurrentUser ? theme.palette.primary.main : theme.palette.background.paper,
-                                                color: isCurrentUser ? theme.palette.primary.contrastText : theme.palette.text.primary,
-                                                wordBreak: 'break-word',
-                                                boxShadow: theme.shadows[1],
-                                            }}
-                                        >
-                                            <Typography variant="body1">
-                                                {msg.content}
+                                        <Avatar sx={{
+                                            bgcolor: isCurrentUser ? theme.palette.primary.main : theme.palette.secondary.main,
+                                            width: 32,
+                                            height: 32,
+                                            fontSize: '0.875rem',
+                                        }}>
+                                            {msg.sender ? msg.sender.charAt(0).toUpperCase() : 'U'}
+                                        </Avatar>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: isCurrentUser ? 'flex-end' : 'flex-start' }}>
+                                            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 0.5, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {msg.sender || '익명'}
+                                                {msg.createdAt && (
+                                                    <Typography variant="caption" sx={{ color: theme.palette.text.disabled, fontSize: '0.7rem' }}>
+                                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </Typography>
+                                                )}
                                             </Typography>
-                                        </Paper>
+                                            <Paper
+                                                elevation={1}
+                                                sx={{
+                                                    padding: '10px 14px',
+                                                    borderRadius: isCurrentUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                                                    backgroundColor: isCurrentUser ? theme.palette.primary.main : theme.palette.background.paper,
+                                                    color: isCurrentUser ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                                                    wordBreak: 'break-word',
+                                                    boxShadow: theme.shadows[1],
+                                                }}
+                                            >
+                                                <Typography variant="body1">
+                                                    {msg.content}
+                                                </Typography>
+                                            </Paper>
+                                        </Box>
                                     </Box>
-                                </Box>
-                            </motion.div>
+                                </motion.div>
+                            );
+                        };
+
+                        return (
+                            <React.Fragment key={index}>
+                                {showDateSeparator && msg.createdAt && (
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            textAlign: 'center',
+                                            color: theme.palette.text.secondary,
+                                            margin: '16px 0',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        {new Date(msg.createdAt).toLocaleDateString('ko-KR', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
+                                    </Typography>
+                                )}
+                                {messageContent()}
+                            </React.Fragment>
                         );
                     })
                 )}
             </Box>
-            <Box component="form" onSubmit={handleSendMessage} sx={{
+            <Box component="form" sx={{
                 display: 'flex',
+                flexDirection: 'column',
                 padding: '16px 24px',
                 borderTop: `1px solid ${theme.palette.divider}`,
-                alignItems: 'center',
                 backgroundColor: theme.palette.background.paper,
             }}>
-                <TextField
-                    fullWidth
-                    variant="outlined"
-                    placeholder="메시지를 입력하세요..."
-                    size="small"
-                    value={messageInput}
-                    onChange={(e) => {
-                        if (isSendingRef.current) return;
-                        setMessageInput(e.target.value);
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendMessage(e);
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TextField
+                        fullWidth
+                        variant="outlined"
+                        placeholder={isBlocked ? blockMessageText : "메시지를 입력하세요..."}
+                        size="small"
+                        value={messageInput}
+                        disabled={isBlocked}
+                        onChange={(e) => {
+                            if (isSendingRef.current) return;
+                            setMessageInput(e.target.value);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage(e);
+                            }
+                        }}
+                        multiline
+                        maxRows={5}
+                        inputRef={inputRef}
+                        sx={{
+                            mr: 2,
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: theme.shape.borderRadius,
+                                '& fieldset': {
+                                    borderColor: theme.palette.divider,
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: theme.palette.primary.light,
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: theme.palette.primary.main,
+                                    borderWidth: '1px',
+                                },
+                                '&.Mui-disabled': {
+                                    backgroundColor: theme.palette.action.disabledBackground,
+                                }
+                            }
+                        }}
+                    />
+                    <Button type="button" onClick={handleSendMessage} variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim() || isBlocked} sx={{
+                        py: 1.2,
+                        px: 3,
+                        borderRadius: theme.shape.borderRadius,
+                        color: 'white',
+                        background: `linear-gradient(45deg, ${theme.palette.warning.dark} 30%, ${theme.palette.warning.light} 90%)`,
+                        boxShadow: `0 4px 10px rgba(242, 151, 39, 0.2)`,
+                        '&:hover': {
+                            background: `linear-gradient(45deg, ${theme.palette.warning.main} 30%, ${theme.palette.warning.dark} 90%)`,
+                            boxShadow: `0 6px 12px rgba(242, 151, 39, 0.3)`,
+                            transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s ease',
+                        whiteSpace: 'nowrap',
+                        '&.Mui-disabled': {
+                            background: theme.palette.action.disabledBackground,
+                            boxShadow: 'none',
+                            color: theme.palette.action.disabled,
                         }
-                    }}
-                    multiline
-                    maxRows={5}
-                    inputRef={inputRef}
-                    sx={{
-                        mr: 2,
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: theme.shape.borderRadius,
-                            '& fieldset': {
-                                borderColor: theme.palette.divider,
-                            },
-                            '&:hover fieldset': {
-                                borderColor: theme.palette.primary.light,
-                            },
-                            '&.Mui-focused fieldset': {
-                                borderColor: theme.palette.primary.main,
-                                borderWidth: '1px',
-                            },
-                        }
-                    }}
-                />
-                <Button type="submit" variant="contained" endIcon={<SendIcon />} disabled={!messageInput.trim()} sx={{
-                    py: 1.2,
-                    px: 3,
-                    borderRadius: theme.shape.borderRadius,
-                    color: 'white',
-                    background: `linear-gradient(45deg, ${theme.palette.warning.dark} 30%, ${theme.palette.warning.light} 90%)`,
-                    boxShadow: `0 4px 10px rgba(242, 151, 39, 0.2)`,
-                    '&:hover': {
-                        background: `linear-gradient(45deg, ${theme.palette.warning.main} 30%, ${theme.palette.warning.dark} 90%)`,
-                        boxShadow: `0 6px 12px rgba(242, 151, 39, 0.3)`,
-                        transform: 'translateY(-2px)'
-                    },
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap',
-                    '&.Mui-disabled': {
-                        background: theme.palette.action.disabledBackground,
-                        boxShadow: 'none',
-                        color: theme.palette.action.disabled,
-                    }
-                }}>
-                    전송
-                </Button>
+                    }}>
+                        전송
+                    </Button>
+                </Box>
+                {isBlocked && (
+                    <Typography variant="caption" color="error" sx={{ mt: 1, textAlign: 'center' }}>
+                        {blockMessageText}
+                    </Typography>
+                )}
             </Box>
         </Paper>
     );
