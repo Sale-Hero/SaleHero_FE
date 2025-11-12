@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
@@ -16,9 +16,7 @@ const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
     const [countdown, setCountdown] = useState(0);
     const dispatch = useDispatch<any>();
-    const messages = useSelector((state: RootState) => state.chat.messages);
-    const connectionStatus = useSelector((state: RootState) => state.chat.connectionStatus);
-    const myChatName = useSelector((state: RootState) => state.chat.myChatName);
+    const { messages, connectionStatus, myChatName, currentPage, totalPages, isLoadingHistory } = useSelector((state: RootState) => state.chat);
     const theme = useTheme();
     const isBlocked = countdown > 0;
 
@@ -31,12 +29,12 @@ const Chat = () => {
     const messageContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const isSendingRef = useRef(false);
-    const messagesLengthRef = useRef(messages.length);
+    const prevScrollHeightRef = useRef(0);
+    const shouldScrollToBottomRef = useRef(true);
     const messageTimestampsRef = useRef<number[]>([]);
 
     useEffect(() => {
-        // Fetch chat history when the component mounts
-        dispatch(getChatHistoryAsync());
+        dispatch(getChatHistoryAsync(0));
     }, [dispatch]);
 
     useEffect(() => {
@@ -46,11 +44,8 @@ const Chat = () => {
                 setCountdown(prev => prev > 0 ? prev - 1 : 0);
             }, 1000);
         }
-
         return () => {
-            if (timer) {
-                clearInterval(timer);
-            }
+            if (timer) clearInterval(timer);
         };
     }, [countdown]);
 
@@ -70,6 +65,7 @@ const Chat = () => {
 
         const messageToSend = messageInput.trim();
         if (messageToSend) {
+            shouldScrollToBottomRef.current = true;
             messageTimestampsRef.current.push(now);
             isSendingRef.current = true;
             sendMessage(messageToSend);
@@ -77,18 +73,29 @@ const Chat = () => {
         }
     };
 
-    useEffect(() => {
+    const handleLoadMore = () => {
         if (messageContainerRef.current) {
-            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+            prevScrollHeightRef.current = messageContainerRef.current.scrollHeight;
+        }
+        shouldScrollToBottomRef.current = false;
+        dispatch(getChatHistoryAsync(currentPage + 1));
+    };
+
+    useLayoutEffect(() => {
+        const messageContainer = messageContainerRef.current;
+        if (!messageContainer) return;
+
+        if (shouldScrollToBottomRef.current) {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        } else if (prevScrollHeightRef.current > 0) {
+            messageContainer.scrollTop = messageContainer.scrollHeight - prevScrollHeightRef.current;
+            prevScrollHeightRef.current = 0;
         }
 
-        // Check if a message was just sent and the message list has updated.
-        if (isSendingRef.current && messages.length > messagesLengthRef.current) {
+        if (isSendingRef.current) {
             isSendingRef.current = false;
             inputRef.current?.focus();
         }
-
-        messagesLengthRef.current = messages.length;
     }, [messages]);
 
     const blockMessageText = `메시지를 너무 빨리 보냈습니다. ${countdown}초 후에 다시 시도하세요.`;
@@ -125,7 +132,20 @@ const Chat = () => {
                 flexDirection: 'column',
                 gap: '20px',
             }}>
-                {connectionStatus === ConnectionStatus.CONNECTING ? (
+                {isLoadingHistory ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                        <CircularProgress size={24} />
+                    </Box>
+                ) : (
+                    currentPage + 1 < totalPages && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+                            <Button onClick={handleLoadMore}>
+                                이전 기록 더 보기
+                            </Button>
+                        </Box>
+                    )
+                )}
+                {connectionStatus === ConnectionStatus.CONNECTING && messages.length === 0 ? (
                     <Box sx={{
                         position: 'absolute',
                         top: '50%',
@@ -152,7 +172,6 @@ const Chat = () => {
                             if (msg.type === MessageType.JOIN || msg.type === MessageType.LEAVE) {
                                 return (
                                     <Typography
-                                        key={index}
                                         variant="body2"
                                         sx={{
                                             textAlign: 'center',
@@ -168,7 +187,6 @@ const Chat = () => {
                             const isCurrentUser = myChatName !== null && msg.sender === myChatName;
                             return (
                                 <motion.div
-                                    key={index}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3 }}
@@ -224,7 +242,7 @@ const Chat = () => {
                         };
 
                         return (
-                            <React.Fragment key={index}>
+                            <React.Fragment key={`${msg.createdAt}-${index}`}>
                                 {showDateSeparator && msg.createdAt && (
                                     <Typography
                                         variant="body2"
