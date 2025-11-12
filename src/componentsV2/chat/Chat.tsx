@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useChat } from './hooks/useChat';
 import { RootState } from '../../store';
 import { ConnectionStatus, MessageType } from '../../types/chat';
-import { Box, TextField, Button, Typography, Paper, CircularProgress, Avatar, useTheme } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper, CircularProgress, Avatar, useTheme, FormControlLabel, Switch } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { motion } from 'framer-motion';
 import { getChatHistoryAsync } from '../../slice/chatSlice';
@@ -15,6 +15,7 @@ const SEND_MESSAGE_DESTINATION = '/app/chat.sendMessage';
 const Chat = () => {
     const [messageInput, setMessageInput] = useState('');
     const [countdown, setCountdown] = useState(0);
+    const [showSystemMessages, setShowSystemMessages] = useState(true);
     const dispatch = useDispatch<any>();
     const { messages, connectionStatus, myChatName, currentPage, totalPages, isLoadingHistory } = useSelector((state: RootState) => state.chat);
     const theme = useTheme();
@@ -100,6 +101,10 @@ const Chat = () => {
 
     const blockMessageText = `메시지를 너무 빨리 보냈습니다. ${countdown}초 후에 다시 시도하세요.`;
 
+    const filteredMessages = showSystemMessages
+        ? messages
+        : messages.filter(msg => msg.type !== MessageType.JOIN && msg.type !== MessageType.LEAVE);
+
     return (
         <Paper elevation={0} sx={{
             display: 'flex',
@@ -116,35 +121,51 @@ const Chat = () => {
                 padding: '16px 24px',
                 backgroundColor: theme.palette.background.paper,
                 borderBottom: `1px solid ${theme.palette.divider}`,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
             }}>
-                <Typography variant="h5" component="h2" fontWeight={600} color={theme.palette.text.primary}>
-                    커뮤니티 채팅
-                </Typography>
-                {connectionStatus === ConnectionStatus.ERROR && <Typography variant="caption" sx={{ color: 'red' }}>연결 오류</Typography>}
-                {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>연결 끊김</Typography>}
+                <Box>
+                    <Typography variant="h5" component="h2" fontWeight={600} color={theme.palette.text.primary}>
+                        커뮤니티 채팅
+                    </Typography>
+                    {connectionStatus === ConnectionStatus.ERROR && <Typography variant="caption" sx={{ color: 'red' }}>연결 오류</Typography>}
+                    {connectionStatus === ConnectionStatus.DISCONNECTED && <Typography variant="caption" sx={{ color: 'grey' }}>연결 끊김</Typography>}
+                </Box>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={showSystemMessages}
+                            onChange={(e) => setShowSystemMessages(e.target.checked)}
+                            size="small"
+                        />
+                    }
+                    label={<Typography variant="body2">입장/퇴장 표시</Typography>}
+                    labelPlacement="start"
+                    sx={{ ml: 2 }}
+                />
             </Box>
             <Box ref={messageContainerRef} sx={{
                 flexGrow: 1,
                 position: 'relative',
                 padding: '24px',
                 overflowY: 'auto',
+                overscrollBehaviorY: 'contain',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '20px',
             }}>
-                {isLoadingHistory ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '56px' }}>
+                    {isLoadingHistory ? (
                         <CircularProgress size={24} />
-                    </Box>
-                ) : (
-                    currentPage + 1 < totalPages && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+                    ) : (
+                        currentPage + 1 < totalPages && (
                             <Button onClick={handleLoadMore}>
                                 이전 기록 더 보기
                             </Button>
-                        </Box>
-                    )
-                )}
+                        )
+                    )}
+                </Box>
                 {connectionStatus === ConnectionStatus.CONNECTING && messages.length === 0 ? (
                     <Box sx={{
                         position: 'absolute',
@@ -162,8 +183,8 @@ const Chat = () => {
                         </Typography>
                     </Box>
                 ) : (
-                    messages.map((msg, index) => {
-                        const previousMsg = messages[index - 1];
+                    filteredMessages.map((msg, index) => {
+                        const previousMsg = filteredMessages[index - 1];
                         const showDateSeparator =
                             !previousMsg ||
                             (msg.createdAt && previousMsg.createdAt && new Date(msg.createdAt).toDateString() !== new Date(previousMsg.createdAt).toDateString());

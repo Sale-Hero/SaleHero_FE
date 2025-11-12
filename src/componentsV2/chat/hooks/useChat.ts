@@ -1,10 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { Client, Stomp, IFrame } from '@stomp/stompjs';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, setConnectionStatus, setMyChatName } from '../../../slice/chatSlice';
 import { ChatMessageDto, MessageType, ConnectionStatus } from '../../../types/chat';
 import { useTokens } from '../../../config/useTokens';
+import { RootState } from '../../../store';
 
 interface UseChatProps {
   websocketUrl: string;
@@ -17,6 +18,12 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dispatch = useDispatch();
   const { accessToken } = useTokens();
+  const { myChatName } = useSelector((state: RootState) => state.chat);
+  const sessionNonce = useRef(`nonce_${Math.random().toString(36).substr(2, 9)}`);
+
+  // Ref to hold the latest myChatName to avoid stale closures in the effect
+  const myChatNameRef = useRef(myChatName);
+  myChatNameRef.current = myChatName;
 
   // Ref to hold the latest accessToken to avoid stale closures
   const accessTokenRef = useRef(accessToken);
@@ -24,9 +31,11 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
 
   const sendMessage = useCallback((content: string, type: MessageType = MessageType.CHAT) => {
     if (stompClientRef.current && stompClientRef.current.connected) {
+      // Only add nonce if we don't know our name yet
+      const messageToSend = myChatName === null ? `${content}::${sessionNonce.current}` : content;
       const chatMessage = {
         type: type,
-        content: content,
+        content: messageToSend,
       };
       stompClientRef.current.publish({
         destination: sendMessageDestination,
@@ -35,9 +44,11 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     } else {
       console.warn('STOMP client not connected. Message not sent.');
     }
-  }, [sendMessageDestination]);
+  }, [myChatName, sendMessageDestination]);
 
   useEffect(() => {
+    console.log("useChat EFFECT MOUNT");
+
     const connect = () => {
       dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
       const socket = new SockJS(websocketUrl);
@@ -59,15 +70,23 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
           clearTimeout(reconnectTimeoutRef.current);
         }
 
-        const sessionId = frame.headers['session'];
         client.subscribe(topic, (message) => {
           const chatMessage: ChatMessageDto = JSON.parse(message.body);
-          if (chatMessage.type === MessageType.JOIN && chatMessage.sessionId === sessionId) {
+
+          // Check for our nonce to identify ourselves, using the ref
+          if (myChatNameRef.current === null && chatMessage.content.includes(`::${sessionNonce.current}`)) {
             if (chatMessage.sender) {
               dispatch(setMyChatName(chatMessage.sender));
             }
+            // Create a new message object with the cleaned content
+            const cleanedMessage = {
+                ...chatMessage,
+                content: chatMessage.content.split('::')[0]
+            };
+            dispatch(addMessage(cleanedMessage));
+          } else {
+            dispatch(addMessage(chatMessage));
           }
-          dispatch(addMessage(chatMessage));
         });
       };
 
@@ -94,14 +113,16 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     connect();
 
     return () => {
+      console.log("useChat EFFECT CLEANUP");
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      if (stompClientRef.current?.connected) {
+      if (stompClientRef.current) {
+        console.log("Deactivating STOMP client");
         stompClientRef.current.deactivate();
       }
     };
-  }, [dispatch, topic, websocketUrl, sendMessageDestination]); // Effect runs once on mount
+  }, [dispatch, topic, websocketUrl, sendMessageDestination]); // Removed myChatName
 
   return { sendMessage };
 };
