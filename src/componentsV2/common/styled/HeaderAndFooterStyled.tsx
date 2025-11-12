@@ -97,7 +97,9 @@ export const HeaderGradientText = styled(Typography)`
     display: inline-block;
 `;
 
-export const NavButton = styled(Button)(({ theme, active }: { theme: any, active: boolean }) => ({
+export const NavButton = styled(Button, {
+    shouldForwardProp: (prop) => prop !== 'active'
+})<{ active: boolean }>(({ theme, active }) => ({
     color: active ? '#FFA41B' : 'rgba(255, 255, 255, 0.8)',
     borderRadius: '12px',
     padding: '8px 16px',
@@ -145,7 +147,9 @@ export const MenuItemStyled = styled(MenuItem)(({ theme }) => ({
     },
 }));
 
-export const DrawerItemButton = styled(ListItemButton)(({ theme, active }: { theme: any, active: boolean }) => ({
+export const DrawerItemButton = styled(ListItemButton, {
+    shouldForwardProp: (prop) => prop !== 'active'
+})<{ active: boolean }>(({ theme, active }) => ({
     padding: '12px 16px',
     borderRadius: '12px',
     margin: '8px 12px',
