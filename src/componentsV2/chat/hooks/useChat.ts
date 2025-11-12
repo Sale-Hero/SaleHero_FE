@@ -14,8 +14,13 @@ interface UseChatProps {
 
 export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChatProps) => {
   const stompClientRef = useRef<Client | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dispatch = useDispatch();
   const { accessToken } = useTokens();
+
+  // Ref to hold the latest accessToken to avoid stale closures
+  const accessTokenRef = useRef(accessToken);
+  accessTokenRef.current = accessToken;
 
   const sendMessage = useCallback((content: string, type: MessageType = MessageType.CHAT) => {
     if (stompClientRef.current && stompClientRef.current.connected) {
@@ -33,12 +38,27 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
   }, [sendMessageDestination]);
 
   useEffect(() => {
-    if (!stompClientRef.current) {
+    const connect = () => {
+      dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
       const socket = new SockJS(websocketUrl);
       const client = Stomp.over(socket);
 
+      // Disable debug messages from stompjs
+      client.debug = () => {};
+
+      // Use the token from the ref to ensure it's always up-to-date
+      if (accessTokenRef.current) {
+        client.connectHeaders = {
+          Authorization: `Bearer ${accessTokenRef.current}`,
+        };
+      }
+
       client.onConnect = (frame: IFrame) => {
         dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+
         const sessionId = frame.headers['session'];
         client.subscribe(topic, (message) => {
           const chatMessage: ChatMessageDto = JSON.parse(message.body);
@@ -58,29 +78,30 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
       };
 
       client.onDisconnect = () => {
-        console.log('Disconnected.');
+        console.log('Disconnected. Attempting to reconnect in 5 seconds...');
         dispatch(setConnectionStatus(ConnectionStatus.DISCONNECTED));
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+        // Re-establish connection after a delay
+        reconnectTimeoutRef.current = setTimeout(connect, 5000);
       };
 
-      stompClientRef.current = client;
-    }
-
-    const client = stompClientRef.current;
-
-    if (accessToken && !client.connected) {
-      console.log('Connecting STOMP client...');
-      dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
-      client.connectHeaders = { Authorization: `Bearer ${accessToken}` };
       client.activate();
-    }
+      stompClientRef.current = client;
+    };
+
+    connect();
 
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
       if (stompClientRef.current?.connected) {
-        console.log('Deactivating STOMP client on cleanup.');
         stompClientRef.current.deactivate();
       }
     };
-  }, [accessToken, dispatch, topic, websocketUrl]);
+  }, [dispatch, topic, websocketUrl, sendMessageDestination]); // Effect runs once on mount
 
   return { sendMessage };
 };
