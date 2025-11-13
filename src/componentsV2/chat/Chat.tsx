@@ -17,7 +17,7 @@ const Chat = () => {
     const [countdown, setCountdown] = useState(0);
     const [showSystemMessages, setShowSystemMessages] = useState(true);
     const dispatch = useDispatch<any>();
-    const { messages, connectionStatus, myChatName, currentPage, totalPages, isLoadingHistory } = useSelector((state: RootState) => state.chat);
+    const { messages, connectionStatus, mySessionId, currentPage, totalPages, isLoadingHistory } = useSelector((state: RootState) => state.chat);
     const theme = useTheme();
     const isBlocked = countdown > 0;
 
@@ -205,7 +205,7 @@ const Chat = () => {
                                     </Typography>
                                 );
                             }
-                            const isCurrentUser = myChatName !== null && msg.sender === myChatName;
+                            const isCurrentUser = mySessionId !== null && msg.sessionId === mySessionId;
                             return (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
