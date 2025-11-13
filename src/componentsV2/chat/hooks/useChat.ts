@@ -1,11 +1,19 @@
 import { useEffect, useRef, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { Client, Stomp, IFrame } from '@stomp/stompjs';
-import { useDispatch, useSelector } from 'react-redux';
-import { addMessage, setConnectionStatus, setMyChatName } from '../../../slice/chatSlice';
+import { useDispatch } from 'react-redux';
+import { addMessage, setConnectionStatus, setMyChatName, setMySessionId } from '../../../slice/chatSlice';
 import { ChatMessageDto, MessageType, ConnectionStatus } from '../../../types/chat';
-import { useTokens } from '../../../config/useTokens';
-import { RootState } from '../../../store';
+
+// Helper function to get/set a persistent client ID
+const getClientId = () => {
+    let clientId = localStorage.getItem('salehero_chat_clientId');
+    if (!clientId) {
+        clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('salehero_chat_clientId', clientId);
+    }
+    return clientId;
+};
 
 interface UseChatProps {
   websocketUrl: string;
@@ -17,25 +25,12 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
   const stompClientRef = useRef<Client | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dispatch = useDispatch();
-  const { accessToken } = useTokens();
-  const { myChatName } = useSelector((state: RootState) => state.chat);
-  const sessionNonce = useRef(`nonce_${Math.random().toString(36).substr(2, 9)}`);
-
-  // Ref to hold the latest myChatName to avoid stale closures in the effect
-  const myChatNameRef = useRef(myChatName);
-  myChatNameRef.current = myChatName;
-
-  // Ref to hold the latest accessToken to avoid stale closures
-  const accessTokenRef = useRef(accessToken);
-  accessTokenRef.current = accessToken;
 
   const sendMessage = useCallback((content: string, type: MessageType = MessageType.CHAT) => {
     if (stompClientRef.current && stompClientRef.current.connected) {
-      // Only add nonce if we don't know our name yet
-      const messageToSend = myChatName === null ? `${content}::${sessionNonce.current}` : content;
       const chatMessage = {
         type: type,
-        content: messageToSend,
+        content: content,
       };
       stompClientRef.current.publish({
         destination: sendMessageDestination,
@@ -44,25 +39,23 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     } else {
       console.warn('STOMP client not connected. Message not sent.');
     }
-  }, [myChatName, sendMessageDestination]);
+  }, [sendMessageDestination]);
 
   useEffect(() => {
-    console.log("useChat EFFECT MOUNT");
+    const clientId = getClientId();
+    console.log("Using Client ID:", clientId);
 
     const connect = () => {
       dispatch(setConnectionStatus(ConnectionStatus.CONNECTING));
       const socket = new SockJS(websocketUrl);
       const client = Stomp.over(socket);
 
-      // Disable debug messages from stompjs
       client.debug = () => {};
 
-      // Use the token from the ref to ensure it's always up-to-date
-      if (accessTokenRef.current) {
-        client.connectHeaders = {
-          Authorization: `Bearer ${accessTokenRef.current}`,
-        };
-      }
+      client.connectHeaders = {
+          login: clientId,
+      };
+      console.log("Connecting with headers:", client.connectHeaders);
 
       client.onConnect = (frame: IFrame) => {
         dispatch(setConnectionStatus(ConnectionStatus.CONNECTED));
@@ -70,24 +63,30 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
           clearTimeout(reconnectTimeoutRef.current);
         }
 
+        // Subscribe to public topic
         client.subscribe(topic, (message) => {
           const chatMessage: ChatMessageDto = JSON.parse(message.body);
-
-          // Check for our nonce to identify ourselves, using the ref
-          if (myChatNameRef.current === null && chatMessage.content.includes(`::${sessionNonce.current}`)) {
-            if (chatMessage.sender) {
-              dispatch(setMyChatName(chatMessage.sender));
-            }
-            // Create a new message object with the cleaned content
-            const cleanedMessage = {
-                ...chatMessage,
-                content: chatMessage.content.split('::')[0]
-            };
-            dispatch(addMessage(cleanedMessage));
-          } else {
-            dispatch(addMessage(chatMessage));
-          }
+          dispatch(addMessage(chatMessage));
         });
+
+        // Subscribe to private channel for self-identification
+        console.log("Subscribing to /user/queue/private");
+        client.subscribe('/user/queue/private', (message) => {
+            console.log("Received message on /user/queue/private:", message.body);
+            const chatMessage: ChatMessageDto = JSON.parse(message.body);
+            if (chatMessage.type === MessageType.SYSTEM) {
+                if (chatMessage.sender) {
+                    dispatch(setMyChatName(chatMessage.sender));
+                }
+                if (chatMessage.sessionId) {
+                    dispatch(setMySessionId(chatMessage.sessionId));
+                }
+            }
+        });
+
+        // Signal to the server that we are ready to receive messages
+        console.log("Publishing to /app/chat.ready");
+        client.publish({ destination: '/app/chat.ready' });
       };
 
       client.onStompError = (frame) => {
@@ -102,7 +101,6 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
         }
-        // Re-establish connection after a delay
         reconnectTimeoutRef.current = setTimeout(connect, 5000);
       };
 
@@ -113,16 +111,14 @@ export const useChat = ({ websocketUrl, topic, sendMessageDestination }: UseChat
     connect();
 
     return () => {
-      console.log("useChat EFFECT CLEANUP");
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      if (stompClientRef.current) {
-        console.log("Deactivating STOMP client");
+      if (stompClientRef.current?.deactivate) {
         stompClientRef.current.deactivate();
       }
     };
-  }, [dispatch, topic, websocketUrl, sendMessageDestination]); // Removed myChatName
+  }, [dispatch, topic, websocketUrl, sendMessageDestination]);
 
   return { sendMessage };
 };
