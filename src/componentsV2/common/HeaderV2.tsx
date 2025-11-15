@@ -80,12 +80,6 @@ const menuItems: MenuItem[] = [
         status: HeaderStatus.CONTACT,
     },
     {
-        label: '데일리 할인정보',
-        icon: <ShoppingBag/>,
-        path: '/deals',
-        status: HeaderStatus.DEALS,
-    },
-    {
         label: '익명채팅',
         icon: <Chat/>,
         path: '/chat',
