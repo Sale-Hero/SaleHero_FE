@@ -147,6 +147,11 @@ export const FooterV2: React.FC = () => {
                                 m: 0
                             }}>
                                 <Box component="li">
+                                    <FooterLink to="/deals">
+                                        데일리 할인정보
+                                    </FooterLink>
+                                </Box>
+                                <Box component="li">
                                     <FooterLink to="/contact">
                                         문의하기
                                     </FooterLink>
