@@ -18,6 +18,16 @@ import {
 import {ArrowBack as ArrowBackIcon, CalendarToday as CalendarIcon, Home as HomeIcon} from '@mui/icons-material';
 import {motion} from 'framer-motion';
 import {useUserNewsLetterGetter} from "./hooks/useUserNewsLetterGetter";
+import {ComponentHelmet} from "../common/ComponentHelmet"; // Import ComponentHelmet
+
+// Utility function to extract plain text from HTML
+const getPlainTextFromHtml = (htmlString: string): string => {
+    if (!htmlString) return '';
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    return textContent.substring(0, 160); // Truncate for meta description
+};
 
 export function DealDetail() {
     const { id } = useParams<{ id: string }>();
@@ -59,6 +69,12 @@ export function DealDetail() {
 
     return (
         <Container maxWidth="lg" sx={{ py: 5 }}>
+            {newsLetter && (
+                <ComponentHelmet
+                    title={newsLetter.title}
+                    description={getPlainTextFromHtml(newsLetter.content)}
+                />
+            )}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
