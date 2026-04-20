@@ -32,6 +32,7 @@ import {AdminArticlePostDTO, ArticleCategory, ArticleDeleteDTO, ArticleResponseD
 import {useArticleActions} from "./hooks/useAdminArticleActions";
 
 export function AdminArticleManagement() {
+    console.log('test')
     const [selectedArticle, setSelectedArticle] = useState<ArticleResponseDTO | null>(null);
     const [openViewDialog, setOpenViewDialog] = useState<boolean>(false);
     const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
@@ -221,9 +222,9 @@ export function AdminArticleManagement() {
     };
 
     const columns: GridColDef[] = [
-        { 
-            field: 'title', 
-            headerName: '제목', 
+        {
+            field: 'title',
+            headerName: '제목',
             flex: 1,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
