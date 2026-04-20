@@ -45,23 +45,24 @@ jobs:
           ls -la salehero_fe.zip
 
       # SSH 접근 설정
-      - name: Set up SSH
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      - name: Add known hosts
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
           ssh-keyscan -H ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
       # ZIP 파일 전송
       - name: Copy ZIP to remote server
         run: |
-          scp -i ~/.ssh/id_rsa salehero_fe.zip ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/salehero/
+          scp salehero_fe.zip ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/salehero/
 
       # 배포 스크립트 실행
       - name: Deploy on remote server
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "
+          ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "
             cd /salehero &&
             rm -rf salehero_fe || true &&
             mkdir -p salehero_fe &&
