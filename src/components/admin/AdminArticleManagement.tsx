@@ -32,7 +32,7 @@ import {AdminArticlePostDTO, ArticleCategory, ArticleDeleteDTO, ArticleResponseD
 import {useArticleActions} from "./hooks/useAdminArticleActions";
 
 export function AdminArticleManagement() {
-    console.log('test2')
+    console.log('test3')
     const [selectedArticle, setSelectedArticle] = useState<ArticleResponseDTO | null>(null);
     const [openViewDialog, setOpenViewDialog] = useState<boolean>(false);
     const [openFormDialog, setOpenFormDialog] = useState<boolean>(false);
