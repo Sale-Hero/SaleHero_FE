@@ -70,7 +70,7 @@ jobs:
             mkdir -p ./nginx/html &&
             cp -r salehero_fe/build/* ./nginx/html/ &&
             chmod -R 755 ./nginx/html &&
-            docker-compose restart nginx
+            docker compose restart nginx
           "
 
       # 배포 완료 알림
