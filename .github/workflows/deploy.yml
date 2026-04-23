@@ -69,7 +69,14 @@ jobs:
             rm -rf ./nginx/html/* || true &&
             mkdir -p ./nginx/html &&
             cp -r salehero_fe/build/* ./nginx/html/ &&
-            chmod -R 755 ./nginx/html
+            chmod -R 755 ./nginx/html &&
+            
+            # PlayGround caddy 설정 업데이트 (한 번만 실행)
+            if ! docker exec caddy ls /usr/share/nginx/html 2>/dev/null; then
+              cd /root/playground &&
+              docker compose down caddy &&
+              docker compose up -d caddy
+            fi
           "
 
       # 배포 완료 알림
