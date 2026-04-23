@@ -69,9 +69,7 @@ jobs:
             rm -rf ./nginx/html/* || true &&
             mkdir -p ./nginx/html &&
             cp -r salehero_fe/build/* ./nginx/html/ &&
-            chmod -R 755 ./nginx/html &&
-            cd /salehero/app &&
-            docker compose restart nginx
+            chmod -R 755 ./nginx/html
           "
 
       # 배포 완료 알림
