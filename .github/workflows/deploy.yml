@@ -73,9 +73,13 @@ jobs:
             
             # PlayGround caddy 설정 업데이트 (한 번만 실행)
             if ! docker exec caddy ls /usr/share/nginx/html 2>/dev/null; then
-              cd /root/playground &&
-              docker compose down caddy &&
-              docker compose up -d caddy
+              if [ -d /root/playground ] && [ -f /root/playground/docker-compose.yml ]; then
+                cd /root/playground &&
+                docker compose down caddy &&
+                docker compose up -d caddy
+              else
+                echo 'PlayGround directory or docker-compose.yml not found. Skipping caddy update.'
+              fi
             fi
           "
 
