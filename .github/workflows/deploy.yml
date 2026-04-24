@@ -71,11 +71,11 @@ jobs:
             cp -r salehero_fe/build/* ./nginx/html/ &&
             chmod -R 755 ./nginx/html &&
             
-            # Caddy 네트워크 연결 및 설정 (한 번만 실행)
+            # Caddy 네트워크 연결 및 설정 (매번 실행)
+            docker network connect app_salehero-network caddy 2>/dev/null || echo 'Network already connected'
+            
+            # Caddy 볼륨 마운트 확인 및 설정 (한 번만 실행)
             if ! docker exec caddy ls /usr/share/nginx/html 2>/dev/null; then
-              # SaleHero 네트워크에 caddy 연결
-              docker network connect app_salehero-network caddy 2>/dev/null || echo 'Network already connected'
-              
               # Caddy 컨테이너 재시작으로 볼륨 마운트 적용
               docker stop caddy &&
               docker run -d --name caddy --restart unless-stopped \
